@@ -6,9 +6,6 @@
 \RequirePackage{xspace}
 
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts (like different typewriter fonts etc.)
 %%
@@ -43,13 +40,11 @@
 \newcommand{\PostContentTitleFormat}{\PreContentTitleFormat}
 \PreContentTitleFormat
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% References (special style etc.)
 %%
 \RequirePackage[numbers,sort&compress]{natbib}
+\RequirePackage{cleveref}
 
 
 
@@ -72,7 +67,6 @@
 %% Captions: This makes captions of figures use a boldfaced small font. 
 %%
 \RequirePackage[small,bf]{caption}
-
 
 
 
@@ -100,6 +94,21 @@
 
 
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Index
+%%
+\usepackage{imakeidx}
+\makeindex
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Packages to help with drafting
+%%
+\RequirePackage{todonotes}
+\RequirePackage{enumitem}
+\RequirePackage{xcolor}
+\newenvironment{roughdraft}{\color{red}\itshape}{}
+\newcommand{\rough}[1]{\textcolor{red}{\textit{#1}}}
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Glossary entries
@@ -109,3 +118,4 @@
     sort={pi},
     description={ratio of the circumference of a circle to the diameter}
 }
+
