@@ -4,14 +4,16 @@
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
 \RequirePackage{xspace}
-
+\RequirePackage{listings}
+\RequirePackage{tipa}
+\RequirePackage{booktabs}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts (like different typewriter fonts etc.)
 %%
-%\RequirePackage[scaled=.87]{couriers}
-%\RequirePackage[T1]{fontenc}
-%\renewcommand\rmdefault{psb}
+% \RequirePackage[scaled=.87]{couriers}
+% \RequirePackage[T1]{fontenc}
+% \renewcommand\rmdefault{psb}
 
 
 
@@ -40,10 +42,14 @@
 \newcommand{\PostContentTitleFormat}{\PreContentTitleFormat}
 \PreContentTitleFormat
 
+% Remove indentation
+%\setlength{\parindent}{0pt}
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% References (special style etc.)
 %%
-\RequirePackage[numbers,sort&compress]{natbib}
+%\RequirePackage[numbers,sort&compress]{natbib}
+\RequirePackage{natbib}
 \RequirePackage{cleveref}
 
 
@@ -103,12 +109,20 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Packages to help with drafting
 %%
+\setlength {\marginparwidth }{2cm} 
 \RequirePackage{todonotes}
 \RequirePackage{enumitem}
 \RequirePackage{xcolor}
 \newenvironment{roughdraft}{\color{red}\itshape}{}
 \newcommand{\rough}[1]{\textcolor{red}{\textit{#1}}}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Other custom commands
+%%
+\newcommand{\corpusphonemizer}[0]{\textsc{Corpus Phonemizer}\xspace}
+\newcommand{\ttipa}[1]{\texttt{\textipa{#1}}}
+\newcommand{\phoible}[0]{\textsc{Phoible}\xspace}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Glossary entries

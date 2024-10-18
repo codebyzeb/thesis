@@ -1,3 +1,41 @@
 \appendix
 \chapter{Extra Information}
 Some more text ...
+
+\section{Corpus Phonemizer tool usage}
+\label{appendix:corpus-phonemizer-usage}
+
+\lstset{basicstyle=\small\ttfamily}
+\begin{lstlisting}[float=tp, breaklines=true,caption={An extract taken from the help menu of \corpusphonemizer, displaying the tool's usage.}]
+
+usage: corpus_phonemizer.py [-h] [-k] [-v] [-u] [-i INPUT_FILE]
+       [-o OUTPUT_FILE] {epitran,phonemizer,pingyam,pinyin_to_ipa} language
+
+Phonemize utterances using a specified backend and language.
+
+positional arguments:
+  {epitran,phonemizer,pingyam,pinyin_to_ipa}
+                                        The backend to use for phonemization.
+  language                              The language to phonemize.
+
+options:
+  -h, --help                            show this help message and exit
+  -k, --keep-word-boundaries            Keep word boundaries in the output.
+  -v, --verbose                         Print debug information.
+  -u, --uncorrected                     Use the wrapper's output without
+                                        applying a folding dictionary to correct
+                                        the phoneme sets.
+  -i INPUT_FILE, --input-file INPUT_FILE
+                                        Input file containing utterances (one
+                                        per line). If not specified, reads from
+                                        stdin.
+  -o OUTPUT_FILE, --output-file OUTPUT_FILE
+                                        Output file for phonemized utterances.
+                                        If not specified, writes to stdout.
+
+Example usage:
+  python corpus_phonemizer.py epitran --language eng-Latn --keep-word-boundaries --verbose < input.txt > output.txt
+\end{lstlisting}
+
+\section{Corpus Phonemizer Folding Dictionaries}
+\label{appendix:folding-dictionaries}
