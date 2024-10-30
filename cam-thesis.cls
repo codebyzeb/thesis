@@ -375,7 +375,7 @@ for the degree of Doctor of Philosophy%
 \setlength{\cam@logorightnudge}{-0.5\paperwidth+12mm}
 \newsavebox{\cam@logo}
 \begin{lrbox}{\cam@logo}
-\hspace*{\cam@logorightnudge}\includegraphics[width=73mm]{CollegeShields/CUni}
+\hspace*{\cam@logorightnudge}\includegraphics[width=73mm]{Figures/01Preamble/Cambridge University.pdf}
 \end{lrbox}
 
 %% THESIS TITLE box

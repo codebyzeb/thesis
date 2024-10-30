@@ -1,5 +1,5 @@
 % For more info see `README.md`
-\documentclass[withindex,glossary]{cam-thesis}
+\documentclass[a4paper,withindex,glossary]{cam-thesis}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Preamble: Contains packages, commands, and meta-info
@@ -13,29 +13,24 @@
 \input{Sections/02ThesisInfo}
 
 
-
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Abstract:
 %%
-%\input{Sections/03Abstract}
-
+\input{Sections/03Abstract}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Acknowledgments
 %%
-%\input{Sections/04Acknowledgments}
+\input{Sections/04Acknowledgments}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Contents:
 %%
-\setcounter{chapter}{2}
 \begin{document}
 
-%\frontmatter
+\frontmatter
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Introduction
@@ -52,6 +47,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Main Chapter
 %%
+\setcounter{chapter}{2}
 \input{Sections/13Dataset}
 
 

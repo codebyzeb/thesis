@@ -5,8 +5,22 @@
 \RequirePackage{amssymb}
 \RequirePackage{xspace}
 \RequirePackage{listings}
-\RequirePackage{tipa}
 \RequirePackage{booktabs}
+\RequirePackage{times}
+\RequirePackage{latexsym}
+\RequirePackage{makecell}
+\RequirePackage{rotating}
+\RequirePackage{pifont} 
+\RequirePackage{tabularray} 
+\RequirePackage{graphicx}
+\RequirePackage{fdsymbol}
+\RequirePackage{multirow}
+\RequirePackage{tipa}
+
+% For proper rendering and hyphenation of words containing Latin characters (including in bib files)
+\RequirePackage[T1]{fontenc}
+% This assumes your files are encoded as UTF8
+\RequirePackage[utf8]{inputenc}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts (like different typewriter fonts etc.)
@@ -14,9 +28,9 @@
 % \RequirePackage[scaled=.87]{couriers}
 % \RequirePackage[T1]{fontenc}
 % \renewcommand\rmdefault{psb}
-
-
-
+% Layout ACL 
+%\RequirePackage{microtype}
+%\RequirePackage{inconsolata}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Style (Changing the visual style of chapter headings and stuff.)
@@ -46,12 +60,24 @@
 %\setlength{\parindent}{0pt}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Other Style (Emojis, colours, etc)
+%%
+\RequirePackage{twemojis}
+\RequirePackage{tcolorbox}      
+\RequirePackage{xcolor}
+
+\RequirePackage{cellspace}
+\setlength\cellspacetoplimit{4pt}
+\setlength\cellspacebottomlimit{4pt}
+\RequirePackage{setspace}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% References (special style etc.)
 %%
 %\RequirePackage[numbers,sort&compress]{natbib}
 \RequirePackage{natbib}
 \RequirePackage{cleveref}
-
 
 
 
@@ -93,7 +119,6 @@
 
 
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Content commands
 %%
@@ -103,7 +128,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Index
 %%
-\usepackage{imakeidx}
+\RequirePackage{imakeidx}
 \makeindex
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -123,6 +148,23 @@
 \newcommand{\corpusphonemizer}[0]{\textsc{Corpus Phonemizer}\xspace}
 \newcommand{\ttipa}[1]{\texttt{\textipa{#1}}}
 \newcommand{\phoible}[0]{\textsc{Phoible}\xspace}
+
+\newcommand\cincludegraphics[2][]{\raisebox{-0.3\height}{\includegraphics[#1]{#2}}}
+
+\newcommand{\cmark}{\ding{51}}%
+\newcommand{\xmark}{\ding{55}}%
+\newcommand{\myemph}[1]{\textsf{{\escapeus{#1}}}}
+\definecolor{characters}{HTML}{40bcd8}
+\definecolor{space}{HTML}{ff6663}
+\definecolor{phoneme}{HTML}{ffcf99}
+
+\newtcbox{\characterhighlight}{on line, colback=characters!50, boxrule=0.2mm, left=0.5mm, right=0.2mm, top=0.2mm, bottom=0.2mm}
+\newtcbox{\spacehighlight}{on line, colback=space!50, boxrule=0.2mm, left=0.5mm, right=0.2mm, top=0.2mm, bottom=0.2mm}
+\newtcbox{\phonemehighlight}{on line, colback=phoneme!50, boxrule=0.2mm, left=0.5mm, right=0.2mm, top=0.2mm, bottom=0.2mm}
+
+
+\newcommand\mybox[2][]
+{\tikz[overlay]\node[fill=blue!10,inner sep=1.3pt, anchor=text, rectangle, rounded corners=1mm,text height=1.5ex, #1] {#2};\phantom{#2}}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Glossary entries
