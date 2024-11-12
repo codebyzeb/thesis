@@ -13,6 +13,9 @@ thesis.out
 thesis.pdf
 thesis.toc
 thesis.synctex.gz
+thesis.fdb_latexmk
+thesis.fls
 
+.vscode/
 /build/
 /.idea/
