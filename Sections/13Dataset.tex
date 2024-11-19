@@ -5,39 +5,11 @@
 \section{Introduction}
 \label{sec:dataset-intro}
 
-\begin{roughdraft}
-1. We want to do language modelling with phonemes, but finding suitable datasets is a challenge, especially considering particular requirements that we may want. These requirements are:
-\begin{itemize}
-    \item \textbf{Phonemic:} First requirement is that the data is in a suitable phonemic format, such as IPA. This already rules out many of the standard open-sourced language modelling datasets, which are orthographic.
-    \item \textbf{Large:} Language models are data-hungry and so need suitable data. Exactly how much is explored in Chapter 4.
-    \item \textbf{Parallel:} In order to establish the feasibility of language modelling with phonemes, and especially to compare phonemic modelling to orthographic modelling (as is done in Chapter 4), we ideally want to have corpora with utterances written both orthographically and phonemically.
-    \item \textbf{Multilingual}: In order to compare the properties of different languages (chapter 5) or establish whether proposed language acquisition mechanisms are universal (chapter 6) we need a datasets that includes as many languages as possible.
-    \item \textbf{Speech:} For comparing properties of spoken language (Chapter 5) and acquisition experiments (due to nature of input children receive, Chapter 6) we require data from speech sources.
-    \item \textbf{Child-directed speech}: For acquisition work, CDS makes sense from what we know about the quality etc (Chapter 6). 
-\end{itemize}
-
-2. These are often competing requirements. Few phonemic datasets that are also large enough for LLMs due to the availability of phonemic transcriptions. Multilingual datasets are also difficult due to how dominant English is in research, yet alone when we also require them to be multi-lingual. 
-
-3. There are some datasets that meet some of the requirements:
-\begin{itemize}
-    \item \textbf{CHILDES:} CHILDES description. Meets many requirements, but not much phonemic data. 
-    \item \textbf{AudioBNC:} Audio BNC description. Meets many requirements but not CDS and not multilingual. 
-    \item \textbf{BabyLM Pre-training data}: Describe. Good for evaluating models. 
-    \item \textbf{\ldots:} 
-\end{itemize}
-
-4. Table here showing which datasets match which requirements. Clearly none match all the requirements we want for the work in this thesis, a good solution is \textbf{automatic phonemization} to convert CHILDES and BabyLM Pre-training data.
-
-5. In this chapter, I first present the creation of \corpusphonemizer to address this challenge. I then introduce \phonemizedchildes, a dataset created using this tool which meets all these requirements and is used in Chapter 5 and Chapter 6. Finally, I use the parallel nature of Audio BNC to address the limits of automatic phonemization by comparing human phonemic transcriptions to the automated transcriptions generated from the parallel orthographic sentences.
-\end{roughdraft}
-
 Language modelling is a core task in NLP that involves learning the structure of language by making predictions of individual language units given a context. There is considerable variation in how the task is approached, whether it be the granularity of the language unit being predicted (such as words, characters or subwords), the model being used (n-gram models, RNNs, transformers) or the objective being optimised (such as next-token prediction or masked language modelling). In all cases, a dataset is required from which the distributed statistics of the language can be extracted.
 
-There are several properties to consider when determining the suitability of a dataset for a particular language modelling task. For example, very large transformer-based language models trained for chat-based applications mostly rely on \textbf{scale}, often requiring datasets with trillions of words such as The Pile or CommonCrawl to meet their data-hungry nature. These models also aim for diverse \textbf{domains} to be included in the dataset so that the model can be exposed to a wide range of language phenomena, whereas other language models may aim to model a single domain. For example, the Switchboard Corpus was originally collected to improve n-gram language modelling for speech recognition software. The \textbf{language} of the data is another crucial factor: many of the largest datasets only exist in English due to the availability of data and the dominance of English in research, but if the purpose of the language model is to build translation systems or facilitate the comparison of the properties of different languages, multi-lingual datasets are required. Finally, the \textbf{modality} of the data is important to consider. Language models can be trained on text, speech or both. Speech models are often trained on phonemes, the smallest unit of sound in a language, which can be useful for applications such as speech recognition or synthesis. Text models are often trained on orthographic text, which is more readily available and easier to process.
+In this thesis, I explore the specific variation of langugage modelling task where the language unit is the phoneme, the model used is a transformer and the objective is next-token prediction. The first challenge, and the topic of this chapter, is to source a suitable dataset for this task, given that this variation of language modelling is under-studied. I require a dataset that is not only representative of child input across many languages to support the analytical experiments in Chapters 5 and 6, but one that can also aid in addressing the modelling challenges presented in Chapter 4. 
 
-In this thesis, I explore the challenges related to language modelling with phonemes and explore the use of such a model to study the properties of language and language acquisition. To do this, I need a dataset that meets several requirements. First, the data must be in a suitable phonemic format, such as the International Phonetic Alphabet (IPA). This is important as the phonemic representation must be consistent across languages and dialects. Second, the dataset must be large enough to train a large language model. Third, the dataset should be parallel, containing both orthographic and phonemic transcriptions. This is important for training models that can convert between orthographic and phonemic representations. Fourth, the dataset should be multilingual, containing data from multiple languages. This is important for studying the properties of different languages and for building models that can work across multiple languages. Finally, the dataset should consist of child-directed speech, as this is the type of speech that children are exposed to when learning a language.
-
-There are several existing datasets that meet some of these requirements, but finding a dataset that meets all requirements is a challenge. In this chapter, I first present these requirements and consider existing datasets in \cref{sec:dataset-background}. I concluding there is no existing dataset that meets all of the requirements. In \cref{sec:dataset-corpus-phonemizer} I present \corpusphonemizer, a tool I developed to address this challenge by leveraging \textbf{automatic phonemization} to convert text-based transcriptions to a phonemic representation. I then describe the creation of \phonemizedchildes, a dataset created using this tool which meets all the requirements, in \cref{sec:dataset-phonemized-childes}. Finally, I explore the limits of automatic phonemization in \cref{sec:dataset-limitations}.
+I begin this chapter by discussing the properties to consider when selecting a dataset for a particular language modelling task, the specific properties I require for the experiments carried out in this thesis, and the range of existing datasets that may meet these requirements (\cref{sec:dataset-background}). After concluding that no such dataset exists, I propose \textbf{automatic phonemization} as a method for converting orthographic datasets to a phonemic format and present \corpusphonemizer, a tool I developed to facilitate the creation of large phonemic datasets (\cref{sec:dataset-corpus-phonemizer}). I then describe the use of this tool to create \phonemizedchildes, a dataset consisting of child-directed speech from 31 languages, meeting all requirements for the work in this thesis (\cref{sec:dataset-phonemized-childes}). Finally, I explore the limits of automatic phonemization by comparing human-transcribed phonemic data to the phonemic data produced by my tool (\cref{sec:dataset-limitations}).
 
 %One important property is the \textbf{granularity} of the data. Language models can be trained on words, characters, subwords or phonemes. Phonemic data is useful for studying the structure of language, as it is more closely related to the underlying phonological structure of the language. However, phonemic data is not as readily available as orthographic data, and so datasets containing phonemic transcriptions are less common.
 
@@ -52,35 +24,146 @@ There are several existing datasets that meet some of these requirements, but fi
 \section{Background}
 \label{sec:dataset-background}
 
-\rough{Related background to this work. Introduction to IPA. Introduction to the Phoneme Stream representation (motivated by past work and existing evaluation datasets). Maybe introduce Phoible here.}
+There are several dimensions to consider when determining the suitability of a dataset for a particular language modelling task, often determined by the analytical or downstream use of the language model being trained. The first dimensions is the \textbf{modality} of the dataset. Language models can be trained on a diverse range of data representations, including written text, phonemic transcriptions, images and continuous audio\todo{possibly cite examples for each of these}. Often the modality should match the downstream purpose of the language model (whether to solve additional tasks or study linguistic properties) and it is difficult to train a language model with one modality and apply it to another \citep{suvarna-etal-2024-phonologybench,lavechin}.
 
-\subsection{Requirements for a phonemic dataset}
+The \textbf{domain} of the dataset should also be representative. Some datasets are collected to match one specific domain. For instance, the Switchboard corpus was originally collected to improve n-gram language modelling for speech recognition software \citep{godfrey1992switchboard}. In other cases, datasets consist of many domains, represent a broad range of language use in order to improve general-purpose language models. An early benchmark for n-gram language modelling research was the Brown Corpus, which consisted of 1 million words across various genres, such as news, fiction, reviews and essays\citep{francis1979brown}.
 
-The requirements for training a large language model on phonemes are described below:
+Another important consideration is the \textbf{scale} of the dataset. This is typically determined by the size of model being used for the task. The Brown Corpus may have been sufficient to train n-gram models but modern transformer-based architectures are extremely data-hungry, often trained on datasets containing trillions of words \citep{elazar-2024-redpajama}, despite the diminishing returns \citep{kaplan2020scaling}. Examples of such datasets include The Pile \citep{pile} or CommonCrawl\footnote{\url{https://commoncrawl.org}} which also aim to include a diverse range of domains in order to improve the generalisation of the model for downstream tasks.
 
-\begin{itemize}
-    \item \textbf{Phonemic:} First requirement is that the data is in a suitable phonemic format, such as IPA. This already rules out many of the standard open-sourced language modelling datasets, which are orthographic.
-    \item \textbf{Large:} Language models are data-hungry and so need suitable data. Exactly how much is explored in Chapter 4.
-    \item \textbf{Parallel:} In order to establish the feasibility of language modelling with phonemes, and especially to compare phonemic modelling to orthographic modelling (as is done in Chapter 4), we ideally want to have corpora with utterances written both orthographically and phonemically.
-    \item \textbf{Multilingual}: In order to compare the properties of different languages (chapter 5) or establish whether proposed language acquisition mechanisms are universal (chapter 6) we need a datasets that includes as many languages as possible.
-    \item \textbf{Speech:} For comparing properties of spoken language (Chapter 5) and acquisition experiments (due to nature of input children receive, Chapter 6) we require data from speech sources.
-    \item \textbf{Child-directed speech}: For acquisition work, CDS makes sense from what we know about the quality etc (Chapter 6). 
-\end{itemize}
+Finally, the \textbf{language} of the dataset also depends on the eventual use of the language model. Many of the largest datasets only exist in English due to the availability of data and the dominance of English in NLP research, but if the purpose of the language model is to build translation systems or facilitate the the cross-lingual comparison of language properties, multi-lingual datasets are required.
 
-These requirements are motivated by the work in this thesis and are not necessarily required for all language modelling tasks. If the purpose of the language model is only to model the structure of language, only the first two requirements are necessary. 
+Within each of these dimensions there are many datasets to choose from. However, when considering a particular instance of the language modelling task, certain properties do not always align. This is particularly the case when considering the \textbf{scale} of datasets. Very large datasets are required to train transformer-based architectures, but it is difficult to satisfy \textbf{domain}, \textbf{modality} and \textbf{language} requirements when the scale of datasets reaches trillions of words. The very largest datasets only exist due to the practice of web-scraping \citep{bansal-2022-datascaling} and so are typically only representative of written text and particular domains. This practice also leads to a skew towards English data, as English continues to account for over 50\% of the text on the internet \citep{ebbertz2002, danet2007multilingual, DataReportal2024}.
 
-%In order to train a language model on phonemes, we require a dataset that meets several requirements. First, the data must be in a suitable phonemic format, such as the International Phonetic Alphabet (IPA). This is important as the phonemic representation must be consistent across languages and dialects. Second, the dataset must be large enough to train a language model. The size of the dataset required depends on the model architecture and the task being performed. For example, the GPT-3 model has 175 billion parameters and was trained on a dataset of 570GB of text. Third, the dataset should be parallel, containing both orthographic and phonemic transcriptions. This is important for training models that can convert between orthographic and phonemic representations. Fourth, the dataset should be multilingual, containing data from multiple languages. This is important for studying the properties of different languages and for building models that can work across multiple languages. Finally, the dataset should be child-directed speech, as this is the type of speech that children are exposed to when learning a language.
+This creates a challenge for the work in this thesis, as I require sufficient data to train transformer-based language models, but I also require the data to have a phonemic modality. Finding datasets that meet these two requirements alone is already a challenge, but in order to support the analytical experiments in Chapter 5 and 6, I also require the dataset to be multi-lingual and have a domain representative of child-directed speech. This is a unique set of requirements that is not met by any existing dataset. However, \textbf{automatic phonemization} can be used to convert orthographic datasets to phonemic datasets, and this can be used to create a dataset that meets all requirements for the work in this thesis.
+
+In this section, I begin by giving further background into these specific requirements (\cref{sec:dataset-requirements}). I then compare these requirements against existing datasets, finding that none match all of the requirements (\cref{sec:dataset-existing}). I then explore the use of automatic phonemization to convert orthographic datasets to phonemic datasets, which could be used to solve the \textbf{phonemic} constraint (\cref{sec:dataset-phonemization}). Finally, I present the specific phonemic representation I use in this thesis (\cref{sec:dataset-phoneme-streams}).
+
+%For example, very large transformer-based language models trained for chat-based applications mostly rely on \textbf{scale}, often requiring datasets with trillions of words such as The Pile \citep{pile} or CommonCrawl\footnote{\url{https://commoncrawl.org/}} to meet their data-hungry nature. These models also aim for diverse \textbf{domains} to be included in the dataset so that the model can be exposed to a wide range of language phenomena, whereas other language models may aim to model a single domain. For example, the Switchboard Corpus was originally collected to improve n-gram language modelling for speech recognition software. The \textbf{language} of the data is another crucial factor: many of the largest datasets only exist in English due to the availability of data and the dominance of English in research, but if the purpose of the language model is to build translation systems or facilitate the comparison of the properties of different languages, multi-lingual datasets are required. Finally, the \textbf{modality} of the data is important to consider. Language models can be trained on text, speech or both. Speech models are often trained on phonemes, the smallest unit of sound in a language, which can be useful for applications such as speech recognition or synthesis. Text models are often trained on orthographic text, which is more readily available and easier to process.
+
+\subsection{Requirements}
+\label{sec:dataset-requirements}
+
+I can now discuss the specific requirements for the dataset used in this thesis according to the \textbf{modality}, \textbf{scale}, \textbf{domain} and \textbf{language} of the data.
+
+\paragraph{Modality:} Since the phoneme is the unit of language we are modelling, our first requirement is that the training data must have a \textbf{phonemic} representation. Phonemic representations can vary considerably in terms of the level of details (e.g. broad phonemic transcriptions or narrow phonetic transcriptions) as well as the alphabet used. The most comprehensive and widely used alphabet is the International Phonetic Alphabet (IPA) which includes a broad range of symbols for phonemes as well as diacritics to represent finer phonetic details. There are also alphabets that were created for specific languages, such as the Americanist Phonetic Notation for Native American languages and the Uralic Phonetic Alphabet for Uralic languages. Other languages such as the Speech Assessment Methods Phonetic Alphabet (SAMPA) \citep{wells1992standard} or the Kirschenbaum Phonetic Alphabet were developed as machine-readable alternatives to IPA, representing sounds with ASCII characters. There exist tables to easily convert between these alphabets, so the exact choice is not crucial. However, a phonemic representation is necessary to ensure that the model is learning the structure of language at the phonological level. \rough{Either explain differences between orthographic and phonemic data, or probably refer to chapter 1 or 2 where this is discussed in further detail.}
+
+\paragraph{Scale:} In this thesis I use a transformer-based architecture for the language modelling task. It is clear from the scaling laws of neural language models that larger datasets are beneficial \citep{bansal-2022-datascaling} and transformer-based language models trained on the largest datasets available have demonstrated impressive linguistic capabilities \rough{citations here}. However, the purpose of the language models trained in this thesis is not to achieve high performance on application-driven benchmarks, but to study the properties of language. This means that the scale of the dataset is not as crucial as it would be for chat-based applications. The BabyLM workshop has demonstrated that language models can achieve good performance on a range of linguistic tasks when the scale of the training data is limited to 10-100 million words, mimicking the linguistic experience of a 13-year-old \citep{warstadt-2023-babylm-findings}, but this is still considered \textbf{large} in the context of phonemic datasets. The question of what quantity of data is required for a language model to learn specific properties of language is still an open question and is under-studied in the phonemic domain. This question is addressed in Chapter 4, requiring a dataset that is still in the order of millions of words in order to carry out this analysis.
+
+\paragraph{Domain:} In order to investigate the spoken properties of language, the dataset being used in language modelling should be sourced from a \textbf{speech} domain. This is closely linked with the phonemic modality of the data, although many speech-based datasets are represented as audio files or as orthographic transcriptions. Speech datasets also vary considerably according to how naturalistic the data is. For instance, audio book datasets are more representative of written language use than spoken language use, which is often more informal, with more disfluencies, repetition and incomplete sentences \rough{[citation]}. It is important to match the domain we are seeking to model and language models trained on clean audio book data have demonstrated very different characteristics when compared to recordings of naturalistic, spontaneous speech \citep{lavechin}\todo{maybe cut this sentence since we mention it below}. Naturalistic speech is also more representative of the input that children acquire langauge from, and child-directed speech has unique properties such as ... \rough{[examples and citation]}. Given this, the dataset should also be \textbf{child-directed} for the simulation experiments in Chapter 6. 
+
+\paragraph{Language:} Finally, I require the dataset to be \textbf{multilingual} both for the cross-lingual phonological analysis of languages carried out in Chapter 5 and also to support the acquisition study in Chapter 6. When testing hypotheses to do with the structure of language and the learnability of language, it is important to test the hypothesis on as many languages as possible and across as many language families as possible. Every language has a different structure, so while one model may work well for one language, it may not on another. This is especially important for acquisition experiments where language-independent mechanisms are being proposed. \rough{Citations and tidy this up further}
+
+These properties are motivated by the work in this thesis and are not necessarily required for all language modelling tasks. If the purpose of the language model is only to examine the the phonological structure of language, we only require the data be \textbf{large} and \textbf{phonemic}. Comparing the phonological properties of language also does not necessarily require the data to come from \textbf{child-directed} sources, although this is the particular domain I examine in this work. Similarly, for experiments studying a particular language, the dataset does not necessarily need to be \textbf{multilingual}, although having a single multilingual dataset does facilitate many monolingual studies.
+
+A final property that is not mentioned here is the \textbf{parallel} nature of the data. Parallel data is often used in translation tasks, where the model is trained to predict the target language given the source language. In this thesis, we are not training a translation model, but it is useful to have parallel data for validation experiments. This is particularly useful when converting orthographic data to phonemic data, as it allows us to compare the output of the automatic phonemization process to human-transcribed phonemic data.
+
+\subsection{Existing datasets}
+\label{sec:dataset-existing}
+
+There are several existing datasets that meet some of the requirements outlined above, but there are often trade-offs. I describe these further below and summarise them in \cref{tab:dataset-requirements}.
+
+Typical datasets for pre-training LLMs such as The Pile tend to only meet the size requirement, as they primarily consist of English written text. Other pre-training datasets are multilingual, such as the C4 dataset which contains text from 108 languages \citep{raffel2020exploring}, but such datasets do meet the domain or representation requirements.
+
+In order to find phonemic datasets we must instead look to datasets that were collected for speech recognition research. The GlobalPhone database, for instance, is a large, multilingual dataset with phonemic transcriptions designed to support the deployment of multilingual speech-based applications \citep{schultz2013globalphone}. It is also a \textbf{parallel} dataset, containing both audio, phonemic transcriptions and pronunciation dictionaries to facilitate orthographic analysis. Similarly, Common Voice \citep{ardila-etal-2020-common} consists of over 2,500 hours of audio across 38 languages, but does not include phonemic transcriptions. A limitation of both corpora is that they do not contain naturalistic speech. Instead, speech is elicited from the participants. For GlobalPhone, speakers given just 100 sentences from national newspaper articles to read aloud, and for Common Voice, speakers were provided individual, grammatically correct sentences to record themselves reading. GlobalPhone is also behind a paywall, which may limit its use in research. 
+
+Elicited speech corpora are frequently used in speech processing research because currating the sentences allows researchers to control for phonetic converage, speaker variability and contextual diversity \citep{lamel1989speech}. For instance, the TIMIT acoustic-phonetic database contains 2342 sentences spoken by 630 speakers across English regions and dialects, with audio aligned to detailed phonetic transcriptions \citep{garofolo1993darpa}. Such datasets have also been used for training language models. For instance, LibriSpeech --- which contains 1000 hours of read audibooks from the LibriVox project \citep{panayotov2015librispeech} --- is used as training data for the Zero Resource Speech Challenge, which aims to develop unsupervised methods for discovering linguistic units from speech \citep{dunbar_self-supervised_2022}. However, the clean and elicited nature of the data does not reflect spoken language use, and provides an unrealistic training signal for unsupervised audio-based LLMs \citep{lavechin}. LibriSpeech also does not contain phonemic transcriptions, although Libri-Light, a derived versions of the dataset, has provided phonetic alignments \citep{Kahn_2020}.
+
+Naturalistic speech corpora are more representative of spoken language use, but are often more challenging to collect, often leading to a trade-off between size and phonemic detail. For instance, Switchboard \citep{godfrey1992switchboard} and the Fisher corpus \citep{cieri2004fisher} are both large datasets consisting of recorded telephone conversations, but are only orthographically transcribed. The Buckeye corpus, which contains naturalistic speech from 40 English speakers does have parallel orthographic, phonetic and audio data, but does not meet the size requirement, only containing 300,000 words \citep{pitt2007buckeye}. One corpus that seems to bridge the gap is Audio BNC which contains 7.5 million words of naturalistic speech, provided as audio files aligned with phonemic transcriptions \citep{coleman2012audio}. Audio BNC was derived from the British National Corpus (BNC) which contains 100 million words of text \citep{bnc2007} reflecting a range of British English language use at the end of the 20th century. The spoken portion of BNC consisted of 10 million words of naturalistic speech transcribed orthographically, the majority of which was aligned with the original tape recordings to create Audio BNC as part of the Mining a Year of Speech project \citep{coleman2011mining}. Another large corpus with phonemic transcriptions which is also multilingual is the Babel corpus, consisting of aligned audio, word-level and phoneme-level transcriptions of conversational speech across 22 minority languages \citep{gales2014speech}. However, as with GlobalPhone, the corpus is not distributed with an open license. 
+
+Although many of the datasets described above have met the naturalistic speech requirement, none have fulfilled the \textbf{child-directed} requirement. The \emph{de facto} repository for language acquisition data is the Child Language Data Exchange System (CHILDES) database \citep{macwhinney1985child}. CHILDES was developed with the aim of preserving and standardising data used for child language development research and later grew into the TalkBank project, which now contains over 1.4TB of transcript data and 5TB of associated media data across several ``banks'', each focusing on a particular type of spoken language \citep{macwhinney_understanding_2019}. CHILDES is now a very large database, containing naturalistic child-adult interactions in over 40 different languages. It is a valuable resource for research on child language development, allowing past corpora to be used to answer new research questions, many of which could not have been ``remotely envisioned'' when the corpora were originally collected \citep{bernstein_ratner_augmenting_2024}. 
+
+CHILDES meets the majority of the requirements for the work in this thesis, as a multilingual corpus of naturalistic child-directed speech. CHILDES also may be sufficiently large for training transformer-based language with the North American English portion alone containing over 20 million words, of which 7 million words are child-directed. This portion has been used to train large language models in the past \citep{huebner-etal-2021-babyberta} but the other languages in the database contain fewer words. Whether these sections are sufficient for training large language models is an open question which I address in Chapter 4. The only limitation of CHILDES is that the data is primarily orthographically transcribed and so fails to meet the primary requirement. The PhonBank section of TalkBank does contain phonemic transcriptions but primarily for child-produced speech, with fewer than 100 adult utterances transcribed phonemically. 
+\todo{maybe mention homebank for longitudinal data}
+
+Finally, there exist some corpora that are child-directed but are not speech-based, such as the children's stories in Project Gutenberg \citep{gerlach2018standardizedprojectgutenbergcorpus}. This dataset makes up a portion of the pre-training dataset used for the BabyLM workshop, which was designed to mimick the linguistic experience of a 13-year-old both and consists of 100 million words. By combining data from multiple corpora including CHILDES, BNC and Switchboard, the BabyLM pre-training dataset aims to be representative of the input a child receives while also being sufficiently large \citep{choshen-et-al-2024-callforpapers-babylm2}. However, although 58\% of the data is derived from speech transcripts and 70\% of the data is child-directed, only the 29\% of the data (the CHILDES portion) is naturalistic child-directed speech. The remaining speech data is adult-directed and the remaining child-directed data consists of written stories or simplified Wikipedia articles. The dataset is also not phonemic or multilingual, but the dataset is still a useful resource for training transformer-based language models on relatively smaller corpora.
+
+% \begin{table}[t]
+%     \centering
+%     \begin{tabular}{c||cc|c|cc|c}
+%     %\toprule
+%         % Rotate text using \rotatebox from graphicx package
+%         & \multicolumn{2}{c|}{\textit{Modality}} & \multicolumn{1}{c|}{\textit{Scale}} & \multicolumn{2}{c|}{\textit{Domain}} & \textit{Language} \\
+%         & \footnotesize{\textbf{Phonemic}} & \footnotesize{\textbf{Parallel}} & \footnotesize{\textbf{Large}} & \footnotesize{\textbf{Speech}} & \footnotesize{\textbf{Child-Directed}} & \footnotesize{\textbf{Multilingual}} \\
+%         \hline
+%         GlobalPhone & \cmark & \cmark & \cmark & (\cmark) & \xmark & \cmark \\
+%         CHILDES & \xmark & \xmark & \cmark & \cmark & \cmark & \cmark \\
+%         AudioBNC & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+%         BabyLM & \xmark & \xmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+%         \hline
+%         Phonemized BabyLM & \cmark & \cmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+%         Phonemized CHILDES & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+%     \end{tabular}
+%     \caption{A summary of the properties of existing datasets that are used in this thesis.}
+%     \label{tab:dataset-requirements}
+% \end{table}
+
+\begin{table}[t]
+    \centering
+    \footnotesize
+    \begin{tabular}{l||cc|c|cc|c}
+    \toprule
+        % Rotate text using \rotatebox from graphicx package
+        & \multicolumn{2}{c|}{\textit{Modality}} & \multicolumn{1}{c|}{\textit{Scale}} & \multicolumn{2}{c|}{\textit{Domain}} & \textit{Language} \\
+        {\textbf{Dataset}} & {\textbf{Phonemic}} & {\textbf{Parallel}} & {\textbf{Large}} & {\textbf{Speech}} & {\textbf{Child-Directed}} & {\textbf{Multilingual}} \\
+        \midrule
+        The Pile & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark \\
+        C4 & \xmark & \xmark & \cmark & \xmark & \xmark & \cmark \\
+        GlobalPhone & \cmark & \cmark & \cmark & (\cmark) & \xmark & \cmark \\
+        Common Voice & \xmark & \xmark & \cmark & (\cmark) & \xmark & \cmark \\
+        TIMIT & \cmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
+        LibriSpeech & \xmark & \cmark & \cmark & (\cmark) & \xmark & \xmark \\
+        Libri-Light & \cmark & \cmark & \cmark & (\cmark) & \xmark & \xmark \\
+        Switchboard & \xmark & \cmark & \cmark & \cmark & \xmark & \xmark \\ 
+        Fisher & \xmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+        Buckeye & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+        AudioBNC & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+        Babel & \cmark & \cmark & \cmark & \cmark & \xmark & \cmark \\
+        CHILDES & \xmark & \xmark & \cmark & \cmark & \cmark & \cmark \\
+        Gutenberg Stories & \xmark & \xmark & \xmark & \xmark & \cmark & \xmark \\ 
+        BabyLM & \xmark & \xmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+        \midrule
+        Phonemized BabyLM & \cmark & \cmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+        Phonemized CHILDES & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+        \bottomrule
+    \end{tabular}
+    \caption{A summary of the properties of existing datasets that are used in this thesis.}
+    \label{tab:dataset-requirements}
+\end{table}
+
+\todo{check whether switchboard has phonemes and check gutenberg properties in table}
+
+\rough{Clearly none match all the requirements we want for the work in this thesis, a good solution is \textbf{automatic phonemization} to convert CHILDES and BabyLM Pre-training data. Talk about how some even fully sythesise speech and then use ASR to get phonemic data. E.g. \citep{zissman1994automatic} with switchboard}
+
+Two approaches to getting phonemes: 1) use ASR to get phonemes from audio data, 2) use automatic phonemization to convert orthographic data to phonemic data. The latter is the approach I take in this thesis.
+Some people have trained phonemic language models by first using ASR on audio data to generate phonemes, then training a language model on these phonemes \citep{zissman1994automatic}.
+
+In general, there are trade-offs between the properties of the datasets. The main challenge seems to be finding \textbf{phomemic} datasets that are sufficiently \textbf{large} for training transformer-based language models. It is then even more challenging to find datasets that also match the particular domain and language requirements of this thesis. If CHILDES were available in a phonemic format, it would be a suitable dataset for this work. One solution to this problem is to use \textbf{automatic phonemization} to convert orthographic datasets to a phonemic format. This is the approach I take in this thesis.
+
+\subsection{Automatic phonemization}
+\label{sec:dataset-phonemization}
+
+\rough{Argue why automatic phonemization is a good approach. Discuss the way this has been approached in the past. Mention the benefits and potential limitations, mention that we will tackle this in the last section. Say but first we need to define our phoneme stream representation...?}
+
+\subsection{Phoneme streams}
+\label{sec:dataset-phoneme-streams}
+
+\rough{Describe phoneme stream representation as a useful way to store phonemes. Referencing past phonemic representations and how it's useful to do space-separation due to multi-character symbols in IPA. Mention word boundaries also included and give an example}
+
+\subsection{Summary}
+\label{sec:dataset-background-summary}
+
+\rough{Summarise background.}
 
 \section{Corpus Phonemizer}
 \label{sec:dataset-corpus-phonemizer}
 
-In order to address the challenges of automatically converting orthographic datasets to phonemic streams, I developed \corpusphonemizer,\footnote{\url{https://github.com/codebyzeb/Corpus-Phonemicizers}} a suite of tools and scripts for converting corpora into datasets using a consistent phoneme stream representation.
+In order to address the challenges of automatically converting orthographic datasets to phonemic streams, I developed \corpusphonemizer,\footnote{\url{https://github.com/codebyzeb/Corpus-Phonemizer}} a suite of tools and scripts for converting datasets from an orthographic representation to the phoneme stream representation.
 
-The primary tool in the suite is a command-line application \texttt{corpus\_phonemizer.py} which takes orthographic text as input and converts it to a unified phonemic representation in IPA. The tool supports many languages by leveraging backend transliteration tools which can be selected by the user, each of which provides a different set of language codes (see \cref{sec:dataset-transliteration-tool-backends}).
+The primary tool in the suite is a command-line application \texttt{corpus\_phonemizer.py} which takes orthographic text as input and converts it to phonemes. The tool supports many languages by leveraging backend transliteration tools which can be selected by the user, each of which provides a different set of language codes (see \cref{sec:dataset-transliteration-tool-backends}).
 
 A crucial component of the tool is the use of \emph{folding dictionaries} to ensure that the set of phonemes produced by the backend transliteration tool for a particular language matches a standard phonemic inventory for that language. This validation step is important, \todo{expand on this}. It is also important to ensure that when designing the folding dictionaries, a consistent methodology is used. In order to support my multi-lingual experiments, I created folding dictionaries for 31 language codes. This process is described in \cref{sec:dataset-folding}.
 
-The tool is versatile, supporting many options for ease-of-use when preparing corpora. Despite the tool's utility, there are still limitations to using an automated tool for creating phonemic transcriptions from orthographic text. I give example usage and discuss these limitations further in \cref{sec:dataset-usage,sec:dataset-limitations}.
+The tool is versatile, supporting many options for ease-of-use when preparing corpora. Despite the tool's utility, there are still limitations to using an automated tool for creating phonemic transcriptions from orthographic text. I give example usage in \cref{sec:dataset-usage} and discuss these limitations further in \cref{sec:dataset-limitations}.
 
 %Besides the command-line application, the \corpusphonemizer suite also contains scripts dedicated to preparing the specific datasets used in this thesis. These include:
 % \begin{itemize}
@@ -90,9 +173,6 @@ The tool is versatile, supporting many options for ease-of-use when preparing co
 %     \item The British National Corpus (BNC)
 % \end{itemize}
 % Phonemized CHILDES is a large corpus of child-directed speech across 31 languages. I describe the creation of this dataset in \cref{sec:dataset-phonemized-childes}. The other datasets are in English and follow a similar process so I do not go into detail on their creation.
-
-\subsection{Phoneme Stream representation}
-\label{sec:dataset-phoneme-stream}
 
 \subsection{Transliteration tool backends}
 \label{sec:dataset-transliteration-tool-backends}
@@ -197,16 +277,6 @@ DEBUG:src.wrappers.wrapper.PhonemizerWrapper:Applying folding dictionary for lan
 
 I give three examples in \cref{listing:corpus-phonemizer}, all using the \texttt{en-us} language code with the \texttt{phonemizer} backend to phonemize the phrase ``hello there!''. The first example demonstrates how the tool can be used with input text provided in STDIN and output to STDOUT, with word boundaries maintained. The second example demonstrates how the folding step can be skipped, revealing that one of the errors corrected by the folding map is the incorrect merging of \ttipa{E\*r}. The final example shows how files can be passed to the tool and gives the output of the \texttt{--verbose} option. A full description of the tool's usage is given in \cref{appendix:corpus-phonemizer-usage}. 
 
-\subsection{Limitations of automatic phonemization}
-\label{sec:dataset-limitations}
-
-% One difficulty in training models from ecological long-form child-centered audio is the lack of corpora available. Papers reporting research on day-long recordings tend not to release the raw data due to privacy concerns (e.g.\ \citet{bergelson-etal-2023,leon-cristia-2024}).
-% Our method allows us to convert text (which is much more readily available) into a speech representation (phoneme streams), meaning that we could quickly prepare a corpus of 100 million words. 
-
-There are limitations in this transcription generation process. The fact that phonemes are an abstraction of speech means that the resulting dataset does not contain key information contained in speech such as prosody, stress and allophonic variation. Using a single accent to generate phonemes also leads to a loss of inter-speaker variability.
-
-\todo[inline]{Expand on this and give examples. Possibly call forward to a potential comparison between BNC automatic and human-made transcription}
-
 \section{Phonemized CHILDES}
 \label{sec:dataset-phonemized-childes}
 
@@ -306,8 +376,17 @@ There is considerable variation in size between each subset in \phonemizedchilde
 }
 
 \section{Limitations of Automated Phonemization[?]}
+\label{sec:dataset-limitations}
 
 \rough{Optional section to describe the Phonemized BNC and experiments where I compare the automated phonemization to the human transcriptions included in Audio BNC. Can serve as an in-depth exploration of the limitations of this approach.}
+
+
+% One difficulty in training models from ecological long-form child-centered audio is the lack of corpora available. Papers reporting research on day-long recordings tend not to release the raw data due to privacy concerns (e.g.\ \citet{bergelson-etal-2023,leon-cristia-2024}).
+% Our method allows us to convert text (which is much more readily available) into a speech representation (phoneme streams), meaning that we could quickly prepare a corpus of 100 million words. 
+
+There are limitations in this transcription generation process. The fact that phonemes are an abstraction of speech means that the resulting dataset does not contain key information contained in speech such as prosody, stress and allophonic variation. Using a single accent to generate phonemes also leads to a loss of inter-speaker variability.
+
+\todo[inline]{Expand on this and give examples. Possibly call forward to a potential comparison between BNC automatic and human-made transcription}
 
 \todo[inline]{If this section is included, remove limitations section from \cref{sec:dataset-limitations}.}
 
