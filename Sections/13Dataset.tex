@@ -72,45 +72,92 @@ Another branch of elicited speech corpora are those collected from audiobooks. F
 
 %Such datasets have also been used for training language models. For instance, LibriSpeech --- which contains 1000 hours of read audibooks from the LibriVox project \citep{panayotov2015librispeech} --- is used as training data for the Zero Resource Speech Challenge, which aims to develop unsupervised methods for discovering linguistic units from speech \citep{dunbar_self-supervised_2022}. However, as discussed above, the clean and elicited nature of the data does not reflect spoken language use, and provides an unrealistic training signal for unsupervised audio-based LLMs \citep{lavechin}\todo{maybe cut this}. LibriSpeech also does not contain phonemic transcriptions, although Libri-Light, a derived versions of the dataset, has provided phonetic alignments \citep{Kahn_2020}.
 
+% \begin{table}[t]
+%     \centering
+%     \footnotesize
+%     \begin{tabular}{l||cc|c|cc|c}
+%     \toprule
+%         % Rotate text using \rotatebox from graphicx package
+%         & \multicolumn{2}{c|}{\textit{Modality}} & \multicolumn{1}{c|}{\textit{Scale}} & \multicolumn{2}{c|}{\textit{Domain}} & \textit{Language} \\
+%         {\textbf{Dataset}} & {\textbf{Phonemic}} & {\textbf{Parallel}} & {\textbf{Large}} & {\textbf{Speech}} & {\textbf{Child-Directed}} & {\textbf{Multilingual}} \\
+%         \midrule
+%         The Pile & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark \\
+%         Common Crawl & \xmark & \xmark & \cmark & \xmark & \xmark & \cmark \\
+%         C4 & \xmark & \xmark & \cmark & \xmark & \xmark & \cmark \\
+%         GlobalPhone & \cmark & \cmark & \cmark & (\cmark) & \xmark & \cmark \\
+%         CommonVoice & \xmark & \xmark & \cmark & (\cmark) & \xmark & \cmark \\
+%         TIMIT & \cmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
+%         FLEURS & \xmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
+%         MSWC & \xmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
+%         IPAPACK & \cmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
+%         LibriSpeech & \xmark & \cmark & \cmark & (\cmark) & \xmark & \xmark \\
+%         Libri-Light & \cmark & \cmark & \cmark & (\cmark) & \xmark & \xmark \\
+%         MLS & \xmark & \cmark & \cmark & (\cmark) & \xmark & \cmark \\
+%         Switchboard & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\ 
+%         Fisher & \xmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+%         Buckeye & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+%         Audio BNC & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
+%         Babel & \cmark & \cmark & \xmark & \cmark & \xmark & \cmark \\
+%         CHILDES & \xmark & \xmark & \cmark & \cmark & \cmark & \cmark \\
+%         Gutenberg Stories & \xmark & \xmark & \xmark & \xmark & \cmark & \xmark \\ 
+%         BabyLM & \xmark & \xmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+%         \midrule
+%         %Phonemized BabyLM & \cmark & \cmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+%         Phonemized CHILDES & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{\rough{Caption Here. Could consider reformatting this table to include the actual modalities, sizes and number of languages in each dataset.}}
+%     \label{tab:dataset-requirements}
+% \end{table}
+
+\setlength{\tabcolsep}{2pt}
 \begin{table}[t]
     \centering
-    \footnotesize
-    \begin{tabular}{l||cc|c|cc|c}
-    \toprule
-        % Rotate text using \rotatebox from graphicx package
-        & \multicolumn{2}{c|}{\textit{Modality}} & \multicolumn{1}{c|}{\textit{Scale}} & \multicolumn{2}{c|}{\textit{Domain}} & \textit{Language} \\
-        {\textbf{Dataset}} & {\textbf{Phonemic}} & {\textbf{Parallel}} & {\textbf{Large}} & {\textbf{Speech}} & {\textbf{Child-Directed}} & {\textbf{Multilingual}} \\
-        \midrule
-        The Pile & \xmark & \xmark & \cmark & \xmark & \xmark & \xmark \\
-        Common Crawl & \xmark & \xmark & \cmark & \xmark & \xmark & \cmark \\
-        C4 & \xmark & \xmark & \cmark & \xmark & \xmark & \cmark \\
-        GlobalPhone & \cmark & \cmark & \cmark & (\cmark) & \xmark & \cmark \\
-        CommonVoice & \xmark & \xmark & \cmark & (\cmark) & \xmark & \cmark \\
-        TIMIT & \cmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
-        FLEURS & \xmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
-        MSWC & \xmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
-        IPAPACK & \cmark & \cmark & \xmark & (\cmark) & \xmark & \cmark \\
-        LibriSpeech & \xmark & \cmark & \cmark & (\cmark) & \xmark & \xmark \\
-        Libri-Light & \cmark & \cmark & \cmark & (\cmark) & \xmark & \xmark \\
-        MLS & \xmark & \cmark & \cmark & (\cmark) & \xmark & \cmark \\
-        Switchboard & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\ 
-        Fisher & \xmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
-        Buckeye & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
-        Audio BNC & \cmark & \cmark & \cmark & \cmark & \xmark & \xmark \\
-        Babel & \cmark & \cmark & \xmark & \cmark & \xmark & \cmark \\
-        CHILDES & \xmark & \xmark & \cmark & \cmark & \cmark & \cmark \\
-        Gutenberg Stories & \xmark & \xmark & \xmark & \xmark & \cmark & \xmark \\ 
-        BabyLM & \xmark & \xmark & \cmark & (\cmark) & (\cmark) & \xmark \\
-        \midrule
-        Phonemized BabyLM & \cmark & \cmark & \cmark & (\cmark) & (\cmark) & \xmark \\
-        Phonemized CHILDES & \cmark & \cmark & \cmark & \cmark & \cmark & \cmark \\
-        \bottomrule
-    \end{tabular}
-    \caption{\rough{Caption Here. Could consider reformatting this table to include the actual modalities, sizes and number of languages in each dataset.}}
-    \label{tab:dataset-requirements}
+    \tiny
+    \begin{threeparttable}
+        \begin{tabular}{lcccc}
+             \toprule
+            % Rotate text using \rotatebox from graphicx package
+            {\textbf{Dataset}} & {\textbf{Modality}} & {\textbf{Scale} (words)} & {\textbf{Domain}} & {\textbf{Language}} \\
+            \midrule
+            \textit{Requirements} & \textit{\underline{Phonemic} (\cmark) and \underline{Parallel} (\cmark)} & \textit{\underline{Large} (\cmark) (> 1M words)} & \textit{\underline{Naturalistic} (\cmark) \underline{Child-Directed} (\cmark) \underline{Speech}} (\cmark) & \textit{\underline{Multilingual}} (\cmark) \\
+            \midrule
+            The Pile \citep{pile} & Orthographic (\xmark~\xmark) & >100 billion\textsuperscript{\dagger} (\cmark) & Web-scraped written text (\xmark~\xmark~\xmark) & English only (\xmark) \\
+            Common Crawl & Orthographic (\xmark~\xmark) & >100 trillion\textsuperscript{\dagger} (\cmark) & Web-scraped written text (\xmark~\xmark~\xmark) & >160 languages (\cmark) \\
+            C4 \citep{raffel2020exploring} & Orthographic (\xmark~\xmark) & 1 trillion\textsuperscript{\dagger} (\cmark) & Web-scraped written text (\xmark~\xmark~\xmark) & >160 languages (\cmark) \\
+            GlobalPhone \citep{schultz2002globalphone} & Orthographic, Phonemic, Audio (\cmark~\cmark) & 5 million\textsuperscript{\dagger} (\cmark) & Read speech (\cmark~\xmark~\xmark) & 22 languages (\cmark) \\
+            CommonVoice \citep{ardila-etal-2020-common} & Orthographic, Audio (\xmark~\cmark) & 30 million\textsuperscript{\dagger} (\cmark) & Read speech (\cmark~\xmark~\xmark) & 38 languages (\cmark) \\
+            TIMIT \citep{garofolo1993darpa} & Orthographic, Phonemic, Audio (\cmark~\cmark) & 40 thousand (\xmark) & Read speech (\cmark~\xmark~\xmark) & English only (\xmark) \\
+            FLEURS \citep{conneau2023fleurs} & Orthographic, Audio (\xmark~\cmark) & 15 million\textsuperscript{\dagger} (\cmark) &Read speech (\cmark~\xmark~\xmark) & 102 languages (\cmark) \\
+            MSWC \citep{mazumder2021multilingual} & Orthographic, Audio (\xmark~\cmark) & 20 million (\cmark) & Read speech (\cmark~\xmark~\xmark) & 102 languages (\cmark) \\
+            IPAPACK \citep{zhu-etal-2024-taste} & Orthographic, Phonemic (\cmark~\cmark) & 15 million\textsuperscript{\dagger} (\cmark) & Read speech (\cmark~\xmark~\xmark) & 115 languages (\cmark) \\
+            LibriSpeech \citep{panayotov2015librispeech} & Orthographic, Audio (\xmark~\cmark) & 10 million\textsuperscript{\dagger} (\cmark) & Audio books (\cmark~\xmark~\xmark) & English only (\xmark) \\
+            Libri-Light \citep{Kahn_2020} & Orthographic\textsuperscript{*}, Phonemic\textsuperscript{*}, Audio (\cmark~\cmark) & 700 million\textsuperscript{\dagger} (\cmark) & Audio books (\cmark~\xmark~\xmark) & English only (\xmark) \\
+            MLS \citep{pratap2020mls} & Orthographic\textsuperscript{*}, Phonemic\textsuperscript{*}, Audio (\cmark~\cmark) & 600 million\textsuperscript{\dagger} (\cmark) & Audio books (\cmark~\xmark~\xmark) & 8 languages (\cmark) \\
+            Switchboard \citep{godfrey1992switchboard} & Orthographic, Phonemic, Audio (\cmark~\cmark) & 3 million\textsuperscript{\dagger} (\cmark) & Telephone conversations (\cmark~\cmark~\xmark) & English only (\xmark) \\
+            Fisher \citep{cieri2004fisher} & Orthographic, Audio (\xmark~\cmark) & 12 million\textsuperscript{\dagger} (\cmark) & Telephone conversations (\cmark~\cmark~\xmark) & English only (\xmark) \\
+            Buckeye \citep{PITT200589} & Orthographic, Phonemic, Audio (\cmark~\cmark) & 300 thousand (\xmark) & Spontaneous speech (\cmark~\cmark~\xmark) & English only (\xmark) \\
+            Audio BNC \citep{coleman2012audio} & Orthographic, Phonemic, Audio (\cmark~\cmark) & 7 million (\cmark) & Spontaneous speech (\cmark~\cmark~\xmark) & English only (\xmark) \\
+            Babel \citep{harper2011babel} & Orthographic, Audio (\xmark~\cmark) & 60 million (\cmark) & Telephone conversations (\cmark~\cmark~\xmark) & 25 languages (\xmark) \\
+            CHILDES \citep{macwhinney1985child} & Orthographic (\xmark~\xmark) & > 10 million (\cmark) & Spontaneous speech (\cmark~\cmark~\cmark) & 45 languages (\cmark) \\
+            Gutenberg Stories \citep{gerlach2018standardizedprojectgutenbergcorpus} & Orthographic (\xmark~\xmark) & 20 billion?? (\cmark) & Child stories (\cmark~\cmark~\cmark) & 22 languages (\cmark) \\
+            BabyLM \citep{choshen-et-al-2024-callforpapers-babylm2} & Orthographic (\xmark~\xmark) & 100 million (\cmark) & Speech and text (\cmark~\cmark~\cmark)\textsuperscript{**} & English only (\xmark) \\
+            \midrule
+            %Phonemized BabyLM & \cmark & \cmark & \cmark & (\cmark) & (\cmark) & \xmark \\
+            Phonemized CHILDES & Orthographic, Phonemic (\cmark~\cmark) & 10 million (\cmark) & Transcriptions of child-directed speech (\cmark~\cmark~\cmark) & 31 languages (\cmark) \\
+            \bottomrule
+        \end{tabular}
+        \normalsize
+        \caption{A description of related datasets and whether they meet the requirements for transformer-based phonemic language modelling from child-directed speech, as outlined in \cref{sec:dataset-requirements}. The datasets are described in terms of their modality, scale, domain and language and checkmarks (\cmark) indicate that the dataset meets one of the requirements for that property.\\\emph{\textsuperscript{\dagger}Word counts estimated from the size in GB or the hours of audio in the dataset, using a heuristic of 5 bytes per word and 12,000 words per hour of audio based on the size of Switchboard.}\\\emph{\textsuperscript{*}Libri-Light and MLS only have orthographic and phonemic transcriptions for 10 hours of audio per language.}.\\\emph{\textsuperscript{**}BabyLM contains a mix of speech and text data from a mix of adult-directed and child-directed sources, only 29\% is child-directed speech.}}
+        \label{tab:dataset-requirements}
+    \end{threeparttable}
 \end{table}
+\setlength{\tabcolsep}{6pt}
 
-Naturalistic speech corpora were originally collected to improve speech processing applications due to being more representative of `in the wild' spoken language use. An early example is Switchboard, which was collected shortly after TIMIT and includes recorded telephone conversations across many speakers and multiple dialects of American English \citep{godfrey1992switchboard}. Totalling 250 hours and 3 million words of speech, it was originally collected for improving telephone-based speech recognition research but has since been a valuable resource for sociological and linguistic research, having later been annotated with syntactic tags and phonetic labels \rough{[citations]}. Similar examples include the Fisher corpus \citep{cieri2004fisher}, another large dataset consisting of recording telephone conversations, and the Buckeye corpus \citep{pitt2007buckeye}, which contains recorded interviews with 40 speakers. These fail to meet some of the requirements; The Fisher corpus does not have phonemic transcriptions, and the Buckeye only contains 300,000 words \citep{pitt2007buckeye}. Audio BNC is another corpus consisting of naturalistic speech recorded in the 1990s. It contains 7.5 million words of speech from participant-carried tape recorders, available as audio files aligned with phonemic and orthographic transcriptions \citep{coleman2012audio}. Finally, the Babel corpus is a multilingual corpus of conversational speech across 22 minority language, which also contains parallel audio, orthographic and phoneme-level transcriptions \citep{gales2014speech}. 
+Naturalistic speech corpora were originally collected to improve speech processing applications due to being more representative of `in the wild' spoken language use. An early example is Switchboard, which was collected shortly after TIMIT and includes recorded telephone conversations across many speakers and multiple dialects of American English \citep{godfrey1992switchboard}. Totalling 250 hours and 3 million words of speech, it was originally collected for improving telephone-based speech recognition research but has since been a valuable resource for sociological and linguistic research, having later been annotated with syntactic tags and phonetic labels \rough{[citations]}. Similar examples include the Fisher corpus \citep{cieri2004fisher}, another large dataset consisting of recording telephone conversations, and the Buckeye corpus \citep{pitt2007buckeye}, which contains recorded interviews with 40 speakers. These fail to meet some of the requirements; The Fisher corpus does not have phonemic transcriptions, and the Buckeye only contains 300,000 words \citep{pitt2007buckeye}. Audio BNC is another corpus consisting of naturalistic speech recorded in the 1990s. It contains 7.5 million words of speech from participant-carried tape recorders, available as audio files aligned with phonemic and orthographic transcriptions \citep{coleman2012audio}. Finally, the Babel corpus is a multilingual corpus of conversational speech across 22 minority language, which also contains parallel audio and orthographic transcriptions \citep{harper2011babel}. 
+
+% Gales claims that Babel ships with phoneme dictionaries but doesn't seem to be listed on LDC:
+% https://catalog.ldc.upenn.edu/LDC2019S03
 
 %Audio BNC was derived from the British National Corpus (BNC), a very large corpus containing 100 million words of text reflecting a range of British English language use at the end of the 20th century \citep{bnc2007}. The spoken portion of BNC consisted of 10 million words of naturalistic speech transcribed orthographically, the majority of which was aligned with the original tape recordings to create Audio BNC as part of the Mining a Year of Speech project \citep{coleman2011mining}. Another large corpus with phonemic transcriptions which is also multilingual is the Babel corpus, consisting of aligned audio, word-level and phoneme-level transcriptions of conversational speech across 22 minority languages \citep{gales2014speech}. However, as with GlobalPhone, the corpus is not distributed with an open license. 
 
@@ -140,7 +187,7 @@ Despite producing phonemic transcriptions at a faster rate than human annotators
 
 An alternative method for automatic phonemization is to use \textbf{grapheme-to-phoneme} conversion (G2P) systems, which convert orthographic text using a combination of pronouncing dictionaries and statistical models. These systems have been developed for many languages using rules or finite-state transducers to generalise to unseen words \citep{Mortensen-et-al:2018, johnson2020g2p, hasegawa-2020-g2pmultilingual, Bernard2021}. Other G2P systems have applied neural networks to automatically learn these rules and generalise to new languages \citep{NOVAK_MINEMATSU_HIROSE_2016, Zhu2022} but these systems are typically trained on pronouncing dictionaries, so may fail to capture the variation in natural speech. Nevertheless, these systems provide a useful method for converting orthographic text to phonemic text at scale, and have been used to produce phonemic transcriptions for the LibriSpeech corpus \citep{Kahn_2020} and IPAPACK \citep{zhu-etal-2024-taste}.
 
-Instead of converting orthographic text to phonemes, \textbf{automated speech recognition} (ASR) systems can be used to create a phonemic transcription directly from audio, which allows the system to capture phonetic detail that is not available from an orthographic transcription. ASR systems are typically trained to convert audio to text \citep{chan2015listen}\rough{[more ASR citations]} but can also be used to produce phonemic transcriptions by training on phonemic data \citep{feng-2023-language-universal-phonetic}. However, these ASR systems require phonemic training data, and are often trained on the datasets discussed in the previous section, or on datasets converted to a phonemic representation using G2P systems. This means that although they could in principle access to finer phonetic detail from the audio information, in practice they may not be able to produce transcriptions that contain any more detail than those produced by G2P systems or forced aligners. Another limitation is that they can only produce a phonemic transcription if audio is available. Previous work has converted orthographic text to audio using text-to-speech (TTS) systems and followed this by ASR to get a phonemic representation, but this still has the same limitations as using an ASR system on real audio, with the additional limitations of whatever TTS system is in use \rough[had a citation for this but lost it].  
+Instead of converting orthographic text to phonemes, \textbf{automated speech recognition} (ASR) systems can be used to create a phonemic transcription directly from audio, which allows the system to capture phonetic detail that is not available from an orthographic transcription. Older ASR systems made use of \textbf{acoustic models}, consisting of a HMM for each desired phoneme, which would then be compared with the audio signal to find determine the best-fitting phoneme for each segment of audio. More recent ASR systems use neural networks to model the acoustic signal, such as the Listen, Attend and Spell (LAS) model \citep{chan2015listen}. These are typically trained to convert audio to text but can also be used to produce phonemic transcriptions by training on phonemic data \citep{feng-2023-language-universal-phonetic}. Both of these ASR systems require phonemic training data, and are often trained on the datasets discussed in the previous section, or on datasets converted to a phonemic representation using G2P systems. This means that although they could in principle access to finer phonetic detail from the audio information, in practice they may not be able to produce transcriptions that contain any more detail than those produced by G2P systems or forced aligners. Another limitation is that they can only produce a phonemic transcription if audio is available. Previous work has converted orthographic text to audio using text-to-speech (TTS) systems and followed this by ASR to get a phonemic representation, but this still has the same limitations as using an ASR system on real audio, with the additional limitations of whatever TTS system is in use \rough[had a citation for this but lost it].  
 
 In conclusion, there are many methods for converting datasets to a phonemic representation, but each has its own limitations. The most accurate phonemic transcriptions are produced by human annotators, but the slow rate of transcription makes this method infeasible for large-scale datasets. Forced aligners can produce phonemic transcriptions at a faster rate, but are designed to align phonemic transcriptions to audio, not to produce accurate phonemic transcriptions. G2P systems can convert orthographic text to phonemic text at scale, but may fail to capture the variation in natural speech. Finally, ASR systems can produce phonemic transcriptions directly from audio and could theoretically output a more detailed transcription, but are limited by their training data and so may not be able to produce more detailed transcriptions than G2P systems.
 
@@ -148,12 +195,15 @@ In conclusion, there are many methods for converting datasets to a phonemic repr
 % TODO:
 % - Should talk about HMM-based acoustic models and how they are used in ASR
 % - Possibly remove Babel, or figure out how it was made
-% - Possibly add vox forge
+% - Possibly add vox lingua (youtube 107 languages) and voxpopuli (parliament)
+% - Defo need to add vox communis https://aclanthology.org/2022.lrec-1.566/
 
 %In general, there are trade-offs between the properties of the datasets. The main challenge seems to be finding \textbf{phomemic} datasets that are sufficiently \textbf{large} for training transformer-based language models. It is then even more challenging to find datasets that also match the particular domain and language requirements of this thesis. If CHILDES were available in a phonemic format, it would be a suitable dataset for this work. One solution to this problem is to use \textbf{automatic phonemization} to convert orthographic datasets to a phonemic format. This is the approach I take in this thesis.
 
 % \subsection{Phoneme streams}
 % \label{sec:dataset-phoneme-streams}
+
+
 
 % \rough{Describe phoneme stream representation as a useful way to store phonemes. Referencing past phonemic representations and how it's useful to do space-separation due to multi-character symbols in IPA. Mention word boundaries also included and give an example}
 
@@ -185,10 +235,23 @@ The tool is versatile, supporting many options for ease-of-use when preparing co
 % \end{itemize}
 % Phonemized CHILDES is a large corpus of child-directed speech across 31 languages. I describe the creation of this dataset in \cref{sec:dataset-phonemized-childes}. The other datasets are in English and follow a similar process so I do not go into detail on their creation.
 
-\subsection{Transliteration tool backends}
+
+\subsection{Phoneme Stream Representation}
+\label{sec:dataset-phoneme-stream-representation}
+
+In order to ensure that phonemes are output using a consistent representation, I define the \textbf{phoneme stream representation} as follows:
+\begin{itemize}
+    \item Each phoneme is represented using the International Phonetic Alphabet (IPA).
+    \item Each phoneme is separated by a space.
+    \item Word boundaries and utterance boundaries are represented using unique symbols.
+\end{itemize}
+
+IPA is used to represent each phoneme due to being the most widely used and comprehensive phonetic alphabet, as discussed in \cref{sec:dataset-requirements}. It is important to separate phonemes by spaces because IPA symbols may be represented using multiple Unicode characters. For instance, the word ``enjoy'' can be transcribed in IPA as \textipa{EndZOI} which uses six characters but only contains four phonemes, since \textipa{dZ} is a single consonant and \textipa{OI} is a diphthong. By instead representing the word as \textipa{E~n~dZ~OI}, it is much easier to split the word into individual phonemes by using whitespace as a delimiter. Similarly, word boundaries and utterance boundaries are represented using the unique symbols \texttt{WORD\_BOUNDARY} and \texttt{UTT\_BOUNDARY}. 
+
+\subsection{G2P backends}
 \label{sec:dataset-transliteration-tool-backends}
 
-In order to convert orthographic text to phonemes, I leverage four transliteration tools, each of which supports a different set of languages. The tools use different approaches for different languages, including rule-based transliteration and dictionary pronunciations. In order to ensure a consistent output, I create a custom wrapper for each tool.
+In order to convert orthographic text to phonemes, I leverage four transliteration tools, each of which supports a unique set of languages. I create a custom wrapper for each, ensuring that the output adheres to the phoneme stream representation. The tools use varying approaches for each languages, including rule-based transliteration and dictionary pronunciations.
 
 \paragraph{\texttt{phonemizer}:}
 Phonemizer \citep{Bernard2021} is a python library that supports the automatic phonemization of text in many languages. It allows the user to select from one of four backends, each of which have different capabilities. By default, I use eSpeak \citep{Dunn2019}, an open-source speech synthesizer which supports over one hundred languages and outputs phonemes in IPA. This synthesizer uses a combination of handwritten rules and pronunciation dictionaries for each language it supports. Besides supporting many languages, it also supports many accents (such as Scottish English or Lancaster English) but only for a few languages besides English. For Japanese text written in Romanji, I instead use \texttt{phonemizer} with the Segments \citep{robert_forkel_2019_3549784} backend, which uses simple grapheme to phoneme mapping (Romanji has very simple pronunciation rules and is not supported by eSpeak).\footnote{\texttt{phonemizer}'s segments dictionary for Japanese was actually missing an entry to map `s' to /s/ but I was able to add this to their codebase and become a contributor of their project.}
@@ -261,7 +324,7 @@ In \cref{appendix:folding-dictionaries} I give the folding dictionary for each b
 
 %\rough{Describe overall usage of tool and how it can be used. Call forward to next section where it is used to produce the Phonemized CHILDES dataset. Briefly mention how it also used to create Phonemized BabyLM datset and can be used for evaluation data as well, calling forward to next chapter. Discuss limitations of the tool. Mention that folding maps optional}
 
-The main usage of \corpusphonemizer is to use either use the command-line tool or equivalent python function call \texttt{phonemize\_utterances()} to convert orthographic text to a phonemic representation. The tool allows the user to select the backend and language code to use for phonemization and the command-line tool allows the text to be input/output from STDIN/STDOUt or to/from provided file paths. Additional options include \texttt{--keep\_word\_boundaries} to output a dedicated \texttt{WORD\_BOUNDARY} token between words and \texttt{--uncorrected} to skip the \textbf{folding} process and output the phonemes exactly as produced by the backend tool. 
+The main usage of \corpusphonemizer is to use either use the command-line tool or python API to convert orthographic text to a phonemic representation. The tool allows the user to select the backend and language code to use for phonemization and the command-line tool allows the text to be input/output from STDIN/STDOUT or to/from provided file paths. Additional options include \texttt{--keep\_word\_boundaries} to output a dedicated \texttt{WORD\_BOUNDARY} token between words and \texttt{--uncorrected} to skip the \textbf{folding} process and output the phonemes exactly as produced by the backend tool. 
 
 \lstset{
     basicstyle=\ttfamily,
@@ -285,6 +348,8 @@ DEBUG:src.wrappers.wrapper.PhonemizerWrapper:Initializing PhonemizerWrapper with
 DEBUG:src.wrappers.wrapper.PhonemizerWrapper:Using espeak backend with language code "en-us"...
 DEBUG:src.wrappers.wrapper.PhonemizerWrapper:Applying folding dictionary for language code: "en-us".
 \end{lstlisting}
+
+\todo{This is a bit messy, perhaps we move this listing to the appendix.}
 
 I give three examples in \cref{listing:corpus-phonemizer}, all using the \texttt{en-us} language code with the \texttt{phonemizer} backend to phonemize the phrase ``hello there!''. The first example demonstrates how the tool can be used with input text provided in STDIN and output to STDOUT, with word boundaries maintained. The second example demonstrates how the folding step can be skipped, revealing that one of the errors corrected by the folding map is the incorrect merging of \ttipa{E\*r}. The final example shows how files can be passed to the tool and gives the output of the \texttt{--verbose} option. A full description of the tool's usage is given in \cref{appendix:corpus-phonemizer-usage}. 
 
@@ -321,7 +386,7 @@ Finally, I add the pair of CSV files to the \phonemizedchildes repository hosted
 \subsection{Dataset overview}
 \label{sec:dataset-phonemized-childes-overview}
 
-The \phonemizedchildes dataset contains over seven million utterances of child-directed speech across 31 languages. Each language is available as a subset, with a `train' split containing the majority of the utterances downloaded from CHILDES and a `valid' split containing 10,000 utterances for validation purposes. An overview of each section is given in \cref{tab:dataset-phonemized-childes-sections}, detailing the corresponding CHILDES collection, the number of corpora downloaded, the backend and language code used with \corpusphonemizer to convert the corpora to phonemes and a numerical overview of the size of each section. Note that English is split into two sections to mirror the split present in CHILDES and Portuguese is split into two sections due to the phonological differences between Brazilian and Portugal Portuguese, the availability of language codes to phonemize the two, and the fact that the corpora are distinct within CHILDES.
+The \phonemizedchildes dataset contains over seven million utterances of child-directed speech across 31 languages. Each language is available as a subset, with a `train' split containing the majority of the utterances downloaded from CHILDES and a `valid' split containing 10,000 utterances for validation purposes. An overview of each section is given in \cref{tab:dataset-phonemized-childes-sections}, detailing the corresponding CHILDES collection, the number of corpora downloaded, the backend and language code used with \corpusphonemizer to convert the corpora to phonemes and a numerical overview of the size of each section. Note that English is split into two sections to mirror the split present in CHILDES and Portuguese is split into two sections, following previous work \citep{caines2019cross, goriely2023word}. %due to the phonological differences between Brazilian and Portugal Portuguese, the availability of language codes to phonemize the two, and the fact that the corpora are distinct within CHILDES.
 
 \begin{table}[t]
     \centering
@@ -368,38 +433,48 @@ The \phonemizedchildes dataset contains over seven million utterances of child-d
 \end{table}
 \todo[inline]{Possibly need to add the Phoible phoneme inventory information to this table, although perhaps that can be in the appendix.}
 
-The dataset is hosted on Huggingface and can be loaded using Huggingface's \texttt{datasets} library \citep{lhoest-etal-2021-datasets} or downloaded directly. The dataset is stored as CSV files with one utterance per row, maintaining the structure of the CHILDES database. Both the original orthographic utterances and phonemized utterances are available, as well as many features imported from CHILDES, such as target child age, morpheme count, part of speech information, and the IDs of each utterance, transcript, corpus and collection. Within each section, the transcripts are sorted by target child age, to age-ordered curriculum learning experiments such as in the work of \citet{huebner-etal-2021-babyberta}.
+The dataset is hosted on Huggingface and can be loaded using Huggingface's \texttt{datasets} library \citep{lhoest-etal-2021-datasets} or downloaded directly. The dataset is stored as CSV files with one utterance per row, maintaining the structure of the CHILDES database. Both the original orthographic utterances and phonemized utterances are available, as well as many features imported from CHILDES, such as target child age, morpheme count, part of speech information, and the IDs of each utterance, transcript, corpus and collection. Within each section, the transcripts are sorted by target child age, to age-ordered curriculum learning experiments such as in the work of \citet{huebner-etal-2021-babyberta}. 
 
 \subsection{Corpus analysis}
 \label{sec:dataset-phonemized-childes-analysis}
 
-There is considerable variation in size between each subset in \phonemizedchildes. The largest subset is \textbf{English (US)} with over 1.6 million utterances and the smallest section is \textbf{Farsi} with only 13 thousand utterances. As these subsets reflect the number of utterances available for each language in CHILDES, which in turn come from individual corpora collected from acquisition research into that language, these differences give a sense of which languages are understudied in the field of acquisition, and the extent to which English dominates\todo{rewrite}. In this section, I compare each language in \phonemizedchildes according to their information-theoretic properties,   
+There is considerable variation in size between each subset in \phonemizedchildes. The largest subset is \textbf{English (US)} with over 1.6 million utterances and the smallest section is \textbf{Farsi} with only 13 thousand utterances. As these subsets reflect the number of utterances available for each language in CHILDES, which in turn come from individual corpora collected from acquisition research into that language, these differences give a sense of which languages are understudied in the field of acquisition, and the extent to which English dominates\todo{rewrite}.
 
-\rough{A broad overview of the phonemic properties of each language within the corpus. A few experiments to justify why we use phonemes instead of letters, trying to highlight that phonemes are a more consistent representation for our purposes. Experiments include:
-\begin{itemize}
-    \item Information theoretic properties (Zipf's law, Heap's law, ratios, information rate, n-gram perplexities)
-    \item Comparing phoneme properties to character properties (hypothesis: information rate more consistent across langugages when looking at phonemes rather than characters)
-    \item Child vs adult speech (extract child utterances in CHILDES and compare MLU, word length etc)
-    \item Child-directed vs adult-directed speech (compare CHILDES to BNC)
-    \item Phoneme clustering (could possibly be moved to chapter 5 - segmentation): looking at phoneme clusters, possibly vowel harmony and other signals for segmentation.
-    \item Child errors (could be moved to chapter 6 - past tense formation): looking at errors that children produce.
-\end{itemize}
-}
+\rough{Analysis 1: Figure of scale of each language, coloured by language family, showing child-adult divide. Discuss the representation of each language further. Show MLU and word length distributions.}
 
-\section{Limitations of Automated Phonemization[?]}
-\label{sec:dataset-limitations}
+\rough{Analysis 2: Distribution of child ages in the dataset. Examine one language more closely (e.g. English) and show how MLU increases with child age, encouraging future work examining information-theoretic properties.}
 
-\rough{Optional section to describe the Phonemized BNC and experiments where I compare the automated phonemization to the human transcriptions included in Audio BNC. Can serve as an in-depth exploration of the limitations of this approach.}
+\rough{Analysis 3: Average information rate of words in each language, compared to orthographic words - ideally showing that phonemes are a more consistent information channel across languages.}
+
+\rough{Conclude that this dataset is useful both for training language models and for multi-lingual analysis of naturalistic and child-directed speech.}
 
 
-% One difficulty in training models from ecological long-form child-centered audio is the lack of corpora available. Papers reporting research on day-long recordings tend not to release the raw data due to privacy concerns (e.g.\ \citet{bergelson-etal-2023,leon-cristia-2024}).
-% Our method allows us to convert text (which is much more readily available) into a speech representation (phoneme streams), meaning that we could quickly prepare a corpus of 100 million words. 
 
-There are limitations in this transcription generation process. The fact that phonemes are an abstraction of speech means that the resulting dataset does not contain key information contained in speech such as prosody, stress and allophonic variation. Using a single accent to generate phonemes also leads to a loss of inter-speaker variability.
+%In this section, I compare each language in \phonemizedchildes according to their information-theoretic properties,   
 
-\todo[inline]{Expand on this and give examples. Possibly call forward to a potential comparison between BNC automatic and human-made transcription}
+% \rough{A broad overview of the phonemic properties of each language within the corpus. A few experiments to justify why we use phonemes instead of letters, trying to highlight that phonemes are a more consistent representation for our purposes. Experiments include:
+% \begin{itemize}
+%     \item Information theoretic properties (Zipf's law, Heap's law, ratios, information rate, n-gram perplexities)
+%     \item Comparing phoneme properties to character properties (hypothesis: information rate more consistent across languages when looking at phonemes rather than characters)
+%     \item Child vs adult speech (extract child utterances in CHILDES and compare MLU, word length etc)
+%     \item Child-directed vs adult-directed speech (compare CHILDES to BNC)
+%     \item Phoneme clustering (could possibly be moved to chapter 5 - segmentation): looking at phoneme clusters, possibly vowel harmony and other signals for segmentation.
+%     \item Child errors (could be moved to chapter 6 - past tense formation): looking at errors that children produce.  
+% \end{itemize}
+% }
 
-\todo[inline]{If this section is included, remove limitations section from \cref{sec:dataset-limitations}.}
+% \section{Limitations of Automated Phonemization[?]}
+% \label{sec:dataset-limitations}
+
+% \rough{Optional section to describe the Phonemized BNC and experiments where I compare the automated phonemization to the human transcriptions included in Audio BNC. Can serve as an in-depth exploration of the limitations of this approach.}
+
+
+% % One difficulty in training models from ecological long-form child-centered audio is the lack of corpora available. Papers reporting research on day-long recordings tend not to release the raw data due to privacy concerns (e.g.\ \citet{bergelson-etal-2023,leon-cristia-2024}).
+% % Our method allows us to convert text (which is much more readily available) into a speech representation (phoneme streams), meaning that we could quickly prepare a corpus of 100 million words. 
+
+% There are limitations in this transcription generation process. The fact that phonemes are an abstraction of speech means that the resulting dataset does not contain key information contained in speech such as prosody, stress and allophonic variation. Using a single accent to generate phonemes also leads to a loss of inter-speaker variability.
+
+% \todo[inline]{Expand on this and give examples. Possibly call forward to a potential comparison between BNC automatic and human-made transcription}
 
 \section{Summary}
 
