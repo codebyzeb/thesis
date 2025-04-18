@@ -65,74 +65,7 @@ We find that large language models are powerful statistical learners capable of 
 
 % We discuss the limitations of our transcription method and discuss the use of raw audio as an alternative input representation. Finally, we present the advantages of this input representation for multi-lingual and low-resource applications and encourage further work in phoneme-based language modeling. 
 
-\section{Related Work}
-
-%Large language models are typically trained on written text using tokenizers that split the text into subword units. By contrast, studies that train models using a phoneme-based input representation tend to use tokenizers that produce a token for each individual phoneme, akin to character-based language models. Often, phonemes are fed to a model in a sequence that does not contain word boundaries, as utterances tend to be produced continuously, with no pauses between individual words. 
-
-The standard input representation for training large language models consists of written text split into subword units. By contrast, studies that train models using a phonemic input representation tend to split words into individual phonemes, without word boundaries (as spoken utterances are produced continuously, without clear pauses between words).
-
-We identify three key transformations that bring us from the standard input representation used by language models to this alternative \textbf{phoneme stream} representation:
-
-% \begin{itemize}
-%     \item Using a character-based tokenization instead of using subwords.
-%     \item Removing word boundaries from the input.
-%     \item Using phonemic transcriptions instead of written text.
-% \end{itemize}
-
-\begin{itemize}
-\setlength\itemsep{0.1em}
-    \item \characterhighlight{Character tokenization} Treating each phoneme or grapheme as a token, rather than using subwords.
-    \item \spacehighlight{Word boundary removal} Removing whitespace or other word boundary cues from the input.
-    \item \phonemehighlight{Phonemic transcription} Converting words to a phonemic representation. 
-\end{itemize}
-
-% \vspace{1em}
-% \noindent\characterhighlight{Character tokenization} Treating each phoneme or grapheme as a token, rather than using subwords.
-
-% \vspace{0.5em}
-% \noindent\spacehighlight{Word boundary removal} Removing whitespace or other word boundary cues from the input.
-
-% \vspace{0.5em}
-% \noindent\phonemehighlight{Phonemic transcription} Converting words to a phonemic representation. 
-% \vspace{1em}
-
-\noindent
-Each transformation can be made independently or in combination, as illustrated in \cref{fix:14-example}. %By implementing every possible combination, we can identify the impact of each transformation on language learning by LLMs. 
-% We can also create novel representations of the input which may not have been considered (such as learning subword units from text stripped of word boundaries). 
-% The three input transformations have mostly been studied separately. 
-
-Previous literature has extensively explored these three transformations but they have typically been studied independently and been used for different downstream purposes. 
-
-\subsection{Training with Phonemes}
-
-Several language models have been trained with phonemic input \citep{sundararaman-2021-phonemebert, gale-etal-2023-bort} but it remains a challenge to do so due to the lack of large phonemic corpora. While a number of well-known speech-based datasets include phonemic transcriptions, such as Switchboard \citep{godfrey1992switchboard}\todo{correct this} and TIMIT \citep{garofolo1993darpa}, these datasets are small compared to the trillions of tokens contained in standard language model pre-training corpora \citep{elazar-2024-redpajama}. The majority of works that use phonemic representations typically rely on grapheme to phoneme conversion tools \citep{bisani-2008-g2p, hasegawa-2020-g2pmultilingual} to generate coarse phonemic transliterations of text data.
-
-It is also a challenge to evaluate the broad capabilities of language models trained with phonemes, as most benchmarks assume a graphemic representation, even some that assess phonological knowledge \citep{suvarna-etal-2024-phonologybench}. One benchmark that assesses both the syntactic and phonological capabilities of language models is BabySLM \citep{lavechin}. %One distinguishing advantage of this benchmark is that it can be applied to models trained on either graphemes or phonemes.
-We discuss this benchmark further in \cref{sec:14-effect}.
-
-\subsection{Character-based Language Models}
-
-The use of characters as the input representation, rather than words or subwords, has been extensively explored. Character-level language models offer a simplified input stream compared to the standard approach of training on learned subword tokens. Many studies have developed specialized architectures to train language models on characters \citep{jozefowicz2016exploringlimitslanguagemodeling, kim2016character, ma-etal-2020-charbert, al-rfou_character-level_2019} while other approaches seek to establish `token-free' training regimes to eliminate the need for subwords entirely \citep{clark-etal-2022-canine, xue-2022-byt5}.
-
-Another alternative input representation is to split words into morphemes, which provide theoretical benefits over subwords and have their own analytical and practical benefits particularly for morphologically rich languages \citep{ustun-etal-2018-characters, nzeyimana-niyongabo-rubungo-2022-kinyabert, fan-sun-2023-constructivist}. Mapping orthographic text to morphemes continues to be a challenging task, requiring dedicated systems trained on labeled corpora \citep{batsuren-etal-2022-sigmorphon} and we do not consider morphemes in this work.
-
-\subsection{Removal of Word Boundaries}
-
-When using a phonemic input representation to model speech, word boundaries are not typically included, as word boundaries are not explicitly marked in the speech stream. The phoneme stream representation (i.e.,\ the combination of all three transformations) is the typical representation for word segmentation studies, where the task is to learn word boundaries without supervision \citep{Brent1999}. A wide variety of statistical, dynamic programming and neural approaches have been applied to the task, with consequences for acquisition research and low-resource language modeling \citep{Blanchard2010, Coltekin2017, algayres_dp-parse_2022, goriely2023word}.
-
-\subsection{Input Representation Comparisons}
-
-To the best of our knowledge, a full systematic comparison of the three input transformations has not yet been conducted.  \citet{hahn-baroni-2019-tabula} investigated the effect of removing word boundaries and using a word-level or character-level tokenization, evaluating on several psycholinguistic benchmarks. However, they only used graphemic text from Wikipedia and did not ablate the two transformations, only comparing a word-level model (with word boundaries) to a character-level model (without word boundaries). \citet{nguyen-2022-word-boundaries} extend this work, comparing character-level graphemic input (with and without word boundaries) to character-level phonemic input (with and without word boundaries) by training on the Librispeech corpus \citep{panayotov2015librispeech}. They also compare larger units of tokenization (BPE and word-level) for both graphemic and phonemic text, but only with word boundaries included, missing out on several key combinations. 
-
-In our work, we provide a complete comparison of these three input representation transformations by considering all combinations, leading to new input representations that have not been studied before (such as subword tokenization trained without word boundaries). We also use a larger model than previous work, a 12-layer transformer rather than a 3-layer LSTM.
-
-% Discuss word boundaries and how the removal has been done before. 
-
-%Another simple heuristic for processing text to be more speech-like is to remove word boundaries. At the simplest level of approximation, some past efforts have studied the effects of removing word boundaries from language models \citep{hahn-baroni-2019-tabula, nguyen-2022-word-boundaries}, finding that LSTM-based models see a marked decrease in performance on several psycholingustic benchmarks. 
-
-% However, these architectures were developed for downstream tasks and not for linguistic theories \citep{baroni-2022-proper}. Before using such models, we must establish the extent to which using standard orthographic text gives language models an advantage over input representations that more closely mimic human speech. 
-
-%However, underlying these approaches is a concern that language models trained under common paradigms may not be scientifically sound for providing insights into human language acquisition. This is because the development of language models is driven by downstream performance on popular tasks rather than being grounded in linguistic theories \citep{baroni-2022-proper}. The recent explosion in the size of language models has further complicated comparisons between human and neural network language acquisition. \citet{warstadt-2022-artificial} argue that to draw valid conclusions about human language acquisition from neural networks, the trained models should not possess any advantages over humans. Similarly, \citet{dupoux-2018-cognitive} proposes that machine learning models should use raw sensory signals perceived by humans (e.g., sound waves) as inputs to remove confounding variables that make interpreting their behaviour as models of language acquisition challenging. Similarly to how the BabyLM challenge reduces the training set to a reasonable size, the Zero Resource Speech Challenge involves developing unsupervised methods that learn language directly from audio \citep{dunbar_self-supervised_2022}. We discuss this paradigm further in \cref{sec:14-audiomodels}.
+\Zeb{Note: \cref{sec:12-tokenization} was previously here}
 
 \section{Phoneme Stream Pipeline}
 \label{sec:14-pipeline}
@@ -258,8 +191,7 @@ Comparing the \mbox{GPT-2} model with no input transformations (top row) to the 
 
 In \cref{sec:14-effect} we investigate this result further through an ablation of the three transformations, noting the effect of punctuation and context size. In \cref{sec:14-babyslm} we focus on the BabySLM metrics, which demonstrate a different pattern to the other benchmarks. Finally, in \cref{sec:14-punctuation} we investigate the consequences of removing punctuation in our phonemic transcriptions.
 
-\subsubsection{Teasing Apart the Three Transformations}
-\label{sec:14-effect}
+\subsection{Teasing Apart the Three Transformations}\label{sec:14-effect}
 
 By running our GPT-2 model with all eight combinations of the three input adjustments, we can tease apart the effect of each transformation.
 

@@ -26,9 +26,8 @@
 % \RequirePackage[scaled=.87]{couriers}
 % \RequirePackage[T1]{fontenc}
 % \renewcommand\rmdefault{psb}
-% Layout ACL 
-% \RequirePackage{microtype}
-% \RequirePackage{inconsolata}
+\RequirePackage{microtype}
+\RequirePackage{inconsolata}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Style (Changing the visual style of chapter headings and stuff.)
@@ -137,7 +136,7 @@
 %% Packages to help with drafting
 %%
 \setlength {\marginparwidth }{2cm} 
-\RequirePackage{todonotes}
+\RequirePackage[textsize=tiny]{todonotes}
 \RequirePackage{enumitem}
 \RequirePackage{xcolor}
 \newenvironment{roughdraft}{\color{red}\itshape}{}
@@ -148,7 +147,7 @@
 %% Other custom commands
 %%
 \newcommand{\corpusphonemizer}[0]{\texttt{G2P+}\xspace}
-\newcommand{\ttipa}[1]{\texttt{\textipa{#1}}}
+\newcommand{\ttipa}[1]{\textipa{#1}}
 \newcommand{\phoible}[0]{Phoible\xspace}
 \newcommand{\ipachildes}[0]{\textsc{IPA CHILDES}\xspace}
 
@@ -169,3 +168,26 @@
 \newcommand\mybox[2][]
 {\tikz[overlay]\node[fill=blue!10,inner sep=1.3pt, anchor=text, rectangle, rounded corners=1mm,text height=1.5ex, #1] {#2};\phantom{#2}}
 
+
+
+
+% %epigraph in chapter header
+% \RequirePackage{epigraph}
+
+
+% %Header
+% \RequirePackage{fancyhdr}
+% \pagestyle{fancy}
+% %\fancyhead{}
+% \renewcommand{\chaptermark}[1]{\markboth{\fontfamily{qag}\selectfont %\chaptername\ 
+%                                             \thechapter.\ #1}{}}
+% \renewcommand{\sectionmark}[1]{\markright{%\thesection\ 
+%                                 #1}}
+
+
+
+% Notes
+\newcommand{\note}[4][]{\todo[author=#2,color=#3,size=\scriptsize,fancyline,caption={},#1]{#4}}
+\newcommand{\zeb}[2][]{\note[#1]{zeb}{cyan!40}{#2}}
+\newcommand{\Zeb}[2][]{\zeb[inline,#1]{#2}}
+\newcommand{\response}[1]{\vspace{3pt}\hrule\vspace{3pt}\textbf{#1:}}
