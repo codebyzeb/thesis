@@ -308,9 +308,9 @@ Second year report submitted
 This dissertation is submitted
 \fi
 \fi
-\ifcam@submissiondate
-    on \@submissiondate{}
-\fi
+% \ifcam@submissiondate
+%     on \@submissiondate{}
+% \fi
 \ifcam@firstyr
 in partial fulfilment of the requirements
 \fi
@@ -425,6 +425,7 @@ for the degree of Doctor of Philosophy%
 \begin{lrbox}{\cam@submitnotice}
     \begin{minipage}[c][\height][c]{.98\textwidth}
         \begin{center}
+            {\bf \@submissiondate{}~\\[1ex]}
             \@submissionnotice{}
         \end{center}
     \end{minipage}

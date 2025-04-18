@@ -1,36 +1,13 @@
 \chapter{Modelling Phonemic Streams using Transformer Language Models}
 
-
-
-
-
-
-
-\section{Pre-Training Language Models on Continuous Streams of Phonemes}
-
-% \author{
-%     {\bf Z\'{e}bulon Goriely} \texttwemoji{orange} ~~~~~ 
-%     {\bf Richard Diehl Martinez} \texttwemoji{orange}~~~~ \\
-%     {\bf Andrew Caines} \texttwemoji{orange}\texttwemoji{lemon} ~~~~
-%     {\bf Lisa Beinborn} \texttwemoji{green_apple} ~~~~ 
-%     {\bf Paula Buttery} \texttwemoji{orange}\texttwemoji{lemon} \\
-%     \texttwemoji{orange} Department of Computer Science \& Technology, University of Cambridge, U.K. \\
-%     \texttwemoji{lemon} ALTA Institute, University of Cambridge, U.K. \\
-%     \texttwemoji{green_apple} University of Göttingen, Germany \\ 
-%     % \textsuperscript{$\mathsection$}\texttt{ccd38@cam.ac.uk}}
-%     \texttwemoji{orange} \texttt{firstname.secondname@cl.cam.ac.uk} \hspace{2mm}
-%         %\{rd654,zg258,hem52,ccd38,apc38,pjb48\}@cam.ac.uk} \\
-%     \texttwemoji{green_apple} \texttt{lisa.beinborn@uni-goettingen.de}
-% }
-
-\subsection{Abstract}
+\section{Abstract}
 
 Language models are typically trained on large corpora of text in their default orthographic form. However, this is not the only option; representing data as streams of phonemes can offer unique advantages, from deeper insights into phonological language acquisition to improved performance on sound-based tasks. The challenge lies in evaluating the impact of phoneme-based training, as most benchmarks are also orthographic. To address this, we develop a pipeline to convert text datasets into a continuous stream of phonemes. We apply this pipeline to the 100-million-word pre-training dataset from the BabyLM challenge, as well as to standard language and grammatical benchmarks, enabling us to pre-train and evaluate a model using phonemic input representations. Our results show that while phoneme-based training slightly reduces performance on traditional language understanding tasks, it offers valuable analytical and practical benefits. 
 
 %Possible alternate version:
 %Language models are typically trained on large corpora of text in their default orthographic form. However, this is not the only option; representing data as streams of phonemes can offer unique advantages, from deeper insights into phonological language acquisition to improved performance on sound-based tasks. The challenge lies in evaluating the impact of phoneme-based training, as most benchmarks are also orthographic. To address this, we use a grapheme-to-phoneme tool to convert the BabyLM dataset and standard language and grammatical benchmarks into continuous streams of phonemes and use these to pre-train and evaluate a language model based on GPT-2. Our results show that while phoneme-based training slightly reduces performance on traditional language understanding tasks, it offers valuable analytical and practical benefits.% and useful insights into the consequences of choosing particular input representation. 
 
-\subsection{Introduction}
+\section{Introduction}
 
 % 1. When neural networks were first invented, they were fed continuous streams of phonemic or graphemic characters and people were amazed by their ability to learn the statistical rules of language. 30 years later, language models have grown considerably, and the standard input representation has been developed to suit downstream applications.
 
@@ -42,7 +19,7 @@ When neural networks were first applied to language, models were primarily train
     \centering
     \includegraphics[width=\linewidth]{14Modelling/example.pdf}
     \caption{An illustration of all three adjustments that we make to convert text input to continuous streams of phonemes.}
-    \label{fig:example}
+    \label{fix:14-example}
     \vspace{-6mm}
 \end{figure}
 
@@ -78,7 +55,7 @@ Answering this question is challenging for two reasons. First, training and eval
 
 % 5. We identify three key transformations and provide the tools to phonemize this data and train a model on a large corpus of phonemes. We run a careful ablation of the effects of each of these transformation in isolation and combination. 
 
-In this work, we address these challenges as follows. We first present a method for converting training data and evaluation benchmarks into a unified IPA representation. This enables language models to be trained and evaluated on graphemic and phonemic representations of the same data. We then identify three key transformations which enable us to map from the written representation typically used to train language models to the phonemic representation often used in analytical studies (see \cref{fig:example}). Finally, we conduct a careful ablation of the three transformations: we train a language model on the same corpus of 100 million words with all combinations of the three transformations ($2^3$ configurations), evaluating the model's grammatical capabilities and its resulting performance on downstream language understanding tasks. 
+In this work, we address these challenges as follows. We first present a method for converting training data and evaluation benchmarks into a unified IPA representation. This enables language models to be trained and evaluated on graphemic and phonemic representations of the same data. We then identify three key transformations which enable us to map from the written representation typically used to train language models to the phonemic representation often used in analytical studies (see \cref{fix:14-example}). Finally, we conduct a careful ablation of the three transformations: we train a language model on the same corpus of 100 million words with all combinations of the three transformations ($2^3$ configurations), evaluating the model's grammatical capabilities and its resulting performance on downstream language understanding tasks. 
 
 % 6. Results and conclusions
 
@@ -88,7 +65,7 @@ We find that large language models are powerful statistical learners capable of 
 
 % We discuss the limitations of our transcription method and discuss the use of raw audio as an alternative input representation. Finally, we present the advantages of this input representation for multi-lingual and low-resource applications and encourage further work in phoneme-based language modeling. 
 
-\subsection{Related Work}
+\section{Related Work}
 
 %Large language models are typically trained on written text using tokenizers that split the text into subword units. By contrast, studies that train models using a phoneme-based input representation tend to use tokenizers that produce a token for each individual phoneme, akin to character-based language models. Often, phonemes are fed to a model in a sequence that does not contain word boundaries, as utterances tend to be produced continuously, with no pauses between individual words. 
 
@@ -120,30 +97,30 @@ We identify three key transformations that bring us from the standard input repr
 % \vspace{1em}
 
 \noindent
-Each transformation can be made independently or in combination, as illustrated in \cref{fig:example}. %By implementing every possible combination, we can identify the impact of each transformation on language learning by LLMs. 
+Each transformation can be made independently or in combination, as illustrated in \cref{fix:14-example}. %By implementing every possible combination, we can identify the impact of each transformation on language learning by LLMs. 
 % We can also create novel representations of the input which may not have been considered (such as learning subword units from text stripped of word boundaries). 
 % The three input transformations have mostly been studied separately. 
 
 Previous literature has extensively explored these three transformations but they have typically been studied independently and been used for different downstream purposes. 
 
-\subsubsection{Training with Phonemes}
+\subsection{Training with Phonemes}
 
 Several language models have been trained with phonemic input \citep{sundararaman-2021-phonemebert, gale-etal-2023-bort} but it remains a challenge to do so due to the lack of large phonemic corpora. While a number of well-known speech-based datasets include phonemic transcriptions, such as Switchboard \citep{godfrey1992switchboard}\todo{correct this} and TIMIT \citep{garofolo1993darpa}, these datasets are small compared to the trillions of tokens contained in standard language model pre-training corpora \citep{elazar-2024-redpajama}. The majority of works that use phonemic representations typically rely on grapheme to phoneme conversion tools \citep{bisani-2008-g2p, hasegawa-2020-g2pmultilingual} to generate coarse phonemic transliterations of text data.
 
 It is also a challenge to evaluate the broad capabilities of language models trained with phonemes, as most benchmarks assume a graphemic representation, even some that assess phonological knowledge \citep{suvarna-etal-2024-phonologybench}. One benchmark that assesses both the syntactic and phonological capabilities of language models is BabySLM \citep{lavechin}. %One distinguishing advantage of this benchmark is that it can be applied to models trained on either graphemes or phonemes.
-We discuss this benchmark further in \cref{sec:effect}.
+We discuss this benchmark further in \cref{sec:14-effect}.
 
-\subsubsection{Character-based Language Models}
+\subsection{Character-based Language Models}
 
-The use of characters as the input representation, rather than words or subwords, has been extensively explored. Character-level language models offer a simplified input stream compared to the standard approach of training on learned subword tokens. Many studies have developed specialized architectures to train language models on characters \citep{jozefowicz2016exploringlimitslanguagemodeling, kim2016character, ma-etal-2020-charbert, al-rfou_character-level_2019} while other approaches seek to establish `token-free' training regimes to eliminate the need for subwords entirely \citep{clark-etal-2022-canine, xue-etal-2022-byt5}.
+The use of characters as the input representation, rather than words or subwords, has been extensively explored. Character-level language models offer a simplified input stream compared to the standard approach of training on learned subword tokens. Many studies have developed specialized architectures to train language models on characters \citep{jozefowicz2016exploringlimitslanguagemodeling, kim2016character, ma-etal-2020-charbert, al-rfou_character-level_2019} while other approaches seek to establish `token-free' training regimes to eliminate the need for subwords entirely \citep{clark-etal-2022-canine, xue-2022-byt5}.
 
 Another alternative input representation is to split words into morphemes, which provide theoretical benefits over subwords and have their own analytical and practical benefits particularly for morphologically rich languages \citep{ustun-etal-2018-characters, nzeyimana-niyongabo-rubungo-2022-kinyabert, fan-sun-2023-constructivist}. Mapping orthographic text to morphemes continues to be a challenging task, requiring dedicated systems trained on labeled corpora \citep{batsuren-etal-2022-sigmorphon} and we do not consider morphemes in this work.
 
-\subsubsection{Removal of Word Boundaries}
+\subsection{Removal of Word Boundaries}
 
 When using a phonemic input representation to model speech, word boundaries are not typically included, as word boundaries are not explicitly marked in the speech stream. The phoneme stream representation (i.e.,\ the combination of all three transformations) is the typical representation for word segmentation studies, where the task is to learn word boundaries without supervision \citep{Brent1999}. A wide variety of statistical, dynamic programming and neural approaches have been applied to the task, with consequences for acquisition research and low-resource language modeling \citep{Blanchard2010, Coltekin2017, algayres_dp-parse_2022, goriely2023word}.
 
-\subsubsection{Input Representation Comparisons}
+\subsection{Input Representation Comparisons}
 
 To the best of our knowledge, a full systematic comparison of the three input transformations has not yet been conducted.  \citet{hahn-baroni-2019-tabula} investigated the effect of removing word boundaries and using a word-level or character-level tokenization, evaluating on several psycholinguistic benchmarks. However, they only used graphemic text from Wikipedia and did not ablate the two transformations, only comparing a word-level model (with word boundaries) to a character-level model (without word boundaries). \citet{nguyen-2022-word-boundaries} extend this work, comparing character-level graphemic input (with and without word boundaries) to character-level phonemic input (with and without word boundaries) by training on the Librispeech corpus \citep{panayotov2015librispeech}. They also compare larger units of tokenization (BPE and word-level) for both graphemic and phonemic text, but only with word boundaries included, missing out on several key combinations. 
 
@@ -155,14 +132,14 @@ In our work, we provide a complete comparison of these three input representatio
 
 % However, these architectures were developed for downstream tasks and not for linguistic theories \citep{baroni-2022-proper}. Before using such models, we must establish the extent to which using standard orthographic text gives language models an advantage over input representations that more closely mimic human speech. 
 
-%However, underlying these approaches is a concern that language models trained under common paradigms may not be scientifically sound for providing insights into human language acquisition. This is because the development of language models is driven by downstream performance on popular tasks rather than being grounded in linguistic theories \citep{baroni-2022-proper}. The recent explosion in the size of language models has further complicated comparisons between human and neural network language acquisition. \citet{warstadt-2022-artificial} argue that to draw valid conclusions about human language acquisition from neural networks, the trained models should not possess any advantages over humans. Similarly, \citet{dupoux-2018-cognitive} proposes that machine learning models should use raw sensory signals perceived by humans (e.g., sound waves) as inputs to remove confounding variables that make interpreting their behaviour as models of language acquisition challenging. Similarly to how the BabyLM challenge reduces the training set to a reasonable size, the Zero Resource Speech Challenge involves developing unsupervised methods that learn language directly from audio \citep{dunbar_self-supervised_2022}. We discuss this paradigm further in \cref{sec:audiomodels}.
+%However, underlying these approaches is a concern that language models trained under common paradigms may not be scientifically sound for providing insights into human language acquisition. This is because the development of language models is driven by downstream performance on popular tasks rather than being grounded in linguistic theories \citep{baroni-2022-proper}. The recent explosion in the size of language models has further complicated comparisons between human and neural network language acquisition. \citet{warstadt-2022-artificial} argue that to draw valid conclusions about human language acquisition from neural networks, the trained models should not possess any advantages over humans. Similarly, \citet{dupoux-2018-cognitive} proposes that machine learning models should use raw sensory signals perceived by humans (e.g., sound waves) as inputs to remove confounding variables that make interpreting their behaviour as models of language acquisition challenging. Similarly to how the BabyLM challenge reduces the training set to a reasonable size, the Zero Resource Speech Challenge involves developing unsupervised methods that learn language directly from audio \citep{dunbar_self-supervised_2022}. We discuss this paradigm further in \cref{sec:14-audiomodels}.
 
-\subsection{Phoneme Stream Pipeline}
-\label{sec:pipeline}
+\section{Phoneme Stream Pipeline}
+\label{sec:14-pipeline}
 
 To convert the data to a phonemic representation, we developed the \textbf{Corpus Phonemizer} tool:\footnote{\url{https://github.com/codebyzeb/Corpus-Phonemizer}} a library to convert various corpora across many different languages to a unified phonemic representation in IPA, prepare them as Huggingface datasets and subsequently train Huggingface tokenizers.
 
-\subsubsection{Dataset Phonemization}
+\subsection{Dataset Phonemization}
 
 Our toolkit leverages the \texttt{phonemizer} package \citep{Bernard2021} with the \texttt{espeak-ng} backend\footnote{\url{https://github.com/espeak-ng/espeak-ng}} which uses a combination of a pronunciation dictionary and pronunciation rules to convert orthographic transcriptions to IPA. We select the American English accent (\texttt{en-US}) for a consistent pronunciation. 
 
@@ -176,7 +153,7 @@ k @ n 2 n d \*r @ m} \textvisiblespace~}
 \vspace{-1mm}
 
 \noindent
-One limitation of our phonemization tool is that `a' is not reduced to the shwah, `\textipa{@}', as it would be in continuous speech. We discuss the limitations of this phonemization process in \cref{sec:phonemeslimitations}. Crucially, we lose punctuation marks, as they are an artefact of orthographic text and equivalent information in speech would be conveyed through prosody, stress, or non-linguistic signals such as gestures, none of which are included in this simple phonemic format. This has potential consequences for downstream tasks that rely on such markers, as discussed in \cref{sec:punctuation}.
+One limitation of our phonemization tool is that `a' is not reduced to the shwah, `\textipa{@}', as it would be in continuous speech. We discuss the limitations of this phonemization process in \cref{sec:14-phonemeslimitations}. Crucially, we lose punctuation marks, as they are an artefact of orthographic text and equivalent information in speech would be conveyed through prosody, stress, or non-linguistic signals such as gestures, none of which are included in this simple phonemic format. This has potential consequences for downstream tasks that rely on such markers, as discussed in \cref{sec:14-punctuation}.
 
 \begin{table*}[t]
     \centering
@@ -202,7 +179,7 @@ One limitation of our phonemization tool is that `a' is not reduced to the shwah
     \vspace{-4mm}
 \end{table*}
 
-\subsubsection{Tokenizer Preparation}
+\subsection{Tokenizer Preparation}
 
 Using the phonemic data transcribed by the Corpus Phonemizer tool, our pipeline then implements the three input transformations by preparing different tokenizers:
 
@@ -225,36 +202,36 @@ Using the phonemic data transcribed by the Corpus Phonemizer tool, our pipeline 
 
 These transformations can be made independently, allowing for all eight combinations of the transformations to be implemented as individual tokenizers. For the combination of BPE and no word boundaries, the whitespace is removed before training, so the model may learn `subwords' that cross word boundaries.
 
-Each tokenizer also adds a dedicated ``utterance boundary'' token \texttt{UTT\_BOUNDARY} to the start of each sentence, representing the pauses between spoken utterances and serving as a dedicated start-of-sentence token. When sentences are collated, it also implicitly acts as an end-of-sentence token, as discussed in \cref{sec:endofsentence}.
+Each tokenizer also adds a dedicated ``utterance boundary'' token \texttt{UTT\_BOUNDARY} to the start of each sentence, representing the pauses between spoken utterances and serving as a dedicated start-of-sentence token. When sentences are collated, it also implicitly acts as an end-of-sentence token, as discussed in \cref{sec:14-endofsentence}.
 
-\subsection{Experimental Setup}
+\section{Experimental Setup}
 
 We evaluate the effect of our proposed input adjustments by training a GPT-2 model \citep{radford-2019-gpt2} using the BabyLM challenge framework \citep{choshen-et-al-2024-callforpapers-babylm2}. The model is trained eight times with each combination of the three input adjustments. Following the \textsc{strict} track of the BabyLM challenge, we train on a provided corpus of 100 million words and evaluate on a series of benchmarks assessing the grammatical knowledge and the downstream capabilities of each model. We additionally evaluate on BabySLM \citep{lavechin} which provides syntactic and lexical scores specifically for speech-based models. Our phonemized dataset, trained models and tokenizers are hosted on Huggingface.\footnote{\url{https://huggingface.co/collections/phonemetransformers/from-babble-to-words-66e068b54765a48ff30273c9}}
-%Below, we describe the BabyLM corpus and how we implemented the three proposed input adjustments (\cref{sec:input}). We then describe the GPT-2 model and the BabyLM baseline (\cref{sec:model}). Finally, we introduce BLiMP, GLUE and BabySLM in \cref{sec:evaluation}.
+%Below, we describe the BabyLM corpus and how we implemented the three proposed input adjustments (\cref{sec:14-input}). We then describe the GPT-2 model and the BabyLM baseline (\cref{sec:14-model}). Finally, we introduce BLiMP, GLUE and BabySLM in \cref{sec:14-evaluation}.
 
-\subsubsection{Dataset}
-\label{sec:input}
+\subsection{Dataset}
+\label{sec:14-input}
 
 The BabyLM 2024 pretraining data contains 100 million words sourced from nine different corpora \citep{warstadt-2023-babylm-findings}. Over 50\% of the data consists of transcribed or scripted speech and over 40\% comes from child-directed sources (written or spoken). %While some studies train models from purely child-directed speech, the BabyLM organisers included additional sources to represent overheard language that a child may learn from and to reach the 100 million word target.
 We apply minor cleaning operations to the dataset, removing extraneous spaces and formatting anomalies using regular expressions.
 
-\subsubsection{Tokenizers}
-\label{sec:tokenizers}
+\subsection{Tokenizers}
+\label{sec:14-tokenizers}
 
 For each of the eight combinations of the three transformations, we train a tokenizer on the `train' portion of the BabyLM dataset.
 We compare the output of the eight tokenizers in \cref{table:results}. We used a vocabulary size of 16,000 for the BPE tokenizers to match the vocabulary size used by the two baseline models provided by the BabyLM challenge (described below). 
 
 Note that the vocabulary size for the character-level tokenizers operating on phonemes is less than half the vocabulary size of their orthographic equivalents. This is because the phonemic data only consists of the 47 phonemes produced by the American English accent, but the orthographic data includes numbers, punctuation and other symbols. 
 
-\subsubsection{Model}
-\label{sec:model}
+\subsection{Model}
+\label{sec:14-model}
 
-Our experiments use the GPT-2 architecture. We train the model using all eight tokenizers (using the phonemized dataset for the phoneme-based tokenizers) for 400k steps, selecting the checkpoint with the lowest perplexity.\footnote{The best checkpoint for five of the eight models was the final checkpoint but a visual inspection of the curve revealed that differences between the final checkpoints were minimal.} See \cref{app:implementation_details} for a full description of the chosen model parameters and training procedure.
+Our experiments use the GPT-2 architecture. We train the model using all eight tokenizers (using the phonemized dataset for the phoneme-based tokenizers) for 400k steps, selecting the checkpoint with the lowest perplexity.\footnote{The best checkpoint for five of the eight models was the final checkpoint but a visual inspection of the curve revealed that differences between the final checkpoints were minimal.} See \cref{app:14-implementation_details} for a full description of the chosen model parameters and training procedure.
 
 We also report the results from two baseline models which achieved the highest scores at the 2023 BabyLM challenge. These are Baby Llama, an auto-regressive model, which was trained using knowledge distillation from an ensemble of teachers \citep{timiryasov-tastet-2023-baby} and LTG-BERT, an architectural variation of the standard auto-encoding BERT architecture optimized for small, speech-based corpora \citep{samuel-etal-2023-trained, charpentier-samuel-2023-layers}. Both models use a BPE tokenizer with a vocabulary size of 16,000 and have a similar number of parameters to our model.\footnote{Our GPT-2 model has 85M non-embedding parameters. Baby Llama has 41M and LTG-Bert has 110M.}  
 
-\subsubsection{Evaluation}
-\label{sec:evaluation}
+\subsection{Evaluation}
+\label{sec:14-evaluation}
 
 We follow the BabyLM Challenge's framework and evaluate on BLiMP \citep{warstadt-etal-2020-blimp-benchmark}, BLiMP Supplement \citep{choshen-et-al-2024-callforpapers-babylm2} and a subset of the (Super)GLUE tasks \citep{wang-etal-2018-glue, wang-etal-2019-superglue}. BLiMP assesses a model's ability to distinguish grammatical sentences from ungrammatical sentences across 67 subtasks covering a range of linguistic phenomena. BLiMP Supplement consists of 5 BLiMP-style tasks covering additional linguistic phenomena not tested by BLiMP. The GLUE suite assesses a language model's language understanding abilities on typical downstream tasks using fine-tuning. 
 
@@ -270,19 +247,19 @@ The lexical metric consists of minimal pairs of words and pseudo-words in a phon
 
 To evaluate our phoneme-based models, we run our phonemizer tool on all test instances across these benchmarks (except for the BabySLM lexical examples, which are already in IPA). %As with the training data, the other input adjustments do not need to be made ahead of time, as these are handled by the tokenizers on-the-fly during evaluation.
 
-\subsection{Results}
-\label{sec:results}
+\section{Results}
+\label{sec:14-results}
 
 In \cref{table:results}, we report a summary of the results obtained by the two BabyLM baseline models and our \mbox{GPT-2} model trained in all eight conditions. Due to limited computational resources we only train a single run per condition, limiting our ability to critique them individually. Exact results may be subject to variance across random seeds but we can still observe trends over the whole set. 
 
-The base \mbox{GPT-2} model with no input adjustments outperforms the two baselines for BLiMP, BLiMP Supplement and GLUE, validating our selection of hyper-parameters and choice of architecture as described in \cref{app:implementation_details}.
+The base \mbox{GPT-2} model with no input adjustments outperforms the two baselines for BLiMP, BLiMP Supplement and GLUE, validating our selection of hyper-parameters and choice of architecture as described in \cref{app:14-implementation_details}.
 
 Comparing the \mbox{GPT-2} model with no input transformations (top row) to the same model with all three transformations applied (bottom row), we notice a decrease in performance across all benchmarks. Although this indicates that the \mbox{GPT-2} architecture is best suited for the standard orthographic input representation (word boundaries, graphemes and subword tokenization), the decrease in performance when the three transformations are applied is not substantial and scores remaining competitive with the baseline models (all combinations still outperform LTG-BERT on BLiMP). It is clear that the model is still capable of learning grammatical rules and excelling at downstream tasks when the input consists of individual phonemes with no word boundaries. 
 
-In \cref{sec:effect} we investigate this result further through an ablation of the three transformations, noting the effect of punctuation and context size. In \cref{sec:babyslm} we focus on the BabySLM metrics, which demonstrate a different pattern to the other benchmarks. Finally, in \cref{sec:punctuation} we investigate the consequences of removing punctuation in our phonemic transcriptions.
+In \cref{sec:14-effect} we investigate this result further through an ablation of the three transformations, noting the effect of punctuation and context size. In \cref{sec:14-babyslm} we focus on the BabySLM metrics, which demonstrate a different pattern to the other benchmarks. Finally, in \cref{sec:14-punctuation} we investigate the consequences of removing punctuation in our phonemic transcriptions.
 
 \subsubsection{Teasing Apart the Three Transformations}
-\label{sec:effect}
+\label{sec:14-effect}
 
 By running our GPT-2 model with all eight combinations of the three input adjustments, we can tease apart the effect of each transformation.
 
@@ -290,22 +267,22 @@ By running our GPT-2 model with all eight combinations of the three input adjust
     \centering
     \includegraphics[width=0.9\linewidth]{14Modelling/confidence-int.png}
       \caption{Mean (with Min and Max range) percentage difference achieved on each benchmark's macro score as a result of the three adjustments.}
-    \label{fig:condition-differences}
+    \label{fix:14-condition-differences}
 \vspace{-4mm}
 \end{figure}
 
-For each transformation, we can create four pairs of runs that only differ with respect to that transformation (e.g.\ the four runs with a phonemic transcription and the four runs with orthographic text). For each pair, we calculate the percentage increase in each metric caused by the transformation. In \cref{fig:condition-differences} we plot the average of these four percentage differences, allowing us to identify the overall effect of each transformation. We can also use the averaged scores for each subtask within a benchmark (such as the 67 BLiMP subtasks) to assess whether differences are significant for BLiMP, BLiMP Supplement, GLUE and BabySLM (Syntactic) using a paired $t$-test (see \cref{sec:significance} for details and $p$-values for each test conducted).
+For each transformation, we can create four pairs of runs that only differ with respect to that transformation (e.g.\ the four runs with a phonemic transcription and the four runs with orthographic text). For each pair, we calculate the percentage increase in each metric caused by the transformation. In \cref{fix:14-condition-differences} we plot the average of these four percentage differences, allowing us to identify the overall effect of each transformation. We can also use the averaged scores for each subtask within a benchmark (such as the 67 BLiMP subtasks) to assess whether differences are significant for BLiMP, BLiMP Supplement, GLUE and BabySLM (Syntactic) using a paired $t$-test (see \cref{sec:14-significance} for details and $p$-values for each test conducted).
 
 \paragraph{Character Tokenization} We find that character tokenization does not significantly decrease performance on BLiMP or BLiMP Supplement compared to subword tokenization. This validates previous work which found that despite the higher computation costs, character-based language models are just as capable of learning language \citep{al-rfou_character-level_2019, hahn-baroni-2019-tabula}. We do find a significant decrease for GLUE but this may be due to the fact that many of the finetuning examples for GLUE are very long and our model's context size is only 128 tokens, leading to severe truncation. As character-based tokenizers output more tokens for the same sentence than BPE tokenizers, this means that for many GLUE tasks, necessary information is lost.
 
 \paragraph{Word boundary removal} We find that removing word boundaries significantly decreases the BLiMP score, but the decreases for BLiMP Supplement and GLUE are not significant.\footnote{Since there are only 5 tasks for BLiMP Supplement it is difficult to get a $p$-value below 0.05.} In their investigation, \citet{nguyen-2022-word-boundaries} found a decrease of 7-8\% on their own phonemic version of BLiMP when word boundaries were removed, but here we observe only an average decrease of 3.7\%. As they only trained 3-layer LSTMs, it is possible that larger models like ours are required to overcome the loss of word boundaries.
 
-\paragraph{Phonemic Transcription} Finally, we find that using a phonemic transcription instead of the original written text significantly decreases performance on BLiMP and GLUE, although the percentage decreases are small (3.5\% and 1.5\% respectively). It also leads to the largest decrease of 11.3\% for BLiMP Supplement. We discuss a possible explanation for this particular decrease in \cref{sec:punctuation}.
+\paragraph{Phonemic Transcription} Finally, we find that using a phonemic transcription instead of the original written text significantly decreases performance on BLiMP and GLUE, although the percentage decreases are small (3.5\% and 1.5\% respectively). It also leads to the largest decrease of 11.3\% for BLiMP Supplement. We discuss a possible explanation for this particular decrease in \cref{sec:14-punctuation}.
 
-\subsubsection{BabySLM}
-\label{sec:babyslm}
+\subsection{BabySLM}
+\label{sec:14-babyslm}
 
-Unlike the other benchmarks, our best BabySLM score is not achieved by the model trained with the standard orthographic input representation. Instead, the best syntactic score of 94.9 is achieved by the model that uses character-based tokenization (on written text, with word boundaries) and the best lexical score of 89.6 is achieved by the model that uses character-based tokenization for phonemes. It is also worth noting that, to the best of our knowledge, these are the best BabySLM scores to date (see \cref{sec:babyslmcomparison} for a detailed comparison).
+Unlike the other benchmarks, our best BabySLM score is not achieved by the model trained with the standard orthographic input representation. Instead, the best syntactic score of 94.9 is achieved by the model that uses character-based tokenization (on written text, with word boundaries) and the best lexical score of 89.6 is achieved by the model that uses character-based tokenization for phonemes. It is also worth noting that, to the best of our knowledge, these are the best BabySLM scores to date (see \cref{sec:14-babyslmcomparison} for a detailed comparison).
 
 Examining the effect of each condition, we find that using a phonemic transcription on average reduces the syntactic score by 4.0\%, which is in line with the other benchmarks discussed above. Unlike the other benchmarks, the character tokenization condition \textbf{always leads to an improvement} for both BabySLM scores: an average increase of 9.9\% for the syntactic score and 23.9\% for the lexical score. The sentences used for the syntactic test are all very short compared to the BLiMP sentences (4 words long on average) so a more fine-grained representation may be more useful. For the lexical test, where single words are compared that often only differ by a single phoneme, it seems more appropriate to use a character-based tokenization as the model needs to learn the distributional properties of individual phonemes, which may be lost in subword units. 
 
@@ -315,8 +292,8 @@ The removal of word boundaries has a contrasting effect on the two scores. It re
 
 For the syntactic score, the worst scores are achieved by the models that learn subwords without word boundaries. For these models, the BPE algorithm is essentially acting as an unsupervised word segmentation algorithm learning to split entire sentences into useful units. With a vocabulary size of 16,000, it seems we learn units smaller than words (morpheme-sized units such as ``un'' in \cref{table:results}) but also units that cross word boundaries (such as ``acon'' in \cref{table:results}). The resulting implicit subword boundaries seem to have particular consequences when evaluating the shorter BabySLM sentences. Using the BPE algorithm in this way could be of interest for word segmentation studies. 
 
-\subsubsection{The Effect of Punctuation}
-\label{sec:punctuation}
+\subsection{The Effect of Punctuation}
+\label{sec:14-punctuation}
 
 Punctuation is a feature of written text that is rarely included in phonemic transcriptions, as it does not typically change the way that words are pronounced. However, punctuation in written text does carry important meaning about the structure and tone of sentences. In speech, this information is typically conveyed through intonation, stress and rhythm. By simply stripping punctuation in our phonemic transcriptions, we may be removing information that is important for a model's ability to learn and process language. 
 
@@ -346,40 +323,40 @@ This reliance on punctuation seems to be the leading cause of the drop in perfor
     \centering
     \includegraphics[width=\linewidth]{14Modelling/endofsentencetoken.png}
     \caption{The overall BLiMP scores achieved by GPT-2 in our eight conditions with and without the \texttt{UTT\_BOUNDARY} token (used to separate sentences) included at the end of evaluation instances.}
-    \label{fig:endofsentencetoken}
+    \label{fix:14-endofsentencetoken}
 \end{figure}
 
-There is another subtle yet crucial consequence of removing punctuation: stripping punctuation at the end of sentences, if not handled correctly, can lead to significant decreases in performance on these benchmarks. This is because without an end-of-sentence marker, certain evaluation examples are no longer valid. In order to mark the end of the sentences without puncutation, we needed to ensure that our dedicated sentence-separation token was added to the end of each evaluation instance. The effect of this adjustment is highlighted in \cref{fig:endofsentencetoken}. The increase in BLiMP score for our phonemic models confirms that this change was necessary and highlights the importance of carefully investigating the role of tokenization in the evaluation of large language models. We discuss this effect further in \cref{sec:endofsentence}.
+There is another subtle yet crucial consequence of removing punctuation: stripping punctuation at the end of sentences, if not handled correctly, can lead to significant decreases in performance on these benchmarks. This is because without an end-of-sentence marker, certain evaluation examples are no longer valid. In order to mark the end of the sentences without puncutation, we needed to ensure that our dedicated sentence-separation token was added to the end of each evaluation instance. The effect of this adjustment is highlighted in \cref{fix:14-endofsentencetoken}. The increase in BLiMP score for our phonemic models confirms that this change was necessary and highlights the importance of carefully investigating the role of tokenization in the evaluation of large language models. We discuss this effect further in \cref{sec:14-endofsentence}.
 
-\subsection{Discussion}
-\label{sec:gap}
+\section{Discussion}
+\label{sec:14-gap}
 
 In this work, we set out to establish whether modern language model architectures can encode grammatical knowledge and succeed at language understanding tasks when trained with phonemic input representations. By identifying three key transformations, carefully ablating them and evaluating our models on a wide variety of benchmarks, we found that these transformations do lead to decreased performance on standard benchmarks, but that this decrease is not substantial, and the effect of each transformation varies according to the evaluation. Generally, we conclude that language models are capable learners and training with these input representations is completely viable.
 
-In this section, we consider explanations for the difference in performance across the benchmarks and discuss the limitations of phonemic transcriptions and our monolingual approach. Our work also has implications for human acquisition investigations and studies that train models directly from raw audio, which we discuss in \cref{sec:further}.
+In this section, we consider explanations for the difference in performance across the benchmarks and discuss the limitations of phonemic transcriptions and our monolingual approach. Our work also has implications for human acquisition investigations and studies that train models directly from raw audio, which we discuss in \cref{sec:14-further}.
 
-\subsubsection{The Effect of Input Transformations}
+\subsection{The Effect of Input Transformations}
 
-There are many possible explanations for the decrease in performance for BLiMP, BLiMP Supplement and GLUE. In \cref{sec:evaluation} and \cref{sec:punctuation} we discuss two possibilities; the fact that character tokenization causes more substantial truncation (affecting GLUE) and the fact that phonemic transcriptions do not include punctuation (which particularly affects BLiMP Supplement). Another factor to consider is that although we do not change the GPT-2 architecture or training parameters, the vocabulary size does change, which affects the size of the embedding layer. Character tokenization also leads to reduced exposure to each sentence during training (fewer epochs) because each sentence is represented with more tokens, increasing the number of steps required for each epoch. Furthermore, our initial choice of model parameters may have implicitly favored the standard orthographic input representation given that the language modeling community has been collectively optimizing these architectures to learn representations for written text, not phonemic streams. Just as the BabyLM challenge seeks to find solutions for low-resource language modeling, we may require an equivalent challenge to identify new methods and architectures for a phonemic input representation. 
+There are many possible explanations for the decrease in performance for BLiMP, BLiMP Supplement and GLUE. In \cref{sec:14-evaluation} and \cref{sec:14-punctuation} we discuss two possibilities; the fact that character tokenization causes more substantial truncation (affecting GLUE) and the fact that phonemic transcriptions do not include punctuation (which particularly affects BLiMP Supplement). Another factor to consider is that although we do not change the GPT-2 architecture or training parameters, the vocabulary size does change, which affects the size of the embedding layer. Character tokenization also leads to reduced exposure to each sentence during training (fewer epochs) because each sentence is represented with more tokens, increasing the number of steps required for each epoch. Furthermore, our initial choice of model parameters may have implicitly favored the standard orthographic input representation given that the language modeling community has been collectively optimizing these architectures to learn representations for written text, not phonemic streams. Just as the BabyLM challenge seeks to find solutions for low-resource language modeling, we may require an equivalent challenge to identify new methods and architectures for a phonemic input representation. 
 
 We also found a different pattern for the BabySLM benchmark, that certain transformations increased performance. In some cases, the transformations were even necessary (the lexical measure requiring a model to be trained on phonemic input). Given that the BabySLM benchmark more closely relates to child-language acquisition with its shorter sentences and vocabulary taken from child-directed speech, this result will be of interest to studies using language models to study acquisition.
 
-% \subsubsection{Limitations and advantages of phonemic transcriptions}
-% \label{sec:phonemeslimitations}
+\subsection{Limitations and advantages of phonemic transcriptions}
+\label{sec:14-phonemeslimitations}
 
-% One difficulty in training models from ecological long-form child-centered audio is the lack of corpora available. Papers reporting research on day-long recordings tend not to release the raw data due to privacy concerns (e.g.\ \citet{bergelson-etal-2023,leon-cristia-2024}).
-% Our method allows us to convert text (which is much more readily available) into a speech representation (phoneme streams), meaning that we could quickly prepare a corpus of 100 million words. 
+One difficulty in training models from ecological long-form child-centered audio is the lack of corpora available. Papers reporting research on day-long recordings tend not to release the raw data due to privacy concerns (e.g.\ \citet{bergelson-etal-2023,leon-cristia-2024}).
+Our method allows us to convert text (which is much more readily available) into a speech representation (phoneme streams), meaning that we could quickly prepare a corpus of 100 million words. 
 
-% There are also limitations in our transcription generation process. The fact that phonemes are an abstraction of speech means that we lose key information contained in speech such as prosody, stress and allophonic variation. Using a single accent to generate our phonemes, we also lose inter-speaker variability. Children also learn from non-linguistic cues, multi-modal input and interaction. If anything, it is a striking result that a model trained only on a set of 51 discrete symbols is able to demonstrate grammatical knowledge and perform competitively at downstream linguistic tasks. 
+There are also limitations in our transcription generation process. The fact that phonemes are an abstraction of speech means that we lose key information contained in speech such as prosody, stress and allophonic variation. Using a single accent to generate our phonemes, we also lose inter-speaker variability. Children also learn from non-linguistic cues, multi-modal input and interaction. If anything, it is a striking result that a model trained only on a set of 51 discrete symbols is able to demonstrate grammatical knowledge and perform competitively at downstream linguistic tasks. 
 
 %[Effect of noise: only 51 symbols to choose from for phoneme data, so each carries less information, so an difference in one token would be harder for the language model to get right compared to 115 characters (possibly). With subwords, way more possibility for distinguishing. Maybe move this up to results and do detailed analysis of some examples.]
 
-\subsubsection{Multi-lingual evaluation}
-\label{sec:limitations} 
+\subsection{Multi-lingual evaluation}
+\label{sec:14-limitations} 
 
 A final important remark is that our experiments are conducted only in English. It is possible that language models trained on phonemic data in other languages would exhibit different trends in downstream performance. Although a multilingual analysis is outside the scope of our paper, we have applied our data processing pipeline to prepare phonemized datasets for 31 of the languages contained in the CHILDES database and hope to release this dataset in the near future.
 
-\subsection{Conclusion}
+\section{Conclusion}
 
 Our study explores the effect of training language models using phonemic input representations, which offer both analytical and practical advantages. We develop a pipeline to convert orthographic datasets into a continuous stream of phonemes and leverage this pipeline to train a language model on phoneme streams and evaluate its grammatical and language understanding abilities. Our findings suggest that while phoneme-based input representations result in a slight decrease in model performance on traditional language understanding tasks, it is nonetheless a feasible training paradigm, facilitating future language modeling work, improving phonological interpretability and enhancing speech-based applications.  
 
@@ -387,26 +364,14 @@ Our study explores the effect of training language models using phonemic input r
 
 % one of the key advantages of language models—the reliance on orthographic text—and examines how this factor influences their performance. We find that replacing orthographic text with more speech-like representations often leads to a decline in performance across various language undestanding tasks and syntactic abilities. Our work highlight the importance of considering data representation in language acquisition research and offers straightforward preprocessing methods as a step toward more human-like input for language models.]
 
-\subsection*{Acknowledgements}
-
 Our experiments were performed using resources provided by the Cambridge Service for Data Driven Discovery (CSD3) operated by the University of Cambridge Research Computing Service, provided by Dell EMC and Intel using Tier-2 funding from the Engineering and Physical Sciences Research Council (capital grant EP/T022159/1), and DiRAC funding from the Science and Technology Facilities Council. Z\'ebulon Goriely's work is supported by The Cambridge Trust. Richard Diehl Martinez is supported by the Gates Cambridge Trust (grant OPP1144 from the Bill \& Melinda Gates Foundation). Andrew Caines and Paula Buttery are supported by Cambridge University Press \& Assessment. 
 Lisa Beinborn's work is partially supported by the Dutch National Science Organisation (NWO) through the VENI program (Vl.Veni.211C.039).
 
-%\bibliographystyle{acl_natbib}
-
-% Bibliography entries for the entire Anthology, followed by custom entries
-%\bibliography{anthology,custom}
-% Custom bibliography entries only
-
-\newpage
-
-%\appendix
-
-\subsection{Implementation Details}\label{app:implementation_details}
+\section{Implementation Details}\label{app:14-implementation_details}
 
 We implement all experiments using the \texttt{PyTorch} framework \citep{paszke-etal-2019-pytorch} and the \texttt{Transformers} library \citep{wolf-etal-2020-transformers}.
 
-\subsubsection{Hardware Details}
+\subsection{Hardware Details}
 
 We use a server with one NVIDIA A100 80GB PCIe GPU, 32 CPUs, and 32 GB of RAM for all experiments. Below, we report a subset of the output of the \emph{lscpu} command:
 
@@ -434,7 +399,7 @@ BogoMIPS:            4800.11
 \end{verbatim}
 \end{tcolorbox}
 
-\subsubsection{Model Parameters and Training Procedure}
+\subsection{Model Parameters and Training Procedure}
 
 \begin{table}[ht!]
     \centering
@@ -467,10 +432,10 @@ Data is prepared into batches by first tokenizing the entire dataset, combining 
 
 Checkpoints are taken every 50,000 steps during training. At each checkpoint, the perplexity is evaluated on the held-back evaluation set, and at the end of training the checkpoint with the lowest perplexity is returned as the best model. 
 
-\subsection{Evaluation Details}
+\section{Evaluation Details}
 
-\subsubsection{Significance Tests}
-\label{sec:significance}
+\subsection{Significance Tests}
+\label{sec:14-significance}
 
 \begin{table*}[t]
     \centering
@@ -483,19 +448,19 @@ word boundaries vs.\ no word boundaries & \textbf{0.0000} & 0.1831 & 0.0813 & \t
 character tokenization vs.\ subword tokenization & 0.5069 & 0.4832 & \textbf{0.0010} & 0.1500 \\
     \end{tabular}
     \caption{$p$-values from the paired student t-tests for each experiment. Significant results are given in \textbf{bold} using an alpha level of 0.05.}
-    \label{tab:pvalues}
+    \label{tab:14-pvalues}
 \end{table*}
 
 
-It is difficult to determine whether the results for a given benchmark are significant given that we only train a single run for each of the eight conditions. Instead, we calculate the significance of a particular transformation by comparing the scores for each subtask of a benchmark. We average the scores achieved by the four models with a transformation applied and average the scores achieved by the four models without the transformation applied, giving us paired results for each subtask. We then use a paired student $t$-test to assess the significance of the transformation. We give the $p$-values for our significance tests in \cref{tab:pvalues}.
+It is difficult to determine whether the results for a given benchmark are significant given that we only train a single run for each of the eight conditions. Instead, we calculate the significance of a particular transformation by comparing the scores for each subtask of a benchmark. We average the scores achieved by the four models with a transformation applied and average the scores achieved by the four models without the transformation applied, giving us paired results for each subtask. We then use a paired student $t$-test to assess the significance of the transformation. We give the $p$-values for our significance tests in \cref{tab:14-pvalues}.
 
 Note that there are 67 subtasks for BLiMP, 5 for BLiMP Supplement, 9 for GLUE and 9 for BabySLM (Syntactic). With only 5 pairs for BLiMP Supplement, 
 %it is difficult to beat the significance level of 0.05.
 the test is under-powered and low $p$-values are unlikely. There are no subtasks for BabySLM (Lexical) so significance cannot be computed in the same way. 
 
 
-\subsubsection{The Effect of End-of-Sentence Tokens}
-\label{sec:endofsentence}
+\subsection{The Effect of End-of-Sentence Tokens}
+\label{sec:14-endofsentence}
 
 By default, our tokenizers add a special start-of-sentence token \texttt{UTT\_BOUNDARY} to all sentences. This corresponds to the \texttt{<s>} token often used by tokenizers to help transformers with sentence-level processing, and also represents utterance boundaries, which unlike word boundaries are a clear cue present in speech and often included in word segmentation studies \citep{feliciano-de-faria-2019-utterance-boundaries}. 
 
@@ -516,10 +481,10 @@ Since sentences are collated together during training, this means that these tok
        \bottomrule
     \end{tabular}
     \caption{An example sentence pair from the \texttt{wh\_vs\_that\_with\_gap} subtask in BLiMP and the outputted tokens from our two tokenizers that use subwords but do not remove word boundaries. The `\textvisiblespace ' character denotes word boundaries and the `<s>' token represents our \texttt{UTT\_BOUNDARY} token which acts as an utterance boundary and a start-of-sentence token.}
-    \label{tab:blimpexample}
+    \label{tab:14-blimpexample}
 \end{table*}
 
-This has consequences for zero-shot evaluation tasks where the grammaticality of the sentence depends on the sentence being marked as complete, which is the case for several of the BLiMP subtasks. For instance, one subtask evaluates a model's understanding of filler-gap dependencies by presenting grammatical ``wh''-phrases with ``that''-phrases that are ungrammatical due to a missing dependency. An example is given in \cref{tab:blimpexample} along with the tokens produced by two of our tokenizers. Crucially, our phonemic transcriptions do not include punctuation (see \cref{sec:punctuation}) and for this task, without an end-of-sentence marker, the ``ungrammatical'' sentence is no longer ungrammatical, as it could just be incomplete.
+This has consequences for zero-shot evaluation tasks where the grammaticality of the sentence depends on the sentence being marked as complete, which is the case for several of the BLiMP subtasks. For instance, one subtask evaluates a model's understanding of filler-gap dependencies by presenting grammatical ``wh''-phrases with ``that''-phrases that are ungrammatical due to a missing dependency. An example is given in \cref{tab:14-blimpexample} along with the tokens produced by two of our tokenizers. Crucially, our phonemic transcriptions do not include punctuation (see \cref{sec:14-punctuation}) and for this task, without an end-of-sentence marker, the ``ungrammatical'' sentence is no longer ungrammatical, as it could just be incomplete.
 
 This means that the subtask remained a valid test for our orthographic models (due to the inclusion of punctuation to mark the end of the sentence), but not the phonemic ones, since for the phonemic models both the ``grammatical'' and ``ungrammatical'' sentences could be considered grammatical. Since this task is not balanced, any preference for the word ``that'' over the ``wh''-words would lead to the model consistently choosing the ``that'' sentences and achieving results below chance (which is 0.5 for all BLiMP tasks).
 
@@ -527,14 +492,14 @@ In our initial experiments we found that the models trained on phonemes achieved
 
 We thus decided to ensure that the token was added to the end of every evaluation instance for all benchmarks reported in this paper for two reasons. First, it acts as a necessary end-of-sentence marker to ensure certain tests remain valid for the phonemic models, and second, because the token may encode useful sentence-level information for all models (particularly for GLUE tasks, as only the encoding of the final token is used for predictions).
 
-We present the effect of this decision in \cref{fig:endofsentencetoken} which reports the overall BLiMP scores for our eight conditions with and without the inclusion of the \texttt{UTT\_BOUNDARY} token at the end of each evaluation sentence. There is a very large increase for all four phonemic models with little change for the orthographic models, confirming that this was a crucial adjustment.
+We present the effect of this decision in \cref{fix:14-endofsentencetoken} which reports the overall BLiMP scores for our eight conditions with and without the inclusion of the \texttt{UTT\_BOUNDARY} token at the end of each evaluation sentence. There is a very large increase for all four phonemic models with little change for the orthographic models, confirming that this was a crucial adjustment.
 
-\subsubsection{BabySLM Comparison}
-\label{sec:babyslmcomparison}
+\subsection{BabySLM Comparison}
+\label{sec:14-babyslmcomparison}
 
-In \cref{table:results} we report the BabySLM scores achieved by our models and in \cref{sec:babyslm} we mention that these are the highest scores achieved on this benchmark to date. It is worth noting that this is only in comparison to the baseline scores released with the BabySLM benchmark \citep{lavechin}, as at the time of writing no other scores have been published for this benchmark, given how recently it was introduced.
+In \cref{table:results} we report the BabySLM scores achieved by our models and in \cref{sec:14-babyslm} we mention that these are the highest scores achieved on this benchmark to date. It is worth noting that this is only in comparison to the baseline scores released with the BabySLM benchmark \citep{lavechin}, as at the time of writing no other scores have been published for this benchmark, given how recently it was introduced.
 
-In their study, \citet{lavechin} achieved their highest syntactic score of 70.4 using BabyBERTa \citep{huebner-etal-2021-babyberta} trained on only 5 million words from CHILDES \citep{macwhinney1985child}. All of our models beat this score, with the highest achieving 94.9. BabyBERTa also uses a BPE tokenizer whereas we found that a character-based tokenizer consistently gave better performance (see \cref{sec:babyslm}). There is also an architectural difference, BabyBERTa is an autoencoder trained using masked language modeling, whereas our model is autoregressive, using next-token prediction. The LTG-BERT baseline, which is a similarly sized model also trained on 100 million words, only achieves a score of 75.8. The Baby Llama baseline, by comparison, achieves 94.0. It is possible that the autoregressive architecture is much more suited to the syntactic task than the autoencoder architecture of BERT. 
+In their study, \citet{lavechin} achieved their highest syntactic score of 70.4 using BabyBERTa \citep{huebner-etal-2021-babyberta} trained on only 5 million words from CHILDES \citep{macwhinney1985child}. All of our models beat this score, with the highest achieving 94.9. BabyBERTa also uses a BPE tokenizer whereas we found that a character-based tokenizer consistently gave better performance (see \cref{sec:14-babyslm}). There is also an architectural difference, BabyBERTa is an autoencoder trained using masked language modeling, whereas our model is autoregressive, using next-token prediction. The LTG-BERT baseline, which is a similarly sized model also trained on 100 million words, only achieves a score of 75.8. The Baby Llama baseline, by comparison, achieves 94.0. It is possible that the autoregressive architecture is much more suited to the syntactic task than the autoencoder architecture of BERT. 
 
 When it comes to the lexical test, the highest score achieved by \citet{lavechin} was 75.4 using a 3-layer LSTM trained on 1.2 million words from the Providence corpus \citep{borschinger-etal-2013-joint} which they converted to a stream of phonemes with no word boundaries using a similar tool to ours. Our highest-scoring model was also trained with character-based tokenization of phonemes, but did include word boundaries, achieving a score of 89.6. Our model without word boundaries got the second-highest score with 87.8.
 
@@ -544,11 +509,11 @@ In both cases, our model is larger (12 layers) and trained on much more data (10
 
 %Perhaps language models trained on other languages would not show such a gap in performance, perhaps we have just created the best architectures for english orthographic text.
 
-\subsection{Further Implications}
-\label{sec:further}
+\section{Further Implications}
+\label{sec:14-further}
 
-\subsubsection{Comparing Human Acquisition to Language Model Learning}
-\label{sec:acquisition}
+\subsection{Comparing Human Acquisition to Language Model Learning}
+\label{sec:14-acquisition}
 
 % Here we could go into the BabyLM challenge as related work that looks into reducing the advantages language models have over humans, say that our work here contributes to the BabyLM challenge, and finally briefly mention the literature regarding 'advantages' and point to our discussion section on audio-based models. 
 
@@ -558,8 +523,8 @@ To push this research further, recent efforts aim to make language modeling more
 
 In this work we contribute to all three approaches by training a language model with streams of phonemes and assess whether the language model architecture used is advantaged or disadvantaged by these changes according to a wide variety of benchmarks. We hope that this leads to further work studying acquisition using phoneme streams as an input representation. However, while streams of phonemes may seem more cognitively plausible than written text, many studies go further than we do and seek to train directly on raw audio.
 
-\subsubsection{Learning directly from audio}
-\label{sec:audiomodels}
+\subsection{Learning directly from audio}
+\label{sec:14-audiomodels}
 
 Our study focused on alternative input representations for text-based language models, but there is also a field of work dedicated to training models directly from raw audio.
 %, a completely separate class of input representations.

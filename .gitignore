@@ -19,3 +19,4 @@ thesis.fls
 .vscode/
 /build/
 /.idea/
+.DS_Store

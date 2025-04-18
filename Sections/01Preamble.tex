@@ -6,8 +6,6 @@
 \RequirePackage{xspace}
 \RequirePackage{listings}
 \RequirePackage{booktabs}
-\RequirePackage{times}
-\RequirePackage{latexsym}
 \RequirePackage{makecell}
 \RequirePackage{rotating}
 \RequirePackage{pifont} 
@@ -15,7 +13,7 @@
 \RequirePackage{graphicx}
 \RequirePackage{fdsymbol}
 \RequirePackage{multirow}
-\RequirePackage{tipa}
+\RequirePackage[tone]{tipa}
 
 % For proper rendering and hyphenation of words containing Latin characters (including in bib files)
 \RequirePackage[T1]{fontenc}
@@ -29,8 +27,8 @@
 % \RequirePackage[T1]{fontenc}
 % \renewcommand\rmdefault{psb}
 % Layout ACL 
-%\RequirePackage{microtype}
-%\RequirePackage{inconsolata}
+% \RequirePackage{microtype}
+% \RequirePackage{inconsolata}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Style (Changing the visual style of chapter headings and stuff.)
@@ -67,6 +65,8 @@
 \RequirePackage{tcolorbox}      
 \RequirePackage{xcolor}
 
+\hypersetup{colorlinks,citecolor=blue,linkcolor=blue,urlcolor=blue}
+
 \RequirePackage{cellspace}
 \setlength\cellspacetoplimit{4pt}
 \setlength\cellspacebottomlimit{4pt}
@@ -94,8 +94,6 @@
 \newtheorem{example}{Example}[chapter]
 
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Captions: This makes captions of figures use a boldfaced small font. 
 %%
@@ -106,9 +104,10 @@
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Subfigure (note: this must be included after the `caption` package). 
+%% Using sub caption instead of sub figure 
 %%
-\RequirePackage{subfig}
+\RequirePackage{subcaption}
+%\RequirePackage{subfig}
 
 
 
@@ -148,10 +147,10 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Other custom commands
 %%
-\newcommand{\corpusphonemizer}[0]{\textsc{Corpus Phonemizer}\xspace}
+\newcommand{\corpusphonemizer}[0]{\texttt{G2P+}\xspace}
 \newcommand{\ttipa}[1]{\texttt{\textipa{#1}}}
-\newcommand{\phoible}[0]{\textsc{Phoible}\xspace}
-\newcommand{\phonemizedchildes}[0]{\textsc{Phonemized CHILDES}\xspace}
+\newcommand{\phoible}[0]{Phoible\xspace}
+\newcommand{\ipachildes}[0]{\textsc{IPA CHILDES}\xspace}
 
 \newcommand\cincludegraphics[2][]{\raisebox{-0.3\height}{\includegraphics[#1]{#2}}}
 
@@ -169,13 +168,4 @@
 
 \newcommand\mybox[2][]
 {\tikz[overlay]\node[fill=blue!10,inner sep=1.3pt, anchor=text, rectangle, rounded corners=1mm,text height=1.5ex, #1] {#2};\phantom{#2}}
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Glossary entries
-%%
-\newglossaryentry{pi}{
-    name={\ensuremath{\pi}},
-    sort={pi},
-    description={ratio of the circumference of a circle to the diameter}
-}
 
