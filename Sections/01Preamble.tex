@@ -14,6 +14,7 @@
 \RequirePackage{fdsymbol}
 \RequirePackage{multirow}
 \RequirePackage[tone]{tipa}
+\RequirePackage{csquotes}
 
 % For proper rendering and hyphenation of words containing Latin characters (including in bib files)
 \RequirePackage[T1]{fontenc}
@@ -77,8 +78,8 @@
 %%
 %\RequirePackage[numbers,sort&compress]{natbib}
 \RequirePackage{natbib}
-\RequirePackage{cleveref}
-
+\RequirePackage[capitalise, noabbrev]{cleveref}
+\setlength{\parindent}{0pt}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -91,6 +92,9 @@
 %% label and reference them etc.)
 %%
 \newtheorem{example}{Example}[chapter]
+
+% For boxes
+\RequirePackage[nobreak=true]{mdframed}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -146,10 +150,11 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Other custom commands
 %%
-\newcommand{\corpusphonemizer}[0]{\texttt{G2P+}\xspace}
+\newcommand{\gpp}[0]{\texttt{G2P+}\xspace}
 \newcommand{\ttipa}[1]{\textipa{#1}}
 \newcommand{\phoible}[0]{Phoible\xspace}
 \newcommand{\ipachildes}[0]{\textsc{IPA CHILDES}\xspace}
+\newcommand{\childesprocessor}[0]{\texttt{G2P+}\xspace}
 
 \newcommand\cincludegraphics[2][]{\raisebox{-0.3\height}{\includegraphics[#1]{#2}}}
 

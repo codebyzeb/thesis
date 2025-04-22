@@ -1,2 +1,105 @@
 \chapter{Introduction}
 
+%1. Standard NLP pipeline uses large data, orthographic, scraped from the web, with subword tokenization for efficiency and downstream performance. (+high level explanation here)
+
+%2. LMs can also be a useful tool for linguistic analysis, studying learning dynamics, and drawing parallels to acquisition using developmentally plausible data.
+
+%3. Phoneme-level modeling is under-studied, despite the benefits for phonological analysis, alternative tokenization, multilingual modeling, and low-resource modeling. Resources exist but are limited in availability and few are cross-lingual.
+
+%4. Hence, we must introduce new resources (chapter 3) and properly determine if LM architectures are suitable for modeling with phonemes (chapter 4).
+
+%5. We can then model cross-lingually and probe these models for phonological knowledge using word segmentation (chapter 5). 
+
+%6. Finally, word segmentation could inspire new methods for tokenization in the standard NLP setup (chapter 6), demonstrating the downstream benefits of research that seeks to explore language and language learning more broadly...
+
+\section{Research questions}
+
+
+\section{Thesis outline}
+
+A summary of this thesis' chapters is given below.
+
+\begin{itemize}
+    \item In \cref{chapter:background},
+    \item In \cref{chapter:resources},
+    \item In \cref{chapter:modelling},
+    \item In \cref{chapter:phonology}
+    \item In \cref{chapter:infotokenization},
+    \item In \cref{chapter:conclusion},
+\end{itemize}
+
+\section{Publications and contributions}
+
+The research presented in this thesis has been the basis for the following publications.
+
+\begin{itemize}
+\item The work presented in \cref{chapter:resources}, the experiments using the IPA-CHILDES dataset in \cref{chapter:modelling} and the phonological feature probing experiments in \cref{chapter:phonology} are published as:
+
+\begin{mdframed}[linewidth=1pt]
+Zébulon Goriely and Paula Buttery. 2025. \href{https://arxiv.org/abs/2504.03036}{IPA-CHILDES \& G2P+: Feature-Rich Resources for Cross-Lingual Phonology and Phonemic Language Modeling.} Currently under review at CoNLL 2025.
+\end{mdframed}
+
+\item The work presented in \cref{chapter:modelling} (excluding the experiments using the IPA-CHILDES dataset) won the ``Outstanding Paper'' award at the second edition of the BabyLM challenge and is published as:
+
+\begin{mdframed}[linewidth=1pt]
+Zébulon Goriely, Richard Diehl Martinez, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2024. \href{https://aclanthology.org/2024.conll-babylm.4/#}{From Babble to Words: Pre-Training Language Models on Continuous Streams of Phonemes}. In The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning, pages 37–53, Miami, FL, USA. Association for Computational Linguistics.
+\end{mdframed}
+
+\item The work presented in \cref{chapter:phonology} (excluding the phonological feature probing experiments) is published as:
+\begin{mdframed}[linewidth=1pt]
+Zébulon Goriely and Paula Buttery. 2025. \href{https://arxiv.org/abs/2504.03338}{BabyLM's First Words: Word Segmentation as a Phonological Probing Task}. Currently under review at CoNLL 2025.
+\end{mdframed}
+
+\item The work presented in \cref{chapter:infotokenization} is published as:
+\begin{mdframed}[linewidth=1pt]
+Insert paper here.
+\end{mdframed}
+\end{itemize}
+
+Additionally, several related publications were produced alongside the papers listed above. These are listed below due to being highly related to this research but are not included in this thesis.
+
+\begin{itemize}
+\item The winner of the \enquote{Most Interesting Paper} award at the first edition of the BabyLM challenge, exploring the use of curriculum learning for training LLMs in a developmentally plausible setting:
+\begin{mdframed}[linewidth=1pt]
+    Richard Diehl Martinez, Zébulon Goriely, Hope McGovern, Christopher Davis, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2023. \href{https://aclanthology.org/2023.conll-babylm.10/}{CLIMB – Curriculum Learning for Infant-inspired Model Building}. In Proceedings of the BabyLM Challenge at the 27th Conference on Computational Natural Language Learning, pages 112–127, Singapore. Association for Computational Linguistics.
+\end{mdframed}
+
+\item Introducing a measure of \enquote{Frequency Bias} in LLMs and introducing \enquote{Syntactic Smoothing}, using a prior based on part-of-speech classes during training, to mitigate this bias:
+\begin{mdframed}[linewidth=1pt]
+    Zébulon Goriely, Richard Diehl Martinez, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2024. \href{https://aclanthology.org/2024.emnlp-main.344/}{Mitigating Frequency Bias and Anisotropy in Language Model Pre-Training with Syntactic Smoothing}. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, pages 5999–6011, Miami, Florida, USA. Association for Computational Linguistics.
+\end{mdframed}
+
+\item Exploring the use of fine-grained curriculum learning strategies based on linguistic acquisition theories across several languages:
+\begin{mdframed}[linewidth=1pt]
+    Suchir Salhan, Richard Diehl Martinez, Zébulon Goriely, and Paula Buttery. 2024. \href{https://aclanthology.org/2024.conll-babylm.15/}{Less is More: Pre-Training Cross-Lingual Small-Scale Language Models with Cognitively-Plausible Curriculum Learning Strategies}. In The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning, pages 174–188, Miami, FL, USA. Association for Computational Linguistics.
+\end{mdframed}
+
+\item My master's thesis exploring a cue-based algorithm for word segmentation, which was augmented with additional experiments:
+\begin{mdframed}[linewidth=1pt]
+    Zébulon Goriely, Andrew Caines and Zébulon Goriely. 2023. \href{https://www.cambridge.org/core/journals/journal-of-child-language/article/word-segmentation-from-transcriptions-of-childdirected-speech-using-lexical-and-sublexical-cues/5D206536C878ADA80026ED8E2E72F848}{Word segmentation from transcriptions of child-directed speech using lexical and sub-lexical cues}. Journal of Child Language. 2025;52(1):1-41.
+\end{mdframed}
+\end{itemize}
+
+\section{Open-source contributions and research artefacts}
+
+The two resources presented in \cref{chapter:resources} have been released as open-source:
+
+\begin{itemize}
+\item \gpp is a pip-installable tool using an MIT license. The source is available on \href{https://github.com/codebyzeb/g2p-plus}{GitHub}. 
+\item The \ipachildes dataset is hosted on \href{https://huggingface.co/datasets/phonemetransformers/IPA-CHILDES}{Huggingface}.
+\end{itemize}
+
+Additionally, the following research artefacts have been released for reproducability and dissemination:
+
+\begin{itemize}
+    \item \href{https://github.com/codebyzeb/childes-processor}{https://github.com/codebyzeb/childes-processor}: The source code for \childesprocessor, a pip-installable tool used to download and process the CHILDES database for the creation of the \ipachildes (\cref{chapter:resources}). It is open-sourced with an MIT license.
+    \item \href{https://github.com/codebyzeb/babylm-ipa}{https://github.com/codebyzeb/babylm-ipa}: The scripts used for leveraging \gpp to convert the BabyLM training data and evaluation data to an IPA representation (\cref{chapter:modelling}).
+    \item \href{https://github.com/codebyzeb/PhonemeTransformers}{https://github.com/codebyzeb/PhonemeTransformers}: The source code and scripts used to train language models using phonemes, compare input representations and evaluate models using word segmentation and phonological features probes (\cref{chapter:modelling,chapter:phonology}). 
+    \item \href{https://huggingface.co/phonemetransformers}{https://huggingface.co/phonemetransformers}: A Huggingface organisation containing all datasets, models and tokenizers trained for the experiments in \cref{chapter:modelling,chapter:phonology}, grouped into collections for convenience.
+    \item \href{https://github.com/codebyzeb/infotokenization}{https://github.com/codebyzeb/infotokenization}: The scripts used to train byte-level language models, use their predictions to create subword tokenizers, train subword-level models using these tokenizers and evaluate them (\cref{chapter:infotokenization}).
+    \item \href{https://huggingface.co/InfoTokenizers}{https://huggingface.co/InfoTokenizers}: A Huggingface organisation containing all datasets, models and tokenizers trained for the experiments in \cref{chapter:infotokenization}.
+\end{itemize}
+
+\section{Statement of style}
+
+\Zeb{Use of ``we'' in the thesis for stylistic reasons and to acknowledge the contribution of co-authors. Mixed spelling between British English and American English due to my mixed background and the dominance of American spelling in technical terminology. British English is used throughout, except for the word "tokenizer". }
