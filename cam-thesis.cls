@@ -383,6 +383,8 @@ for the degree of Doctor of Philosophy%
 \begin{lrbox}{\cam@title}
     \begin{minipage}[c][\height][c]{.98\textwidth}
         \begin{center}
+            \rule[0.5ex]{\linewidth}{2pt}\vspace*{-\baselineskip}\vspace*{3.2pt}
+		    \rule[0.5ex]{\linewidth}{1pt}\\[\baselineskip]
 			\Huge%
 				\ifcam@times\else%
 				\bfseries%
@@ -394,6 +396,9 @@ for the degree of Doctor of Philosophy%
 			\ifcam@secondyr\\%
 				{\vspace{5mm}\emph{\LARGE Dissertation Schedule}}%
 			\fi
+            \\[4mm]
+            \rule[0.5ex]{\linewidth}{1pt}\vspace*{-\baselineskip}\vspace{3.2pt}
+            \rule[0.5ex]{\linewidth}{2pt}\\
 		\end{center}
     \end{minipage}
 \end{lrbox}
@@ -402,7 +407,7 @@ for the degree of Doctor of Philosophy%
 \ifcam@collegeshield%
     \newsavebox{\cam@collegeshieldbox}
     \begin{lrbox}{\cam@collegeshieldbox}
-    \includegraphics[height=20mm]{\@collegeshield}
+    \includegraphics[height=70mm]{\@collegeshield}
     \end{lrbox}
 \fi
 
@@ -411,11 +416,13 @@ for the degree of Doctor of Philosophy%
 \begin{lrbox}{\cam@authorcollege}
     \begin{minipage}[c][\height][c]{.98\textwidth}
         \begin{center}
-        {\large \@author{}~\\[1ex]}
+        {\Large \textbf{\@author{}}~\\[1ex]}
         \ifcam@collegeshield%
             \vspace{2mm}{\usebox{\cam@collegeshieldbox}}\\
         \fi
-        \@college{}
+        {\large\textsc{University of Cambridge}}\\
+        \vspace{4mm}
+        {\large\@college{}}
         \end{center}
     \end{minipage}
 \end{lrbox}
@@ -434,7 +441,7 @@ for the degree of Doctor of Philosophy%
 % Now calculate the exact free vertical space
 \newlength{\cam@titlepagevspace}
 \setlength{\cam@titlepagevspace}{\textheight%
-	-\totalheightof{\usebox{\cam@logo}}%
+	% -\totalheightof{\usebox{\cam@logo}}%
 	-\totalheightof{\usebox{\cam@submitnotice}}%
 	-\totalheightof{\usebox{\cam@authorcollege}}%
 	-\totalheightof{\usebox{\cam@title}}}
@@ -447,9 +454,9 @@ for the degree of Doctor of Philosophy%
 %%
 %%%%%
 \begin{center}
-~\vspace{.02\cam@titlepagevspace}\\
-{\usebox{\cam@logo}}\\
-\vspace{.28\cam@titlepagevspace}
+% ~\vspace{.02\cam@titlepagevspace}\\
+% {\usebox{\cam@logo}}\\
+~\vspace{.28\cam@titlepagevspace}
 {\usebox{\cam@title}}\\
 \vspace{.23\cam@titlepagevspace}
 {\usebox{\cam@authorcollege}}\\
