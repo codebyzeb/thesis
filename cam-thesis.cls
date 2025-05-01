@@ -397,7 +397,7 @@ for the degree of Doctor of Philosophy%
 				{\vspace{5mm}\emph{\LARGE Dissertation Schedule}}%
 			\fi
             \\[4mm]
-            \rule[0.5ex]{\linewidth}{1pt}\vspace*{-\baselineskip}\vspace{3.2pt}
+            \rule[0.5ex]{\linewidth}{1pt}\vspace*{-\baselineskip}\vspace{3.8pt}
             \rule[0.5ex]{\linewidth}{2pt}\\
 		\end{center}
     \end{minipage}
