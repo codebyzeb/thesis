@@ -1,36 +1,92 @@
 \chapter{Background}\label{chapter:background}
 
+\Zeb{Introduction to Background}
+
 \section{Input representations in language models}\label{sec:12-tokenization}
 
 \Zeb{Formally define what I mean by input representation. Give the broad definition of tokenizer without going into too much detail. Discuss orthographic text more.}
 
-\subsection{The default input representation}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{example-image-a}
+    \caption{The standard classical and modern pipeline for preparing text for language modelling tasks.}
+    \label{fig:12-pipelinecomparison}
+\end{figure}
+
+Definition of language models - that they predict units given a history of previous units. Early language models were n-grams, which often operated with individual characters or words. This was fine theoretically, but in practice, text is noisy, containing many non-lexical artifacts like numbers and punctuation. What should constitute a ``word'' is also debated, e.g. should clitics like `'s' be a separate token, should compound words like ``bad-mouth'' be split? Handling this complicated task was traditionally one of the first tasks of preparing written text for NLP tasks. Preceding steps could include by text-cleaning operations like lowercasing and the removeal of unwanted symbols like punctuation, with post-tokenisation steps including stemming, part-of-speech tagging and stop-word removal depending on the task. This pipeline is illustrated in \cref{fig:12-pipelinecomparison} and is offered by python packages like NLTK \addcites.
+
+During the shift from count-based representations to neural representations like Word2Vec \addcites, there was also a shift in how words were tokenized. Word-based tokenization suffered from very large vocabulary sizes and out-of-vocabulary (OOV) issues, often using UNK tokens to handle these. An alternative is to split unknown words into subwords, falling back to character n-grams, as pioneered by the FastText embedding model \addcites. This would not be a good idea for n-gram models since more tokens decreases the context seen a fixed context window and increases the vocabulary size further, but embedding models were improved to handle larger, variable context sizes. LSTMs providing a major improvement over the vanishing gradients of RNNs and were used in \writemore models. Later, the transformer architecture improved memory further using the attention mechanism \addcites.
+
+Vocabulary size was still a major issue, linearly scaling the size of the embedding layer (often containing a large percentage of the model's parameters) and linearly increasing the computational cost of the soft-max operation. One option is to use individual characters or bytes to reduce the vocabulary size, but this increases the number of tokens, and context size has a $n^2$ cost for compute and memory in self-attention layers, the main bottleneck in transformer models. With this apparent trade-off between vocabulary size and token length, certain vocabulary-learning algorithms that seem to strike this balance became popular. For example, BPE and WordPiece \addcites. \writemore. An important distinction with these approaches is the difference between their vocabulary-learning algorithm and their inference algorithm, \writemore. Formally, \writemore. 
+
+Both the inference and vocabulary-learning algorithms typically operate after text has already been split into word-like units; with what was previously called `tokenization' in the classical pipeline now referred to as ``pre-tokenization''. 
+
+Several of the steps previously performed separately by the classical pipeline are now packaged together into a single `tokenizer' by libraries such as Huggingface Tokenizers.\footnote{\href{https://huggingface.co/docs/tokenizers/index}{huggingface.co/docs/tokenizers/}} This tokenisation pipeline is shown in \cref{fig:12-pipelinecomparison}. First, \textbf{normalization} performs the text-cleaning steps, before text is split into word-like units via \textbf{pre-tokenization}. The BPE pre-tokenizer not only splits text into word units, but also converts each unit into a byte-based representation, ensuring that the initial vocabulary contains only 256 items instead of every unique character in UTF-32. The tokenizer \textbf{model} then converts each pre-token into one or more tokens using a particular inference algorithm, such as longest-prefix matching for WordPiece or deterministic-merge application by BPE. These tokens are mapped to unique IDs to facilitate lookup into a LM's embedding layer. The pipeline may also include \textbf{post-processing} to add special tokens and \textbf{decoding} to convert IDs back into text for text generation tasks. 
+
+The design and availability of this tokenization pipeline has largely been driven by the sheer scaling capabilities of LM architectures, the largest of which are called ``large'' language models (LLMs). Now, the vast majority of language models are distributed on platforms such as Huggingface with an associated tokenizers that consistently process orthographic text, pre-tokenize the text to preserve word boundaries, and return tokens representing subwords.
+
+Packaging up these pre-processing steps into a single tokenizer provides convenience, but this has had consequences. In classical NLP, it was an important step to carefully considering the data cleaning operations. For example, removing punctuation... \writemore. The scaling ability of modern LMs has largely shifted the focus to language model architectures and machine learning algorithms, with many models using default tokenisers from Huggingface without considering the impact. This is particularly the case for studies using smaller LMs to study language or acquisition (see \cref{sec:12-babylm}) where subwords in particular may not be an appropriate base unit, nor the orthographic domain if simulating spoken speech. In these cases the default representation is no longer as crucial for performance, yet the convenience of the existing frameworks facilitates its use. 
+
+\Zeb{Here it might be good to try to formalise ``input representation'' with the many axes that you can compare them on. Perhaps a figure showing where classical and modern NLP fall on those axes, along with phonemic and other alternatives.}
+
+The following sections provide further background and related work concerning the input representations used in language modelling. First, \cref{sec:12-default} provides a definition of the \textbf{default input representation} and an overview of tokenisation studies that have criticised, analysed and suggested alternative tokenisers that all produce tokens following this representation. \Cref{sec:12-phonemic} presents the \textbf{phonemic input representation} in contrast, an under-studied alternative representation and the subject of this thesis. Finally, these two representations are not the only possibilities; alternatives are briefly described in \cref{sec:12-alternatives}.
+
+\Zeb{Some statement here about potential of phoneme tokenisation and the fact that alternative input representations are largely under-studied in NLP, due to the convenience of the default one. Maybe here go into the historical use of the input representation and that it has been vastly understudied. }. 
+
+\subsection{The default input representation}\label{sec:12-default}
 
 \Zeb{Give background on what LMs use by default. Define as subwords + orthographic + pre-tokenization.}
 
-%\subsubsection{Subword tokenizers}
-
-\Zeb{Define tokenizers more formally and discuss BPE and WordPiece etc and pointing to some surveys about these methods.}
-
-%\subsubsection{Criticisms of the default input representation}
+\Zeb{Define tokenizers more formally and discuss BPE and WordPiece etc and pointing to some surveys about these methods. Greed is all you need method.}
 
 \Zeb{Plausibility of subwords, issues in certain languages, misalignment etc. Superword paper as an alternative to word boundary-based pretokenization. Morpheme-aligned alternatives that never caught on. Many alternative approaches. Character-level models and byte-level models. Attempts to go `token-free' but byte-level still an arbitrary token choice.}
 
-\subsection{The phonemic input representation}
+\zeb{Change this to be about the tokens rather than the tokenizers}
+\begin{enumerate}
+    \item process written (orthographic) text,
+    \item pre-tokenize the text to preserve word boundaries, and
+    \item split pre-tokenized into tokens that represent subwords.
+\end{enumerate}
 
-\Zeb{Formal definition of what I mean by the phonemic input representation. This is where the three transformations are described. Similar to character-level.}
+The combination of these three features will henceforth define the \textbf{default input representation}. Now, the vast majority of language models are distributed with an associated tokenizer. The tokenizer converts noisy text to unique token IDs, which are fed through the model, which produces contextual embeddings. Auto-regressive LMs are trained with a next-token prediction objective, allowing them to generate text one token at a time, which the tokenizer can convert back into readable text. Alternatively, the contextual representations are directly used, or the model is fine-tuned on a downstream task involving labelled data. There are countless variations to this setup in modern NLP but the vast majority use tokenisers...
+
+In recent years, tokenization has become an increasingly popular topic, with the default configurations of popular tokenizers often critiqued and analysed, and many studies proposing improvements and alternatives to existing tokenizers. An overview of this work is provided in \cref{sec:12-default}. Despite this scrutiny, the focus is still on tokenizers that produce the default input representation. 
+
+There is some work exploring representations that challenge one of the features of the default input representation. Several studies have challenged (3) by demonstrating that character-based or byte-based models can still be effectively utilised in language models \addcites. A few studies have challenged (2) by relaxing the word-boundary pre-tokenization constraint to produce `superword' tokens \addcites or explore the effect of removing whitespace altogether to achieve a `tabula rasa' input representation \addcites.
+
+\subsection{The phonemic input representation}\label{sec:12-phonemic}
+
+\Zeb{Formal definition of what I mean by the phonemic input representation. This is where the three transformations are described. Similar to character-level. Maybe here worth going more into detail with character-level models and tabula rasa model.}
 
 %\subsubsection{Practical uses of the phonemic input representation}
 
 \Zeb{Survey of methods using phonemes. Briefly discuss how important phonemes were for speech recognition technology but now a lot of that is end-to-end. Discuss more recent uses in LMs. End by stating maybe we're resource limited, as discussed in \cref{chapter:resources}}
 
-\subsection{Alternative input representations}
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{example-image-b}
+    \caption{The phrase ``example phrase'' encoded using the default input representation compared to the phonemic input representation.}
+    \label{fig:12-representation}
+\end{figure}
 
-\Zeb{Briefly survey speech models, pixel tokenisation etc. but probably don't go into too much detail.}
+An alternative to the default input representation, and the topic of this this thesis, is the \textbf{phonemic input representation}. This is defined in contrast to above as:
 
-\subsection{Related work comparing input representations}
+\begin{enumerate}
+    \item process phonemic text,
+    \item do not preserve word boundaries, and
+    \item split text into tokens that represent individual phonemes.
+\end{enumerate}
 
-\Zeb{Prior work, `tabula rasa', the study of Bunzeck done in parallel to mine. Concluding thoughts for this section.}
+
+\subsection{Alternative input representations}\label{sec:12-alternatives}
+
+\Zeb{Briefly survey speech models, pixel tokenisation etc. but probably don't go into too much detail.  Maybe patches work goes here as well.}
+
+% \subsection{Related work comparing input representations}\label{sec:12-comparisons}
+
+% \Zeb{Prior work, `tabula rasa', the study of Bunzeck done in parallel to mine. Concluding thoughts for this section.}
+
+% One reason could be a lack of resources, which is the topic of \cref{chapter:resources}. A benefit of exploring alternative input representations is to ablate the effect of each of the features of the default representation, as explored in \cref{chapter:modelling}. The cognitive aspect... \cref{chapter:phonology}... and could improve tokenisation methods... \cref{chapter:infotokenization}.
 
 \section{Phonological experimentation using language models}\label{sec:12-phoneval}
 
