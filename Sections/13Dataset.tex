@@ -22,7 +22,7 @@ Phonological research can be enriched by large-scale data-oriented studies that 
     \label{fig:13-overview}
 \end{figure}
 
-There is also a lack of phonemic data for certain domains, preventing phonological research in these areas. In particular, we note that it is difficult to find phonemic data for child-centered speech and, in general, spontaneous speech across several languages. The \emph{de-facto} repository for child-centered data is the Child Language Data Exchange System (CHILDES), which currently contains over 1.4TB of transcript data in over 40 languages \citep{macwhinney1985child, macwhinney_understanding_2019}. The impact of CHILDES across clinical and linguistic research has been profound \citep{ratner2024augmenting} but the largely orthographic nature of the data has prevented phonological experimentation.\footnote{CHILDES does contain phonetic transcriptions for some languages as part of the PhonBank project, but is limited in size and only contains transcriptions of child utterances, impeding the phonological analysis of child-\emph{directed} speech.} 
+There is also a lack of phonemic data for certain domains, preventing phonological research in these areas. In particular, we note that it is difficult to find phonemic data for child-centered speech and, in general, spontaneous speech across several languages. \zeb{Some of this copied to chapter 2}The \emph{de-facto} repository for child-centered data is the Child Language Data Exchange System (CHILDES), which currently contains over 1.4TB of transcript data in over 40 languages \citep{macwhinney1985child, macwhinney_understanding_2019}. The impact of CHILDES across clinical and linguistic research has been profound \citep{bernstein_ratner_augmenting_2024} but the largely orthographic nature of the data has prevented phonological experimentation.\footnote{CHILDES does contain phonetic transcriptions for some languages as part of the PhonBank project, but is limited in size and only contains transcriptions of child utterances, impeding the phonological analysis of child-\emph{directed} speech.} 
 
 %In recent years, researchers have trained language models on child-centered data in order to study acquisition \citep{yedetore-etal-2023-poor}, design cognitively-inspired curricula \citep{martinez-etal-2023-climb, salhan2024morepretrainingcrosslingualsmallscale} and develop chat-based LLMs for children \citep{nayeem-rafiei-2024-kidlm}. Many insights have come from the BabyLM workshop series whose pre-training dataset includes child-directed speech extracted from CHILDES \citep{hu2024findings}. However, much of this work has focused on English and very few have used phoneme-based training to explore the phonological representations learned by model trained on developmentally plausible data \citep{bunzeck2024graphemes, goriely2024babble}. 
 
@@ -313,23 +313,23 @@ In \cref{sec:13-phonemicdatasets} we discuss previous phonemic datasets in relat
             %\midrule
             %\textit{Requirements} & \textit{\underline{Phonemic}  and \underline{Parallel} } & \textit{\underline{Large}  (> 1M words)} & \textit{\underline{Naturalistic}  \underline{Child-Directed}  \underline{Speech}}  & \textit{\underline{Multilingual}}  \\
             \midrule
-            The Pile \citep{pile} & Orth  & 100B\textsuperscript{\dagger}  & Web-scraped written text  & English only  \\
-            %Common Crawl & Orth  & >100 trillion\textsuperscript{\dagger}  & Web-scraped written text  & >160 languages  \\
-            %C4 \citep{raffel2020exploring} & Orth  & 1T\textsuperscript{\dagger}  & Web-scraped written text  & >160 languages  \\
-            GlobalPhone \citep{schultz2002globalphone} & Orth, Phon, Audio  & 5M\textsuperscript{\dagger}  & Read speech  & 22  \\
-            CommonVoice \citep{ardila-etal-2020-common} & Orth, Audio  & 30M\textsuperscript{\dagger}  & Read speech  & 38  \\
-            VoxCommunis \citep{ahn-chodroff-2022-voxcommunis} & Orth, Phon, Audio & 23M\textsuperscript{\dagger} & Read speech & 40 \\
-            CMU Wilderness \citep{8683536} & Orth, Audio & 170M\textsuperscript{\dagger} & Read speech & 699 \\
-            VoxClamantis \citep{salesky-etal-2020-corpus} & Orth, Audio, Phon & 152M\textsuperscript{\dagger} & Read speech & 635 \\
+            The Pile \citep{pile} & Orth  & 100B\textdagger  & Web-scraped written text  & English only  \\
+            %Common Crawl & Orth  & >100 trillion\textdagger  & Web-scraped written text  & >160 languages  \\
+            %C4 \citep{raffel2020exploring} & Orth  & 1T\textdagger  & Web-scraped written text  & >160 languages  \\
+            GlobalPhone \citep{schultz2002globalphone} & Orth, Phon, Audio  & 5M\textdagger  & Read speech  & 22  \\
+            CommonVoice \citep{ardila-etal-2020-common} & Orth, Audio  & 30M\textdagger  & Read speech  & 38  \\
+            VoxCommunis \citep{ahn-chodroff-2022-voxcommunis} & Orth, Phon, Audio & 23M\textdagger & Read speech & 40 \\
+            CMU Wilderness \citep{8683536} & Orth, Audio & 170M\textdagger & Read speech & 699 \\
+            VoxClamantis \citep{salesky-etal-2020-corpus} & Orth, Audio, Phon & 152M\textdagger & Read speech & 635 \\
             TIMIT \citep{garofolo1993darpa} & Orth, Phon, Audio  & 40k & Read speech  & English only  \\
-            FLEURS \citep{conneau2023fleurs} & Orth, Audio  & 15M\textsuperscript{\dagger}  &Read speech  & 102  \\
+            FLEURS \citep{conneau2023fleurs} & Orth, Audio  & 15M\textdagger  &Read speech  & 102  \\
             MSWC \citep{mazumder2021multilingual} & Orth, Audio  & 20M  & Read speech  & 102  \\
-            IPAPACK \citep{zhu-etal-2024-taste} & Orth, Phon  & 15M\textsuperscript{\dagger}  & Read speech  & 115  \\
-            LibriSpeech \citep{panayotov2015librispeech} & Orth, Audio  & 10M\textsuperscript{\dagger}  & Audio books  & English only  \\
-            Libri-Light \citep{Kahn_2020} & Orth,\textsuperscript{*} Phon,\textsuperscript{*} Audio  & 700M\textsuperscript{\dagger}  & Audio books  & English only  \\
-            MLS \citep{pratap2020mls} & Orth,\textsuperscript{*} Phon,\textsuperscript{*} Audio  & 600M\textsuperscript{\dagger}  & Audio books  & 8  \\
-            Switchboard \citep{godfrey1992switchboard} & Orth, Phon, Audio  & 3M\textsuperscript{\dagger}  & Telephone conversations  & English only  \\
-            Fisher \citep{cieri2004fisher} & Orth, Audio  & 12M\textsuperscript{\dagger}  & Telephone conversations  & English only  \\
+            IPAPACK \citep{zhu-etal-2024-taste} & Orth, Phon  & 15M\textdagger  & Read speech  & 115  \\
+            LibriSpeech \citep{panayotov2015librispeech} & Orth, Audio  & 10M\textdagger  & Audio books  & English only  \\
+            Libri-Light \citep{Kahn_2020} & Orth,\textsuperscript{*} Phon,\textsuperscript{*} Audio  & 700M\textdagger  & Audio books  & English only  \\
+            MLS \citep{pratap2020mls} & Orth,\textsuperscript{*} Phon,\textsuperscript{*} Audio  & 600M\textdagger  & Audio books  & 8  \\
+            Switchboard \citep{godfrey1992switchboard} & Orth, Phon, Audio  & 3M\textdagger  & Telephone conversations  & English only  \\
+            Fisher \citep{cieri2004fisher} & Orth, Audio  & 12M\textdagger  & Telephone conversations  & English only  \\
             Buckeye \citep{PITT200589} & Orth, Phon, Audio  & 300k  & Spontaneous speech  & English only  \\
             British National Corpus \citep{bnc2007} & Orth, Audio & 100M & Written \& spontaneous speech & English only \\
             Audio BNC \citep{coleman2012audio} & Orth, Phon, Audio  & 7M  & Spontaneous speech  & English only  \\
@@ -344,7 +344,7 @@ In \cref{sec:13-phonemicdatasets} we discuss previous phonemic datasets in relat
             \bottomrule
         \end{tabular}
         \normalsize
-        \caption{A comparative summary of the datasets discussed in \cref{sec:13-phonemicdatasets}. The datasets are described in terms of their modality, scale, domain and languages. \ipachildes is the first multilingual phonemic dataset of spontaneous speech and the first phonemic dataset of child-centered speech. \\\emph{\textsuperscript{\dagger}Word counts estimated from the size in bytes or the hours of audio in the dataset, using a heuristic based on the size of Switchboard of 5 bytes per word and 12,000 words per hour.}\\\emph{\textsuperscript{*}Libri-Light and MLS only have orthographic and phonemic transcriptions for 10 hours of audio per language.}.\\\emph{\textsuperscript{**}BabyLM contains a mix of speech and text data from a mix of adult-directed and child-directed sources, only 29\% is child-directed speech.}}
+        \caption{A comparative summary of the datasets discussed in \cref{sec:13-phonemicdatasets}. The datasets are described in terms of their modality, scale, domain and languages. \ipachildes is the first multilingual phonemic dataset of spontaneous speech and the first phonemic dataset of child-centered speech. \\\emph{\textdagger Word counts estimated from the size in bytes or the hours of audio in the dataset, using a heuristic based on the size of Switchboard of 5 bytes per word and 12,000 words per hour.}\\\emph{\textsuperscript{*}Libri-Light and MLS only have orthographic and phonemic transcriptions for 10 hours of audio per language.}.\\\emph{\textsuperscript{**}BabyLM contains a mix of speech and text data from a mix of adult-directed and child-directed sources, only 29\% is child-directed speech.}}
         \label{tab:13-dataset-requirements}
     \end{threeparttable}
 \end{table*}
