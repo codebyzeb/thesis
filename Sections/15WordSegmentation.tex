@@ -53,7 +53,22 @@ Finally, we release our code and pre-trained models to facilitate future work.
 
 %This task only requires phonemic data labeled with word boundaries and so can be easily applied to any language in \ipachildes. 
 
-\Zeb{Note: \cref{sec:12-phoneval} was previously here.}
+\subsection{Background}
+
+%When trained on developmentally plausible corpora (see the BabyLM challenge, \citep{hu2024findings}), these models have demonstrated comparable performance to their graphemic counterparts \citep{bunzeck2024graphemes, goriely2024babble}.
+%However, the majority of this work only considers English. Recently, \citet{goriely2025} trained phoneme LMs on child-directed speech across 11 languages, but were only able to use an English benchmark for studying how phonological and syntactic knowledge scales in phoneme LMs. 
+
+Modern \emph{large} language models (LLMs) are still probed for grammatical information, but standard benchmarks are generally based on higher-order structures: syntax and semantics rather than morphology and phonology. 
+
+In this work, we propose the word segmentation task as a language-independent method for probing the representations learned by phoneme LMs. Below, we summarise past approaches for investigating the phonological capabilities of language models. We then give historical background on the word segmentation task. Finally, we discuss past examples of word segmentation being used as a probing task.
+
+Previous work has explored the representations of word boundaries in LLMs. \citet{sanabria2021difficulty} explored methods for extracting word boundaries from attention weights in an LSTM, finding that attention had limited value for segmentation. \citet{hahn-baroni-2019-tabula} trained character-level RNNs and LSTMs without word boundaries, finding that individual activations correlated with word boundaries and that a linear probe trained on all activations also identified boundaries. They claimed that removing word boundaries resulted in a `near tabula rasa' training paradigm but trained on billions of graphemic words Wikipedia, which is not developmentally plausible. Here, we use this probe on the final layer of phoneme LMs trained on developmentally plausible data, a more `tabula rasa' paradigm. 
+
+Other studies have verified \citeauthor{elman-1990-finding}'s observations that prediction-error corresponds with word boundaries. For instance, \citet{al-rfou_character-level_2019} train a 64-layer character-level transformer and in qualitative analysis note that three measures of prediction-error sharply increase at the start of words. However, their model is trained on graphemic text from Wikipedia without removing the word boundaries and they do not explicitly use these measures to evaluate word segmentation performance. Here, we use their three measures to propose an unsupervised word segmentation algorithm using phoneme LMs trained without word boundaries.
+
+In this study, we combine ideas from past computational models for word segmentation. Rather than explicitly calculate n-gram statistics, our cues are based on prediction-error and utterance boundary probability extracted from LLMs trained on the next-phoneme prediction task. As these cues are based on the language model's prediction of phonemes, successful segmentation indicates that implicit phonological knowledge of word-like units in these models. 
+
+Peaks in predictability can also be observed in neural language models. In the foundational work of \citet{elman-1990-finding}, a simple recurrent network (SRN) is trained to predict letters in an unsegmented sequence (one of the first examples of autoregressive language modeling). Elman observes that the prediction-error increases at the onset of each new word, concluding that ``there is information in the signal that could serve as a cue to the boundaries of linguistic units which must be learned''.
 
 \section{Word Segmentation Task}
 

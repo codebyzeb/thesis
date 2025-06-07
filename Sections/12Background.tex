@@ -117,15 +117,17 @@ The fine-tuning paradigm itself also has computational constraints. The common u
 
 % maybe fit in a citation for futrell2019neural and dupoux-2018-cognitive
 
-However, there are issues with using LLMs for testing probabilistic theories of language processing. Considering surprisal theory, \citet{wilcox2020predictive} found that language models with a better ability to predict upcoming words are also better predictors of human language processing. However, \citet{shain2024large, oh2024frequency} found that this trend is reversed in LLMs. \citet{wilcox2025} argue that ``bigger is not always better''; LLMs are now such good predictors of language that they no longer provide human-like probability distributions that can be used to further psycholinguistic theories. This is also the case for using LLMs as cognitive models of human language learning. Researchers that advocate for the use of language models as cognitive models highlight the importance of human-like pre-training \citep{linzen-2020-accelerate, baroni-2022-proper,warstadt-2022-artificial,wilcox2025} with a particular focus on the \emph{scale} of data used to train these models. This is illustrated in \cref{fig:12-scales}, which shows that \llama-3 is exposed to hundreds of thousands of times more words than the what humans experiences by the onset of adolescence --- estimated to be 100 million words for children growing up in the United States \citep{gilkerson2017mapping}. Besides scale, there are also concerns that the domain of pre-training data is not developmentally plausible \citep{huebner-etal-2021-babyberta, warstadt2023findings}. Motivated by both of these concerns, the BabyLM challenge was developed to encourage pre-training research with developmentally-plausible corpora \citep{warstadt2023findings}. 
+However, there are issues with using LLMs for testing probabilistic theories of language processing. Considering surprisal theory, \citet{wilcox2020predictive} found that language models with a better ability to predict upcoming words are also better predictors of human language processing. However, \citet{shain2024large, oh2024frequency} found that this trend is reversed in LLMs. \citet{wilcox2025} argue that ``bigger is not always better''; LLMs are now such good predictors of language that they no longer provide human-like probability distributions that can be used to further psycholinguistic theories. This is also the case for using LLMs as cognitive models of human language learning. Researchers that advocate for the use of language models as cognitive models highlight the importance of human-like pre-training \citep{linzen-2020-accelerate, baroni-2022-proper,warstadt-2022-artificial,wilcox2025} with a particular focus on the \emph{scale} of data used to train these models. This is illustrated in \cref{fig:12-scales}, which shows that \llama-3 is exposed to hundreds of thousands of times more words than the what humans experiences by the onset of adolescence --- estimated to be 100 million words for children growing up in the United States \citep{gilkerson2017mapping}. Besides scale, there are also concerns that the domain of pre-training data is not developmentally plausible \citep{huebner-etal-2021-babyberta, warstadt2023findings} and that using input representations that do not resemble the sensory signals perceived by humans during language learning confound possible insights gained from using language models as cognitive models \citet{dupoux-2018-cognitive}. 
+
+Motivated by these concerns, the BabyLM challenge was developed to encourage pre-training research with developmentally-plausible corpora \citep{warstadt2023findings}. Participants are challenged to train small LMs on a corpus of 100 million words, using audio transcripts and child-directed domains as source data. However, the challenge uses textual data, and the vast majority of participating systems use subword-based representations. There are similar communities that focus more on the plausibility of the input representation, such as the Zero Resource Speech Challenge, which promotes developing unsupervised methods that learn language directly from audio \citep{dunbar_self-supervised_2022}. This work is discussed further in \writemore.
 
 \paragraph{} The three factors discussed above have contributed to the recent shift toward training smaller language models in domain-specific and developmentally-plausible settings. Yet,within this work, comparatively little attention has been paid to the input representations used by these models. The computational and architectural pressures that originally motivated the adoption of subword units have become so dominant that most research now focuses on the choice of subword model itself (as discussed in \cref{sec:12-subword}), rather than exploring alternative forms of representation.
 
-The BabyLM challenge exemplifies how entrenched subword-based input representations have become. Although concerns about developmental plausibility might naturally encourage the use of auditory or visual representations --- such as the phoneme-based inputs used in early cognitive models (see \cref{sec:12-phonemic}) --- the challenge uses textual data, and the vast majority of participating systems rely on subword-based representations. The organisers acknowledge that this is a limitation of the framework \citep{wilcox2025}, pointing to both the lack of suitable alternative data and an aim to attract broader participation as reasons for this choice. Indeed, the challenge is motivated not only by the goal of advancing cognitive and psycholinguistic modelling, but also by more practical objectives such as democratising pre-training research and accelerating architectural innovation --- goals for which text-based subword representations are well suited. Nonetheless, developmentally-plausible pre-training remains a promising framework for exploring phoneme-based input representations, as discussed further in \cref{sec:12-plausiblepretraining}.
+The BabyLM challenge exemplifies how entrenched subword-based input representations have become. Although concerns about developmental plausibility might naturally encourage the use of auditory or visual representations --- such as the phoneme-based inputs used in early cognitive models (see \cref{sec:12-phonemic}) --- the subword-based representation is the default. The organisers acknowledge that this is a limitation of the framework \citep{wilcox2025}, pointing to both the lack of suitable alternative data and an aim to attract broader participation as reasons for this choice. Indeed, the challenge is motivated not only by the goal of advancing cognitive and psycholinguistic modelling, but also by more practical objectives such as democratising pre-training research and accelerating architectural innovation --- goals for which text-based subword representations are well suited. Nonetheless, developmentally-plausible pre-training remains a promising framework for exploring phoneme-based input representations, as discussed further in \cref{sec:12-plausiblepretraining}.
 
 \section{Subword-based input representation}\label{sec:12-subword}
 
-Modern large language models (LLMs) that operate on textual input rely on subword-based input representations, which offer a balance between generalisability and computational efficiency. In the standard framework, the conversion from raw text to model-ready input is handled by a component known as a \defn{tokeniser}, as implemented in libraries such as \texttt{Hugging Face Tokenizers}.\footnote{\href{https://huggingface.co/docs/tokenizers/index}{huggingface.co/docs/tokenizers/}} A typical tokenisation pipeline comprises several sequential stages:
+Modern large language models (LLMs) that operate on textual input rely on subword-based input representations, which offer a balance between generalisability and computational efficiency. In the standard framework, the conversion from raw text to model-ready input is handled by a component known as a \defn{tokeniser}, as implemented in libraries such as \texttt{HuggingFace Tokenizers}.\footnote{\href{https://huggingface.co/docs/tokenizers/index}{huggingface.co/docs/tokenizers/}} A typical tokenisation pipeline comprises several sequential stages:
 
 \begin{itemize}
 \item \textbf{Pre-processing:} operations such as lowercasing, accent removal, Unicode normalisation, or character-to-byte conversion
@@ -161,11 +163,35 @@ In this thesis, the terms “subword tokenisation” and “subword tokeniser”
 
 \subsection{Limitations of subword-based representations}
 
+However, these BabyLMs are typically trained on orthographic text, limiting their ability to be studied at the phonological level, and generally use subword tokens, which do not generally correspond to cognitively plausible units \citep{beinborn-pinter-2023-analyzing} limiting their value for psycholinguistic research \citep{giulianelli-etal-2024-proper}
+
+%In part, this can be attributed to the fact that most state-of-the-art LLMs are trained on graphemic text with a subword tokenization scheme. While this representation has proven to be useful for downstream tasks and allows for linguistic probing at the syntactic and semantic levels, these tokens are not cognitively plausible \citep{beinborn-pinter-2023-analyzing}, and prevent models from learning the structure of words compared to using character-based tokenizers \citep{bunzeck2025subwordmodelsstruggleword}.
+
+While this representation is practical for large-scale training, these tokens are not very cognitively plausible \citep{beinborn-pinter-2023-analyzing}, are less effective than character-based tokens for learning word structure \citep{bunzeck2025subwordmodelsstruggleword} and cannot be used to explore representations of phonological units. Additionally, modern LLMs are inappropriate for theories of acquisition, due to the scales of data they are trained on \citep{warstadt-2023-babylm-findings}.
+
 \subsection{Alternative input representations}
 
 \Zeb{Briefly survey speech models, pixel tokenisation etc. but probably don't go into too much detail.  Maybe patches work goes here as well.}
 
-\Zeb{Character-level, byte-level, phoneme or grapheme, whitespace-agnostic, patching, audio}
+\Zeb{Character-level, byte-level, phoneme or grapheme, whitespace-agnostic, patching, audio. Maybe not character since we briefly mentioned that? Should argue rfou found character to be ok, that maybe its just not used because of computational cost}
+
+\Zeb{Perhaps the next few (previously input representation comparisons) could be moved to modelling chapter as related work.}
+
+To the best of our knowledge, a full systematic comparison of the three input transformations has not yet been conducted.  \citet{hahn-baroni-2019-tabula} investigated the effect of removing word boundaries and using a word-level or character-level tokenization, evaluating on several psycholinguistic benchmarks. However, they only used graphemic text from Wikipedia and did not ablate the two transformations, only comparing a word-level model (with word boundaries) to a character-level model (without word boundaries). \citet{nguyen-2022-word-boundaries} extend this work, comparing character-level graphemic input (with and without word boundaries) to character-level phonemic input (with and without word boundaries) by training on the Librispeech corpus \citep{panayotov2015librispeech}. They also compare larger units of tokenization (BPE and word-level) for both graphemic and phonemic text, but only with word boundaries included, missing out on several key combinations. 
+
+In our work, we provide a complete comparison of these three input representation transformations by considering all combinations, leading to new input representations that have not been studied before (such as subword tokenization trained without word boundaries). We also use a larger model than previous work, a 12-layer transformer rather than a 3-layer LSTM.
+
+%Another simple heuristic for processing text to be more speech-like is to remove word boundaries. At the simplest level of approximation, some past efforts have studied the effects of removing word boundaries from language models \citep{hahn-baroni-2019-tabula, nguyen-2022-word-boundaries}, finding that LSTM-based models see a marked decrease in performance on several psycholingustic benchmarks. 
+
+% However, these architectures were developed for downstream tasks and not for linguistic theories \citep{baroni-2022-proper}. Before using such models, we must establish the extent to which using standard orthographic text gives language models an advantage over input representations that more closely mimic human speech. 
+
+%However, underlying these approaches is a concern that language models trained under common paradigms may not be scientifically sound for providing insights into human language acquisition. This is because the development of language models is driven by downstream performance on popular tasks rather than being grounded in linguistic theories \citep{baroni-2022-proper}. The recent explosion in the size of language models has further complicated comparisons between human and neural network language acquisition. \citet{warstadt-2022-artificial} argue that to draw valid conclusions about human language acquisition from neural networks, the trained models should not possess any advantages over humans. Similarly, \citet{dupoux-2018-cognitive} proposes that machine learning models should use raw sensory signals perceived by humans (e.g., sound waves) as inputs to remove confounding variables that make interpreting their behaviour as models of language acquisition challenging. Similarly to how the BabyLM challenge reduces the training set to a reasonable size, the Zero Resource Speech Challenge involves developing unsupervised methods that learn language directly from audio \citep{dunbar_self-supervised_2022}. We discuss this paradigm further in \cref{sec:14-audiomodels}.
+
+\subsection{Character-based Language Models}
+
+The use of characters as the input representation, rather than words or subwords, has been extensively explored. Character-level language models offer a simplified input stream compared to the standard approach of training on learned susword tokens. Many studies have developed specialised architectures to train language models on characters \citep{jozefowicz2016exploringlimitslanguagemodeling, kim2016character, ma-etal-2020-charbert, al-rfou_character-level_2019} while other approaches seek to establish `token-free' training regimes to eliminate the need for subwords entirely \citep{clark-etal-2022-canine, xue-2022-byt5}.
+
+Another alternative input representation is to split words into morphemes, which provide theoretical benefits over subwords and have their own analytical and practical benefits particularly for morphologically rich languages \citep{ustun-etal-2018-characters, nzeyimana-niyongabo-rubungo-2022-kinyabert, fan-sun-2023-constructivist}. Mapping orthographic text to morphemes continues to be a challenging task, requiring dedicated systems trained on labeled corpora \citep{batsuren-etal-2022-sigmorphon} and we do not consider morphemes in this work.
 
 % \Zeb{Give background on what LMs use by default. Define as subwords + orthographic + pre-tokenization.}
 
@@ -186,6 +212,13 @@ In this thesis, the terms “subword tokenisation” and “subword tokeniser”
 
 \section{Phoneme-based input representation}\label{sec:12-phonemic}
 
+Several language models have been trained with phonemic input \citep{sundararaman-2021-phonemebert, gale-etal-2023-bort} but it remains a challenge to do so due to the lack of large phonemic corpora. While a number of well-known speech-based datasets include phonemic transcriptions, such as Switchboard \citep{godfrey1992switchboard} and TIMIT \citep{garofolo1993darpa}, these datasets are small compared to the trillions of tokens contained in standard language model pre-training corpora \citep{elazar-2024-redpajama}. The majority of works that use phonemic representations typically rely on grapheme to phoneme conversion tools \citep{bisani-2008-g2p, hasegawa-2020-g2pmultilingual} to generate coarse phonemic transliterations of text data.
+
+It is also a challenge to evaluate the broad capabilities of language models trained with phonemes, as most benchmarks assume a graphemic representation, even some that assess phonological knowledge \citep{suvarna-etal-2024-phonologybench}. One benchmark that assesses both the syntactic and phonological capabilities of language models is BabySLM \citep{lavechin}. %One distinguishing advantage of this benchmark is that it can be applied to models trained on either graphemes or phonemes.
+We discuss this benchmark further in \cref{sec:14-effect}.
+
+\citep{nguyen-2022-word-boundaries,bunzeck2024graphemes}
+
 \subsection{Motivation and linguistic rationale}
 
 Cross-linguality, alignment with speech, abstraction
@@ -202,6 +235,11 @@ Introduce the tension: LMs are often tested on phonological knowledge despite be
 
 %The construction of phoneme-based input typically involves a grapheme-to-phoneme (G2P) conversion step, followed by tokenisation over the resulting phoneme sequence. In this work, G2P conversion and dataset construction are handled by a new tool and dataset, introduced and described in detail in Chapter [X]. Here, we provide only a high-level overview to situate the phoneme-based input representation within existing practices.
 
+%Large language models are typically trained on written text using tokenizers that split the text into subword units. By contrast, studies that train models using a phoneme-based input representation tend to use tokenizers that produce a token for each individual phoneme, akin to character-based language models. Often, phonemes are fed to a model in a sequence that does not contain word boundaries, as utterances tend to be produced continuously, with no pauses between individual words. 
+% The standard input representation for training large language models consists of written text split into subword units. By contrast, studies that train models using a phonemic input representation tend to split words into individual phonemes, without word boundaries (as spoken utterances are produced continuously, without clear pauses between words).
+
+
+
 Very brief summary of how phoneme inputs are constructed
 
 High-level G2P overview, mention of boundary decisions, tokenisation granularity
@@ -211,23 +249,50 @@ Forward-reference your tool and dataset in the next chapter
 Possibly add a short note on typical phoneme vocab size and training behaviour
 
 
+Soon after word2vec, \citet{ma2016learning} presented a model that learned phoneme embeddings using the  a word segmentation task
+
 \subsection{Word segmentation}
+
 Phoneme-based models in word segmentation, especially in child-directed speech
 
 Compare to subword segmentation in LLMs
 
 Discuss what phoneme-level segmentation reveals about inductive biases or learning difficulty
 
+Unlike in written text, where lexical units are separated by spaces and punctuation, spoken communication consists of continuous utterances with no clear demarcation of words (see e.g. \citet{cole1980model}). Somehow, without a lexicon to consult, children are able to segment speech into words and phrasal units by the age of six months \citep{Jusczyk1999infants}. How children learn to segment words and bootstrap their lexicon is known in psycholinguistics as the \emph{word segmentation problem}, and statistical learning experiments have established a wide variety of statistical cues which children may use to segment speech \citep{Cutler1987, gleitman1988learning, Jusczyk1993stress, Saffran1996distributional, Jusczyk1999allophonic, Suomi1997}.
+
+
+When using a phonemic input representation to model speech, word boundaries are not typically included, as word boundaries are not explicitly marked in the speech stream. The phoneme stream representation (i.e.,\ the combination of all three transformations) is the typical representation for word segmentation studies, where the task is to learn word boundaries without supervision \citep{Brent1999}. A wide variety of statistical, dynamic programming and neural approaches have been applied to the task, with consequences for acquisition research and low-resource language modeling \citep{Blanchard2010, Coltekin2017, algayres_dp-parse_2022, goriely2023word}.
+
+
+\citet{christiansen1998learning} later used an SRN to segment speech by using the probability of an \emph{utterance} boundary, rather than prediction-error, to place word boundaries. This followed previous work suggesting that children could use utterance boundaries to bootstrap their lexicon \citep{aslin1996models} and is a cue used in the models of \citet{ccoltekin2014explicit, goriely2023word}.
+
+
+Particularly influential were the experiments of \citet{Saffran1996learning}, who established that 8-month-old children use distributional information to segment speech, specifically noting that low conditional probability %\footnote{In their study, the calculation is called ``transitional probability''.}
+between two adjacent syllables often indicated a word boundary. These experiments inspired the development of computational models proposing cognitively plausible learning mechanisms for word segmentation, most of which are based on the principle that units within words are far more predictable than units across word boundaries \citep{harris1955}. Many models draw on \citet{Brent1999}, who used unigram statistics to segment speech, with later models using higher-order n-grams \citep{Venkataraman2001}, incorporating phonological constraints \citep{Blanchard2010} or leveraging prior distributions over word frequencies and phonological shapes \citep{Goldwater2009}. Other models explicitly calculate several statistical cues at each potential word boundary and combine cues using a majority voting framework \citep{ccoltekin2014explicit, Coltekin2017, goriely2023word}. Each cue provides a signal over the utterance (as illustrated in \cref{fig:15-example}) with peaks in each cue indicating a potential boundary. 
+
+% Some models leverage n-gram statistics \citep{Brent1999, Venkataraman2001}, some  Blanchard2010, Elsner2017, Coltekin2017}. Many of these models were evaluated on 10,000 utterances from the Bernstein-Ratner \citeyear{bernstein1987phonology} corpus in CHILDES, transcribed phonemically by \citet{Brent1999}, who also established the evaluation metrics for word segmentation performance (see \cref{sec:15-evaluation}).
+%Brent also established the typical metrics used to evaluate word segmentation performance (see \cref{sec:15-evaluation}) and phonemically transcribed 10,000 utterances from the Bernstein-Ratner \citeyear{bernstein1987phonology} corpus in CHILDES which continues to be used to evaluate segmentation models. 
+
 \subsection{Phonological experimentation}
 
 
 \Zeb{More recent studies that use LMs to study phonology by using tiny LMs that train just over word types rather than tokens in context. Conclude that there have been few attempts at training cross-lingual LMs on naturalistic running text to get a model of phonology for each language.}
+
+Since their inception, language models have been used to study the structures of language and explore mechanisms that humans may use to learn them. 
+
+Early ``connectionist'' language models were trained on sequences of letters or phonemes, often using developmentally plausible data in order to explore theories of word learning and phonology \citep{seidenberg1989distributed, norris1994shortlist, coltheart2001drc}. 
+
 
 Connectionist/early models of phonotactics and processing
 
 LSTM/phoneme-level language models (e.g., phonotactic generalisation, nonce-word acceptability)
 
 Tie back to phoneme input’s usefulness for probing phonological knowledge
+
+
+Here, we are interested in evaluating models that train directly on individual phonemes, without word boundaries. When trained on individual words, phoneme LMs have been used to study the acquisition of morphological rules \citep{kirov-2018-recurrent} and compare phonotactic complexity across languages \citep{pimentel2020phonotactic}. When trained on running text, phoneme LMs have been used for text-to-speech \citep{li-2023-phoneme-level-bert} and lyric generation \citep{ding-2024-songcomposer}. When compared to grapheme-based models on standard linguistic benchmarks, phoneme models slightly under-perform \citep{nguyen-2022-word-boundaries, bunzeck2024graphemes} but this could be attributed to pre-processing, punctuation and the fact that LLM architectures and evaluation sets have been optimised for written text \citep{goriely2024babble}. Despite the benefits of phoneme-based training, phonological evaluation is limited, and few phoneme LMs exist beyond English. \citet{goriely2025} trained phoneme LMs on child-directed speech across 11 languages, but were only able to use an English benchmark for studying how phonological and syntactic knowledge scales in phoneme LMs. 
+
 
 \subsection{Phonological evaluation of transformer language models}
 
@@ -241,6 +306,20 @@ Suggest that phoneme-based LMs offer a more principled alternative for such eval
 
 
 \Zeb{Discuss prior evaluation used to evaluate language models for phonological knowledge. Possibly start with wider background looking at how people evaluate LMs for knowledge of linguistic structure. Discuss phonologybench as the opposite of what we're looking for. BabySLM is more relevant, discussed in the next section.}
+
+While many studies have explored the representations learned by phoneme LMs trained on individual words, there are very few benchmarks for phoneme LMs trained on running text.
+
+One method for testing phonology is to use minimal pairs of words and pseudowords as a lexical decision task. One benchmark that uses this approach is BabySLM \citep{lavechin}, which provides a lexical decision metric for phoneme LMs or speech LMs (which learn directly from audio) using a vocabulary based on child-directed speech. \citet{bunzeck-etal-2025-small} use a similar approach in order to compare grapheme LMs to phoneme LMs. They also use two probing tasks to examine the representations of sentences; age prediction and rhyme prediction. %These studies only test English models, in part due to the lack of phoneme LMs in other languages, but also due to a lack of resources for constructing phonological tasks. For example, they both use \texttt{wuggy} \citep{keuleers2010wuggy} to generate pseudowords, which only supports three languages for phonetic pseudoword generation.
+
+
+%Very few methods for measuring phonological evaluation of LLMs. PhonologyBench is one example but is based on prompting for very large language models trained on orthographic text, limiting analysis of representations learned for individual phonemes. BabySLM provides a lexical decision task, more closely relating language models to psycholingustic studies of human preference. \citet{bunzeck-etal-2025-small} use a similar test, also exploring rhyme prediction and age prediction as phonological tasks. These studies all only explore English phonology due in part to the lack of phonemic data in other language \citep{goriely2023word} as well as a lack of resources for constructing phonological tasks. For example, BabySLM uses Wuggy to generate pseudowords but Wuggy only supports three languages for phonetic pseudoword generation.
+
+PhonologyBench \citep{suvarna-etal-2024-phonologybench} is a benchmark that uses prompts to test chat-based English LLMs. However, by using prompts, they treat phonology as an emergent ability tested through metalinguistic judgment, an evaluation strategy which \citet{hu2023prompting} argues is inferior to using quantities directly derived from a model's representations.  
+
+These benchmarks also only test English models, in part due to the lack of phoneme LMs in other languages, but also due to a lack of resources for constructing phonological tasks. For example, pseudowords are typically generated using \texttt{wuggy} \citep{keuleers2010wuggy}, which only supports three languages for phonetic pseudoword generation. An example of language-independent evaluation of phoneme LMs is the phonetic feature probe used in \citet{goriely2025}, which only requires feature vectors for each IPA symbol. The word segmentation task requires no language-specific data, only utterances labeled with word boundaries. 
+
+% Compared to models trained on orthographic text or raw audio, few studies training with phonemes. Models based on BERT have shown that training with phonemes can be useful for downstream tasks. In comparison studies, grapheme models slightly outperform phoneme models \citep{nguyen-2022-word-boundaries, bunzeck2024graphemes} but this could be attributed to preprocessing differences, punctuation and the fact that typical LLM architectures have been optimized for written text \citep{goriely2024babble}. As with phonological benchmarks, few phoneme LMs exist for languages other than English. Here, we release phoneme LMs trained on the 31 languages in \ipachildes...
+
 
 \subsection{Why not use audio-based representations?}\label{sec:12-whynot}
 
@@ -315,6 +394,9 @@ Suggest that phoneme-based LMs offer a more principled alternative for such eval
 
 Besides low-resource languages, pre-training also more efficient and effective than fine-tuning for domain-specific. For example, humanities language transfre \citep{fittschen2025pretraininglanguagemodelsdiachronic}. Overall, we are seeing a shift away from the LLM framework back towards domain-specific models. But in that time, subword representation is still so entrenched... especially due to tokenisation packages. 
 
+
+Training models on such little data (here, only 500 thousand words) may be considered atypical in the modern NLP landscape, but questions of developmental plausibility have led to an increased interest in pretraining with limited data. For instance, the BabyLM workshop series challenges participants to train smaller models on data that is limited by both scale, 10--100 million words, and by domain, with the pre-training corpus including data from CHILDES, among other child-centered corpora \citep{warstadt-2023-babylm-findings, hu-etal-2024-findings}. Such limitations have led to the development of new architectures \citep{georges-gabriel-charpentier-samuel-2023-layers, charpentier2024gpt}, motivated cognitively-inspired pre-training strategies \citep{huebner-etal-2021-babyberta, martinez-etal-2023-climb} and allowed for gaining insights into human learning \citep{yedetore-etal-2023-poor}. The majority of this work has centered on English. Exceptions include \citet{capone2024babies, shen2024bambino}, who train Italian monolingual and bilingual models, respectively, \citet{yadavalli2023slabert} who use data from five language in CHILDES to explore second language acquisition theories (but only train an English LM) and \citet{salhan-etal-2024-less}, who use age-ordered data from four languages in CHILDES to explore fine-grained curricula inspired by language acquisition.
+
 \subsection{Datasets}
 
 \subsubsection{The CHILDES database}
@@ -351,6 +433,7 @@ Below are a description of the main benchmarks used in this thesis to evaluate L
 \subsubsection{GLUE}
 
 \subsubsection{BabySLM}
+
 
 \section{Summary}
 

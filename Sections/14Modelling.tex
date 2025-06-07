@@ -66,7 +66,29 @@ We find that large language models are powerful statistical learners capable of 
 
 % We discuss the limitations of our transcription method and discuss the use of raw audio as an alternative input representation. Finally, we present the advantages of this input representation for multi-lingual and low-resource applications and encourage further work in phoneme-based language modeling. 
 
-\Zeb{Note: \cref{sec:12-tokenization} was previously here}
+
+\section{tmpintro}
+
+We identify three key transformations that bring us from the standard input representation used by language models to this alternative \textbf{phoneme stream} representation:
+
+% \begin{itemize}
+%     \item Using a character-based tokenization instead of using subwords.
+%     \item Removing word boundaries from the input.
+%     \item Using phonemic transcriptions instead of written text.
+% \end{itemize}
+
+\begin{itemize}
+\setlength\itemsep{0.1em}
+    \item \characterhighlight{Character tokenization} Treating each phoneme or grapheme as a token, rather than using subwords.
+    \item \spacehighlight{Word boundary removal} Removing whitespace or other word boundary cues from the input.
+    \item \phonemehighlight{Phonemic transcription} Converting words to a phonemic representation. 
+\end{itemize}
+
+\noindent
+Each transformation can be made independently or in combination, as illustrated in \cref{fix:14-example}. %By implementing every possible combination, we can identify the impact of each transformation on language learning by LLMs. 
+% We can also create novel representations of the input which may not have been considered (such as learning subword units from text stripped of word boundaries). 
+% The three input transformations have mostly been studied separately. 
+
 
 \section{Phoneme Stream Pipeline}
 \label{sec:14-pipeline}
