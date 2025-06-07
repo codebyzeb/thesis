@@ -1,165 +1,310 @@
 \chapter{Background}\label{chapter:background}
 
-\Zeb{Argument of thesis is that it is important to explore the phonemic representation. In \cref{sec:12-inputrepresentations} I define ``input representation'', establishing a contrast between the default and phoneme input representation. Review past work on input representation in language models and recent work on tokenisation methods, concluding that the phoneme input representation is largely under-studied in the modern NLP landscape. In \cref{sec:12-phoneval} I review work regarding phonological evaluation of language models. This includes the use of the phoneme input representation in early connectionist models of language processing and computational models of acquisition as well as more recent work using phonemes in language models to study phonology cross-lingually to benchmarks that directly probe the phonological capabilities of LMs. Finally, in \cref{sec:12-babylm} I review work concerning the use of developmentally-plausible language models. Such models provide a useful framework for studying linguistic theories but mostly continue to use the default input representation, despite children not learning from arbitrary subwords. This chapter concludes that there is a clear need to study the use of the phoneme input representation in modern LM architectures.}
+% \Zeb{Argument of thesis is that it is important to explore the phonemic representation. In \cref{sec:12-inputrepresentations} I define ``input representation'', establishing a contrast between the default and phoneme input representation. Review past work on input representation in language models and recent work on tokenisation methods, concluding that the phoneme input representation is largely under-studied in the modern NLP landscape. In \cref{sec:12-phoneval} I review work regarding phonological evaluation of language models. This includes the use of the phoneme input representation in early connectionist models of language processing and computational models of acquisition as well as more recent work using phonemes in language models to study phonology cross-lingually to benchmarks that directly probe the phonological capabilities of LMs. Finally, in \cref{sec:12-babylm} I review work concerning the use of developmentally-plausible language models. Such models provide a useful framework for studying linguistic theories but mostly continue to use the default input representation, despite children not learning from arbitrary subwords. This chapter concludes that there is a clear need to study the use of the phoneme input representation in modern LM architectures.}
 
-\section{Input representations in language models}\label{sec:12-inputrepresentations}
+%CHAT: Language models (LMs) are systems that assign probabilities to sequences of linguistic units, such as words, characters, or phonemes. While architectural advances have received significant attention, the form of the input representation—how raw linguistic data is encoded for the model—remains a foundational and sometimes under-examined design decision. This chapter focuses on input representation, defined here as comprising three main components: modality (e.g. orthographic, phonemic), tokenisation, and pre-processing.
+%Two major input paradigms are considered: subword-based input representations, which are now dominant in large-scale language modelling, and phoneme-based input representations, which provide an alternative aligned more closely with speech and cross-linguistic structure. Section 2 traces the historical development of input design choices across architectures. Sections 3 and 4 present each input paradigm in detail. Sections 5 and 6 examine their implications for phonological modelling and cognitive plausibility.
+%A language model (LM) is a computational system that assigns probabilities to sequences of linguistic units, typically words, characters, or phonemes. Formally, given a sequence .. Language models can be used for generation, prediction, or as pre-trained components for downstream tasks. The input to a language model—referred to here as the input representation—is the focus of this chapter.
 
-\Zeb{Here it might be good to try to formalise ``input representation'' with the many axes that you can compare them on. Perhaps a figure showing where classical and modern NLP fall on those axes, along with phonemic and other alternatives.}
+\defn{Language models} are statistical models of (natural) language that assign probabilities to sequences of linguistic units, such as words, characters or phonemes. While architectural advancements have received significant attention, the form of the \defn{input representation} --- how raw linguistic data is encoded for the model --- remains a foundational and under-examined design decision. Input representations are defined here as compromising three main components:
 
-\textbf{Language models} are distributional models of natural language; instead of using a grammar to determine the structure of a sentence, they provide a probability distribution for each lexical item based on its context --- the ``company it keeps'' \citep{firth1957synopsis}. Language models typically operate over discrete units known as \textbf{tokens}, drawn from a fixed \textbf{vocabulary} \(V\). For a sequence of tokens \(w_1, w_2, \dots, w_T\), language models estimates the probability:
-
-\begin{align}
-P(w_1, w_2, \dots, w_T) &= \prod_{t=1}^{T} P\left(w_t \mid w_1, w_2, \dots, w_{t-1} \right) \label{eq:languagemodel}
-\end{align}
-
-In order for these probabilities to be useful, there needs to be an interpretable mapping from \emph{instances of natural language} to \emph{sequences of tokens}. The nature of this mapping is the \textbf{input representation} used by the language model, which can encompass several properties:
 \begin{itemize}
-\item \textbf{Modality:} The modality of the raw data (e.g. orthographic text, phonemic transcriptions, audio).
-\item \textbf{Pre-processing:} Specific operations to clean the raw data, such as removing whitespace or punctuation. 
-\item \textbf{Tokenisation:} How the raw data split into discrete tokens.
-\item \textbf{Encoding:} How the language model encodes the tokens (e.g. using IDs or vector embeddings).
+    \item \textbf{Modality:} The modality of the raw data (e.g. orthographic text, phonemic transcriptions, audio).
+    \item \textbf{Pre-processing:} Specific operations to clean the raw data, such as lowercasing or punctuation. 
+    \item \textbf{Tokenisation:} How the pre-processed raw data is split into discrete tokens.
 \end{itemize}
 
-Whereas the encoding property is largely determined by the architectures used for the language model, the other properties can vary. Whereas early \ngram language models used input representations that matched the downstream task, transformer-based architectures use a representation that enhances computational efficiency, as discussed in \cref{sec:12-architectures}. Notably, modern language models use \textbf{default input representation} consisting of a text-based modality, with minimal pre-processing and subword tokenisation. Tokenisation and pre-processing methods are presented in \cref{sec:12-tokenisation} with work studying the default input representation summarised in \cref{sec:12-default}. The alternative \textbf{phoneme input representation}, which uses a phonemic modality, without whitespace and phoneme-level tokenisation, is discussed in \cref{sec:12-phonemic}. Finally, alternative input representations, such as non-discrete patching methods as well as audio modalities are discussed in \cref{sec:12-alternatives}.
+This thesis adopts a distinction between two broad types of input representation. The \defn{subword-based input representation} refers to the use of orthographic text, segmented into subword units, with whitespace-preserved word boundaries --- a representation that currently dominates large-scale language modelling. In contrast, the \defn{phoneme-based input representation} uses a phonemic modality for the raw data, removes explicit word boundaries and treats individual phonemes as atomic units. This representation has roots in computational models of language processing, speech recognition technology and phonological experimentation, but has rarely been examined in modern language model architectures --- the topic of this thesis.
 
-% The following sections provide further background and related work concerning the input representations used in language modelling. First, \cref{sec:12-default} provides a definition of the \textbf{default input representation} and an overview of tokenisation studies that have criticised, analysed and suggested alternative tokenisers that all produce tokens following this representation. \Cref{sec:12-phonemic} presents the \textbf{phonemic input representation} in contrast, an under-studied alternative representation and the subject of this thesis. Finally, these two representations are not the only possibilities; alternatives are briefly described in \cref{sec:12-alternatives}.
+This chapter provides the necessary background to understand the contrast between these paradigms. \Cref{sec:12-architectures} traces the historical development of input design choices across architectures. \Cref{sec:12-subword,sec:12-phonemic} present each input paradigm in detail. Finally, \cref{sec:12-plausiblepretraining} presents recent work in developmentally-plausible language modelling, a practical framework for exploring the use of a phoneme-based input representation with modern architectures.
 
-\subsection{Input representations across language model architectures}\label{sec:12-architectures}
+\section{Evolution of input representations in language models}\label{sec:12-architectures}
 
-Input representations in language models have evolved alongside the development of new architectures and their emerging use cases. For example, early \ngram language models \zeb{tenses are a mess in these paragraphs}operated on written sentences split into tokens consisting of individual \textbf{words}. These models estimated probabilities using frequency statistics and provided an estimate of \cref{eq:languagemodel} using a Markov assumption:
+\Zeb{Insert figure comparing segmentations for tokenisation: character, subword, word, audio, maybe showing the shift over time.}
 
+Instead of using a grammar to determine the structure of a sentence, language models are \emph{distributional} --- they probabilities assigned to each linguistic unit in a sequence based on its context --- the ``company it keeps'' \citep{firth1957synopsis}. The standard formulation is:
 \begin{align}
-    P(w_1, w_2, \dots, w_T) \approx \prod_{t=1}^{T} P\left(w_t \mid w_{t-(n-1)}, \dots, w_{t-1}\right) \label{eq:ngram}
+    P\left(w_t \mid w_1, \dots, w_{t-1} \right), \label{eq:languagemodel}
 \end{align}
 
-Using word-level tokens was an intuitive choice for many NLP tasks, such as part-of-speech tagging, machine translation, text classification and language generation. Words naturally represent meaningful units in language and word-level predictions provide useful interpretations for these tasks. However, there were limitations to using words in \ngram models. One limitation was to do with their count-based nature. The number of possible \ngrams grows exponentially with $n$, making probabilities inefficient to store and difficult to estimate due to sparsity. These models also struggled with rare words --- which will Zipf's law states will inevitably appear \citep{zipf_human_1949} --- as well as with typos and other out-of-vocabulary (OOV) items, since they will not match any pre-computed \ngram probabilities. To mitigate sparsity and OOV issues, back-off procedures such as Kneser-Ney and Katz smoothing were developed \citep{ney1994structuring, katz2003estimation}, but the exponential factor meant that \ngram models still struggled to scale beyond relatively small context windows.
+where $w_k$ denotes the linguistic unit at position $k$. These units are referred to as \defn{tokens} and are drawn from a set of possible tokens $\vocab$, also known as the \defn{vocabulary}. This formulation provides a convenient method for determining the probability of a sequence using the chain rule of probability:
+\begin{align}
+    P(w_1, \dots, w_T) = \prod_{t=1}^{T} P\left(w_t \mid w_1, \dots, w_{t-1}\right).
+\end{align}
+
+
+Language models of this type are called \defn{auto-regressive} since they predict the next item in a sequence based on on previous items from the same sequence. This can be leverage in language generation tasks, where sequences can be produced by iteratively sampling from the distribution $P(\cdot | w_1, \dots, w_{t-1})$.
+
+% TODO: Possibly insert XLNet and NAR below
+
+In recent years, the term ``language model'' has also been used to refer to models do not use the language modelling equation above. For example, masked language models \citep[MLM;][]{devlin2019bert} are trained to predict items in a sequence using bi-directional context, but typically only in order to learn contextual representations of tokens for language understanding tasks, not to estimate probabilities or generate sequences. This thesis focuses on auto-regressive models, since the use of phoneme-based input representations is primarily explored in contexts where token-level or sequence-level probabilities are required.
+
+The choice of input representation determines how the tokens represent natural language. The tokenisation includes the granularity (e.g. words vs characters), the modality (e.g. phonemes vs graphemes) and whether pre-processing occurs. The following sections explore how representations in language models have evolved alongside the development of new architectures and their emerging use cases.
+
+\subsection{N-gram models}
+
+Early language models were \ngram models. Using a Markov chain of order $n-1$, these models provide an estimate of the next-token probability:
+\begin{align}
+    P\left(w_t \mid w_1, \dots, w_{t-1} \right) \approx P\left(w_t \mid w_{t-(n-1)}, \dots, w_{t-1}\right).\label{eq:ngram}
+\end{align}
+
+These probabilities are computed by calculating the frequency of \ngrams in a training corpus, where \ngrams are defined as contiguous subsequences of tokens of length $n$. Typically, these models use a word-based input representation: raw text is pre-processed with operations that may include lowercasing and accent stripping and then \textbf{tokenised} into word-like units. These operations are facilitated with libraries such as the Natural Language Tool Kit \citep[NLTK;][]{bird2009nltk}. 
+
+Using word-level tokens is an intuitive choice for many NLP tasks, such as part-of-speech tagging, machine translation, text classification and language generation. Words naturally represent meaningful units in language and word-level predictions provide useful interpretations for these tasks. However, there are limitations to using words in \ngram models. One limitation is to do with their count-based nature. The number of possible \ngrams grows exponentially with $n$, making probabilities difficult to store and challenging to estimate due to sparsity. These models also struggle with rare words --- which will Zipf's law states will inevitably appear \citep{zipf_human_1949} --- as well as with typos and other out-of-vocabulary (OOV) items, since they will not match any pre-computed \ngram probabilities. To mitigate sparsity and OOV issues, procedures such as Kneser-Ney back-off and Katz smoothing were developed \citep{ney1994structuring, katz2003estimation}, but the exponential factor meant that \ngram models still struggle to scale beyond relatively small context windows.
+
+Word-level tokenisation can also be a technical challenge. Early LM research focused on English, where using whitespace to create tokens for words and punctuations symbols is effective, but still requires special rules for dealing with clitics, contractions and compound words. In languages without clear word boundaries, dedicated systems are required to segment words, driven by NLP tasks such as Chinese Word Segmentation. Finally, in morphologically rich languages such as Finish or Turkish, there is much higher word-form variation. For these languages, using morpheme-level tokens addressed the resulting sparsity issues and increased generalisation, but required complicated systems to extract morphemes \citep{creutz2005unsupervised,habash2009}. % Possibly add something here about concept of a word being debated...
 
 A lesser-used alternative to word-level tokens in \ngram models was to split sentences into individual \textbf{characters}. This reduces the vocabulary size considerably, allowing for slightly higher-order \ngrams to be computed, as well as providing a robust solution to OOV items. However, since words are split into many tokens, few syntactic dependencies are captured, limiting the utility of these models for many NLP tasks. Instead, these models were primarily used for character-sensitive tasks, such as spelling correction and auto-completion \citep{cucerzan_spelling_2004}.
 
 \ngram models have also been used to model spoken language for tasks such as text-to-speech, accent recognition and language identification. Instead of the raw data consisting of written text, these models use an input representation where tokens consist of individual \textbf{phonemes} --- the basic units of sound that distinguish words in spoken communication. Speech recognition systems often paired these phoneme-level language models with \textbf{acoustic models}, which map from acoustic features to phonemes as implemented in tool-kits such as HTK \citep{young2006htk}.
 
-For many years, \ngram models were a cornerstone of NLP, providing the statistical backbone for early systems in translation and speech \citep{jurafsky2009speech}. They were used with a range of input representations, with tokens typically representing core linguistic units like words, characters and phonemes, depending on the task. However, as neural architectures gradually replaced statistical language models across the NLP landscape, so too did the input representations leveraged by these models.
+For many years, \ngram models were a cornerstone of NLP, providing the statistical backbone for early systems in translation and speech \citep{jurafsky2009speech}. They were used with a range of input representations, with tokens typically representing core linguistic units like words, morphemes, characters and phonemes, driven by the task. However, as neural architectures gradually replaced statistical language models across the NLP landscape, so too did the input representations leveraged by these models.
 
-Neural language models date back to \citet{bengio2003neural}, who used a feed-forward neural network to predict words given a context. This addressed the sparsity issues of \ngrams with generalisable dense embeddings, but this approach was still limited by context and was expensive to train. The shift to neural architectures was catalysed by advances in representation learning — notably Word2Vec \citep{mikolov_distributed_2013} — and by the adoption of recurrent neural networks (\textbf{RNNs}) as language models \citep{mikolov2010recurrent}, which enabled modelling of sequences with theoretically unbounded context. In practice, RNNs suffered from `vanishing gradients', an issue addressed by long short-term memory networks (\textbf{LSTMs}, \citet{sundermeyer2012lstm}) and then by the attention mechanism of the \textbf{transformer} architecture \citep{vaswani2017attention}.
+\subsection{Neural language models}
 
-There are considerable variations of these architectures, most of which build off of the GPT-series of models \citep{radford2018gpt1,radford-2019-gpt2, brown2020gpt3} or BERT \citep{devlin2019bert}. GPT models are \textbf{auto-regressive}, trained with the language modelling objective, whereas BERT-style models are \textbf{auto-encoding}, using a \textbf{masked language modelling} objective to benefit from bi-directional context. These transformer-based language models soon became the dominant approach for tackling most NLP tasks and have become so ubiquitous that the term ``language model'' is synonymous with these architectures. The acronym \textbf{LM} will henceforth be used to refer to language models that use a transformer-based architecture.
+Neural language models began with the work of \citet{bengio2000neural}, who used a feed-forward neural network to predict the next word given a fixed-length context. This approach addressed the sparsity and poor generalisation of \ngram by learning distributed word embeddings, but remained limited in both context size and computational efficiency. The transition to more effective neural architectures was driven by advances in representation learning --- most notably Word2Vec \citep{mikolov_distributed_2013} --- and by the adoption of recurrent neural networks (RNNs) for language modelling \citep[RNNLMs;][]{mikolov2010recurrent}, which offered the ability to model sequences with theoretically unbounded context. In practice, however, RNNs struggled to capture long-range dependencies due to the vanishing gradient problem, which caused the influence of earlier tokens to diminish over time. This limitation was addressed by long short-term memory networks \citep[LSTMs;][]{sundermeyer2012lstm}, which introduced gating mechanisms to help retain relevant information across longer spans. 
 
-Whereas the choice of input representation for \ngram language models was primarily driven by the needs of the specific downstream task, for LMs the choice is instead primarily driven by considerations of computational efficiency. LMs map from unique tokens to dense vector representations using an \textbf{embedding layer}, which grows linearly with the vocabulary size. Using word-level tokens therefore increasing space and time complexity, and reducing the vocabulary size leads to OOV issues. Character or byte-level tokens reduce the vocabulary size and deal with OOV items, but at the cost of increasing the number of tokens for each sentence. Due to the self-attention mechanism, the computational cost of training and inference scales quadratically with context size, so this input representation also undesirable.
+Many of these early recurrent networks still operated at the word-level, using a dedicated unknown token \texttt{<unk>} for rare words, and either learned word embeddings during training or used pre-trained embeddings from systems like Word2Vec or GloVe \citep{pennington2014glove}. This word-level granularity was well-suited to the relatively small vocabularies and modest training corpora of the time, but the limitations associated with word-level representations persisted: out-of-vocabulary (OOV) words were common and rare words had poorly estimated representations, causing generalisation issues particularly for morphologically-rich languages. Some work explored character-level or morpheme-level inputs to address these issues \citep[e.g.,][]{botha2014compositional, kim2016character, vania2017morphology, gerz2018} often by composing word embeddings from these granular units using convolutional or recurrent architectures.
 
-The solution to this problem is to use a \textbf{subword} representation, where words not contained in the vocabulary are split into smaller units (such as character \ngrams or frequent subword units) with the ability to fall back to character or byte-level tokens for particularly rare or complex words. This provides a trade-off between word-level tokens and character-level tokens --- vocabulary sizes can be kept relatively small (at the order of tens of thousands of words for popular models)without creating overly long token sequences, all while being able to handle OOV items.
+A more scalable solution emerged in the form of Byte Pair Encoding (BPE), originally proposed as a compression method by \citet{gage1994new} but introduced to NLP in the context of neural machine translation by \citet{sennrich-etal-2016-bpe}. BPE offers a data-driven, unsupervised algorithm that begins with character-level tokens and iteratively merges the most frequent adjacent pairs into longer units, balancing vocabulary size with the ability to represent rare and unseen words. These units are typically called \defn{subwords}, which can consist of entire words or individual characters, but are not linguistically-motivated. Subword-based representations are discussed in more detail in in \cref{sec:12-subword}.
 
-In the era of large language models (\textbf{LLMs}), the computational considerations have completely outweighed other factors when it comes to selecting the input representation. Instead of training separate models for each downstream task, contemporary practice instead prioritises pre-training a single, general-purpose model on massive text corpora, which can subsequently be adapted to a wide range of tasks through fine-tuning or even used in a zero-shot or few-shot setting. This shift necessitated a consistent input representation, as empirical evidence suggests that exposing models to more data yields greater performance gains than carefully engineered tokenization strategies \citep{brown-2020-gpt3}. Given that these models contain billions of parameters and are typically trained on trillions of tokens, the computational costs are enormous --- resulting in significant real-world costs, not only financially, but also for the environment \citep{strubell-etal-2019-energy, patterson2021carbonemissionslargeneural, bender2021parrots,luccioni2022estimatingcarbonfootprintbloom}.
+%Unlike word-level models, BPE allows open-vocabulary modeling while retaining frequent words as atomic units, enabling better generalisation across morphological variants without relying on handcrafted segmenters. Its efficiency, simplicity, and language-agnostic design made it a de facto standard in subword tokenisation, especially in recurrent and early Transformer-based architectures.
 
-Consequently, designing input representations that optimise pre-training efficiency while preserving generality has become the central motivator for the choice of input representation in the modern NLP landscape. 
+Despite the advantages of subword tokens, using shorter tokens creates longer sequences, and despite capturing long-distance dependencies, LSTMs still process data sequentially and so struggle to learn compositional meaning across distant tokens. This meant that these more granular input representations remained secondary to word-level modelling, until the advent of the transformer.
 
-\Zeb{Some statement here about potential of phoneme tokenisation and the fact that alternative input representations are largely under-studied in NLP, due to the convenience of the default one. Maybe here go into the historical use of the input representation and that it has been vastly understudied. }
+\subsection{Transformers and the shift to subword units}
 
-%Architectures like GPT-2 that provide probabilities corresponding with \cref{eq:languagemodel} are known as \textbf{auto-regressive} architectures, whereas models like BERT solve an alternative objective known as \textbf{masked-language modelling}, 
+Transformers \citep{vaswani2017attention} addressed many of the limitations that made subword tokenisation challenging for LSTMs. Instead of sequential processing, Transformers rely entirely on self-attention mechanisms that allow them to access all positions in the input simultaneously. By better facilitating the modelling of long-range dependencies, Transformers are better equipped to compose meaning from longer sequences of subword units. 
 
-\subsection{Tokenisation and pre-processing}\label{sec:12-tokenisation}
+There are considerable variations of these architectures, with GPT \citep{radford2018gpt1} and BERT \citep{devlin2019bert} as foundational models, both of which used a subword-based input representation. GPT models are auto-regressive, trained with the language modelling objective, whereas BERT-style models use the MLM objective to benefit from bi-directional context. Transformer-based language models quickly began to out-perform past approaches across most NLP tasks, establishing subword units as the default input representation in modern large-scale language models. These architectures are now so ubiquitous that the term ``language model'' without further disambiguation invokes them implicitly. As such, the acronym LM will henceforth be used to refer to transformer-based autoregressive language model in this thesis.
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.99\linewidth]{example-image-a}
-    \caption{The standard classical and modern pipeline for preparing text for language modelling tasks.}
-    \label{fig:12-pipelinecomparison}
-\end{figure}
+Although there have been many attempts to integrate character-level or morpheme-level information when training LMs \citep[e.g.][]{ma-etal-2020-charbert, nzeyimana-niyongabo-rubungo-2022-kinyabert}, subword-based encodings have remained the default. This is primarily because subwords efficiently address the trade-off between vocabulary size and sequence length; whereas number of embeddings grows linearly with the vocabulary size, making more granular encodings desirable, inference scales \emph{quadratically}\zeb{Maybe need to mention MAMBA somewhere.} with the context size due to the self-attention mechanism. Subwords thus not only provide generalisability, but avoid large vocabulary sizes without creating overly long sequences, particularly when using compression-driven methods like BPE. Although morphological tokenisation also seems to address this trade-off while providing a more linguistically-motivated unit, \writemore, as discussed further in \writemore.
 
-Mention bert used lowercasing. Mention minimal pre-processing now since noisy data seems to be helpful. 
+Despite subwords because the default tokenisation scheme, other aspects of the input representation continued to be tailored for specific domains. For instance, a suite of models based on the BERT architecture were trained to provide better encodings of biomedical literature \citep{lee2020biobert}, legal text \citep{chalkidis2020legal}, clinical notes \citep{alsentzer2019publicly} and programming languages \citep{feng-etal-2020-codebert}. By using specific pre-processing steps and vocabularies, these models achieved better performance on tasks related to these domains.
 
-For example, BPE and WordPiece \addcites. \writemore. An important distinction with these approaches is the difference between their vocabulary-learning algorithm and their inference algorithm, \writemore. Formally, \writemore. 
+Pre-processing practices were also driven by computational considerations. Subword-based representations have a vocabulary of single-character units as a fall-back, but the number of unique characters in schemes like UTF-32 is enormous. BERT addressed this using unicode normalization (e.g. \writemore) whereas later models follow GPT-2 \citep{radford-2019-gpt2} in mapping characters to a byte-level vocabulary before splitting into subwords, a process that can then be reversed during decoding.  
 
-Handling this complicated task was traditionally one of the first tasks of preparing written text for NLP tasks. Preceding steps could include by text-cleaning operations like lowercasing and the removal of unwanted symbols like punctuation, with post-tokenisation steps including stemming, part-of-speech tagging and stop-word removal depending on the task. This pipeline is illustrated in \cref{fig:12-pipelinecomparison} and is offered by python packages like NLTK \addcites.
+The advent of large language models (LLMs) has significantly reduced the emphasis on carefully tailored input representations. Rather than training separate models for individual downstream tasks, current practice centres on pre-training a single, general-purpose model on massive text corpora. These models can then be adapted to a wide range of applications through fine-tuning or even used directly in zero-shot or few-shot settings \citep{raffel2020exploring}. This shift has motivated the use of a consistent, task-agnostic input representation, as empirical findings suggest that scaling up data yields greater performance gains than relying on finely tuned tokenisation or pre-processing pipelines \citep{brown-2020-gpt3}. 
 
-For both word-level and character-level \ngram models, the text domain also created complications. Written text is noisy, often containing unwanted data that can interfere with language modelling, depending on the task. Typical NLP pipelines often began with text-cleaning operations like lowercasing and the removal of punctuation. The next step was \textbf{tokenisation}, mapping the character sequence to individual tokens. For character-level models this was straight-forward, but for word-level models this is a complicated task. Tokenisation needed to make arbitrary decisions on how to handle exceptions like clitics and compound words. In general, the very definition of a `word' is still debated, complicating this process further. In some languages like Chinese, words are not even delimited by whitespace, leading to an entire task in NLP dedicated to this word segmentation step \addcites. In certain cases, additional steps post-tokenisation included 
+To match their growing capacity, LLMs require vast quantities of training data, much of which is sourced through web-scraping \citep{bansal-2022-datascaling}. Such data is inherently noisy, which has driven a shift toward scale, architecture and data-driven tokenisation methods rather than linguistic heuristics. Indeed, noise in training data has been shown to improve generalisation \citep{zheng-saparov-2023-noisy}, further diminishing the need for elaborate pre-processing. As a result, modern tokenisers typically apply minimal pre-processing. The sheer scale of these models --- often trained on trillions of tokens and containing billions of parameters --- has dramatically increased computational demands, leading to significant financial and environmental costs \citep{strubell-etal-2019-energy, patterson2021carbonemissionslargeneural, bender2021parrots, luccioni2022estimatingcarbonfootprintbloom}, further causing computational considerations to outweigh other factors when it comes to selecting the input representation. 
 
-Both the inference and vocabulary-learning algorithms typically operate after text has already been split into word-like units; with what was previously called `tokenization' in the classical pipeline now referred to as ``pre-tokenization''. 
+% CHAT: This shift reflects confidence in model capacity and a preference for data-driven robustness, reducing reliance on linguistic heuristics.
 
-Several of the steps previously performed separately by the classical pipeline are now packaged together into a single `tokenizer' by libraries such as Huggingface Tokenizers.\footnote{\href{https://huggingface.co/docs/tokenizers/index}{huggingface.co/docs/tokenizers/}} This tokenisation pipeline is shown in \cref{fig:12-pipelinecomparison}. First, \textbf{normalization} performs the text-cleaning steps, before text is split into word-like units via \textbf{pre-tokenization}. The BPE pre-tokenizer not only splits text into word units, but also converts each unit into a byte-based representation, ensuring that the initial vocabulary contains only 256 items instead of every unique character in UTF-32. The tokenizer \textbf{model} then converts each pre-token into one or more tokens using a particular inference algorithm, such as longest-prefix matching for WordPiece or deterministic-merge application by BPE. These tokens are mapped to unique IDs to facilitate lookup into a LM's embedding layer. The pipeline may also include \textbf{post-processing} to add special tokens and \textbf{decoding} to convert IDs back into text for text generation tasks. 
+Model capacity and architectural advances have also impacted the input representations used for models operating in the audio modality. Instead of creating systems that combine of acoustic models with phoneme language models, recent advances have demonstrated that representations can be learned directly from raw waveforms or spectrograms --- with Wav2Vec \citep{baevski2020wav2vec}, HuBERT \citep{hsu2021hubert} and Whisper \citep{radford2023robust} as notable examples. Audio-based representations are discussed in contrast to phoneme-based representations in \cref{sec:12-whynot}.
 
-The design and availability of this tokenization pipeline has largely been driven by the sheer scaling capabilities of LM architectures, the largest of which are called ``large'' language models (LLMs). Now, the vast majority of language models are distributed on platforms such as Huggingface with an associated tokenizers that consistently process orthographic text, pre-tokenize the text to preserve word boundaries, and return tokens representing subwords.
+Consequently, whereas past models typically used linguistically-motivated representations curated for a specific task, the primary motivators for input representations in the modern NLP landscape are generalisability and computational efficiency. In the text-based domain, these motivations have led to subword-based representations becoming the norm. These data-driven methods are also easier to apply to noisy datasets than linguistically-motivated methods. In the audio domain, increased model capacity had led to representations being learned directly from audio. Hence, the use of phoneme-based representations remains under-explored. 
 
-Packaging up these pre-processing steps into a single tokenizer provides convenience, but this has had consequences. In classical NLP, it was an important step to carefully considering the data cleaning operations. For example, removing punctuation... \writemore. The scaling ability of modern LMs has largely shifted the focus to language model architectures and machine learning algorithms, with many models using default tokenisers from Huggingface without considering the impact. This is particularly the case for studies using smaller LMs to study language or acquisition (see \cref{sec:12-babylm}) where subwords in particular may not be an appropriate base unit, nor the orthographic domain if simulating spoken speech. In these cases the default representation is no longer as crucial for performance, yet the convenience of the existing frameworks facilitates its use. 
+\subsection{Small language models and a return to domain-specific pre-training}
 
-\subsection{The default input representation}\label{sec:12-default}
+\Zeb{Three aspects: small language models good for low-resource or domain-specific work (languages), researching human language learning, and architecture research within academic budgets. }
 
-\Zeb{Give background on what LMs use by default. Define as subwords + orthographic + pre-tokenization.}
+In recent years\footnote{This is the case at the time this thesis was submitted, but with the pace of developments in the field this is likely to change.} there has been a shift away from the LLM paradigm back towards the training of smaller LMs. At the time of writing, `small' LMs  refer to models with significantly fewer parameters than their LLM counter-parts, typically ranging from tens to a few hundred million parameters. There are several motivations for this shift to small LMs, three of which are considered below; computational constraints, over-generalisation and linguistic research.
 
-\Zeb{Define tokenizers more formally and discuss BPE and WordPiece etc and pointing to some surveys about these methods. Greed is all you need method.}
+\paragraph{Computational constraints.} The LLM paradigm focuses on training very large models on a broad range of data (often including multilingual data and code) that then be fine-tuned for specific tasks or applications. For example, the open-sourced \llama-3 suite of models range from 8B to 405B parameters and when fine-tuned, achieve state-of-the-art results on benchmarks across a broad range of categories (e.g. mathematics, language understanding, code generation and multilingual) \citep{grattafiori2024llama}. However, this paradigm makes pre-training research outside of industry infeasible (the largest Llama-3 model was trained on up to 16K GPUs).
 
-\Zeb{Plausibility of subwords, issues in certain languages, misalignment etc. Superword paper as an alternative to word boundary-based pretokenization. Morpheme-aligned alternatives that never caught on. Many alternative approaches. Character-level models and byte-level models. Attempts to go `token-free' but byte-level still an arbitrary token choice.}
+Instead, smaller LMs are used as proxies for studying architecture, training dynamics or data curation strategies. While they cannot match the capabilities of frontier-scale models, findings from small-scale experiments can still yield valuable insights. Often, these studies explore models across scales, which is important due to the fact that certain emergent behaviours only appear at larger model sizes \citep{wei2022emergent, ganguli2022predictability}. For example, the Pythia suite provides models ranging from 14M to 12B parameters, along with checkpoints during training, specifically to enable the analysis of LMs across training and scaling \citep{biderman2023pythia}.
 
-\zeb{Change this to be about the tokens rather than the tokenizers}
-\begin{enumerate}
-    \item process written (orthographic) text,
-    \item pre-tokenize the text to preserve word boundaries, and
-    \item split pre-tokenized into tokens that represent subwords.
-\end{enumerate}
+The fine-tuning paradigm itself also has computational constraints. The common understanding that fine-tuning is both cheaper than pre-training a new LM from scratch and that the resulting model benefits from the language understanding and linguistic capabilities gained from these massive pre-training efforts. However, LLMs have become so large that even efficient fine-tuning strategies like LoRA \citep{hu2022lora} can still be computationally demanding. For example, \citet{fittschen2025pretraininglanguagemodelsdiachronic} compared pre-training small LMs (345M parameters) to fine-tuning \llama-3 (8B parameters) for a set of diachronic linguistics tasks. They found that not only was pre-training cheaper than fine-tuning, but that the smaller yielded better detection of language change and word sense introduction/obsolescence. 
 
-The combination of these three features will henceforth define the \textbf{default input representation}. Now, the vast majority of language models are distributed with an associated tokenizer. The tokenizer converts noisy text to unique token IDs, which are fed through the model, which produces contextual embeddings. Auto-regressive LMs are trained with a next-token prediction objective, allowing them to generate text one token at a time, which the tokenizer can convert back into readable text. Alternatively, the contextual representations are directly used, or the model is fine-tuned on a downstream task involving labelled data. There are countless variations to this setup in modern NLP but the vast majority use tokenisers...
+\paragraph{Over-generalisation.} The assumption that large generalised models are well-suited for domain-specific tasks has been increasingly questioned. For instance, \citet{fittschen2025pretraininglanguagemodelsdiachronic} hypothesised that the large fine-tuned model underperformed because its pre-training on modern language introduced systematic biases --- effectively `leaking' contemporary linguistic features into a task requiring temporal specificity. Similar concerns arise in the multilingual setting, where multilingual LLMs often exhibit a strong bias towards English. \llama-3, for instance, was trained on a total of 15 trillion multilingual tokens, yet only 8\% of this data represents the 176 non-English languages in its corpus.\footnote{A further 25\% of the corpus represents mathematical reasoning and 17\% represents code.} The ratio of English to multilingual data was tuned experimentally with equal weight given to English performance and multilingual performance \citep{grattafiori2024llama}, demonstrating this bias. Although the common belief is that LLMs can leverage transfer learning to support low-resource languages despite the ``curse of multilinguality'' \citep{conneau2020unsupervised}, which predicts performance degradation for low-resource languages due to model capacity --- recent findings challenge this optimism. states that low-resource performance degrades in multilingual models due to limited model capacity --- that the vast generalisation capabilities of LLMs can improve low-resource languages through transfer learning. \citet{chang2024goldfish} report that for many low-resource languages, multilingual LLMs exhibit higher perplexity than even simple bigram models, and that monolingual models trained on as little as 5MB of data outperform them. Similarly, \citet{chang2024multilinguality} show that while multilingual data can sometimes help low-resource modelling, excessive multilingual pre-training may degrade performance for both low- and high-resource languages. Whether in diachronic linguistics or under-resourced language settings, these findings represent a return to domain-specific pre-training with suggestions that smaller, purpose-built models can outperform large-scale LLMs in certain cases.
 
-In recent years, tokenization has become an increasingly popular topic, with the default configurations of popular tokenizers often critiqued and analysed, and many studies proposing improvements and alternatives to existing tokenizers. An overview of this work is provided in \cref{sec:12-default}. Despite this scrutiny, the focus is still on tokenizers that produce the default input representation. 
+\paragraph{Linguistic research.} 
 
-\subsection{The phonemic input representation}\label{sec:12-phonemic}
+Interest in democratising pre-training research and developmental plausibility... also spawned the BabyLM shared task, discussed further in \cref{sec:12-plausiblepretraining}.
 
-\Zeb{Formal definition of what I mean by the phonemic input representation. This is where the three transformations are described. Similar to character-level. Maybe here worth going more into detail with character-level models and tabula rasa model.}
+For example, in an effort to democratising pre-training research and hasten architectural development, the BabyLM challenge challenged participants to train LMs on no more than 100M words (implicitly requiring smaller models) \citep{warstadt2023findings}. The challenge has led to numerous insights across architectures \citep{charpentier2024bert} and pre-training strategies \citep{martinez-etal-2023-climb}. 
 
-%\subsubsection{Practical uses of the phonemic input representation}
+% \subsection{Tokenisation and pre-processing}\label{sec:12-tokenisation}
 
-\Zeb{Survey of methods using phonemes. Briefly discuss how important phonemes were for speech recognition technology but now a lot of that is end-to-end. Discuss more recent uses in LMs. End by stating maybe we're resource limited, as discussed in \cref{chapter:resources}}
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.99\linewidth]{example-image-a}
+%     \caption{The standard classical and modern pipeline for preparing text for language modelling tasks.}
+%     \label{fig:12-pipelinecomparison}
+% \end{figure}
 
-\begin{figure}[t]
-    \centering
-    \includegraphics[width=0.99\linewidth]{example-image-b}
-    \caption{The phrase ``example phrase'' encoded using the default input representation compared to the phonemic input representation.}
-    \label{fig:12-representation}
-\end{figure}
+% In the classical NLP pipeline, raw data is converted into discrete tokens using several processing steps. First, pre-processing operations are used to clean the data. These can include lowercasing, stripping accents and removing punctuation. The next step is \textbf{tokenisation}, mapping from character sequences to individual tokens. For character-level models this is straight-forward, but for word-level tokenisation this is a complicated task. Tokenisation needed to make arbitrary decisions on how to handle exceptions like clitics and compound words. In general, the very definition of a `word' is still debated \addcites, complicating this process further. In some languages like Chinese, words are not even delimited by whitespace, leading to an entire task in NLP dedicated to this word segmentation step \addcites. In certain cases, post-processing steps can also be utilised, such as stemming, part-of-speech tagging and lemmatisation. This pipeline is illustrated in \cref{fig:12-pipelinecomparison} and is offered by python packages like NLTK \citep{bird2009nltk}.
 
-An alternative to the default input representation, and the topic of this this thesis, is the \textbf{phonemic input representation}. This is defined in contrast to above as:
+% In the current paradigm, these steps are now packaged together into a single \defn{tokeniser} by libraries such as Huggingface Tokenizers.\footnote{\href{https://huggingface.co/docs/tokenizers/index}{huggingface.co/docs/tokenizers/}} The pre-processing steps are now referred to as \defn{normalisation} and the task of splitting text into word-like units, previously called tokenisation, is now called \defn{pre-tokenisation}. This is because \defn{tokenisation} now refers to the process of segmenting these \defn{pre-tokens} into \defn{tokens} that may represent shorter units such as subwords. This step also maps tokens to unique IDs to facilitate lookup into a LM's embedding layer. Tokenisers may also include \textbf{post-processing} to add special tokens and \textbf{decoding} to convert IDs back into text for text generation tasks.
 
-\begin{enumerate}
-    \item process phonemic text,
-    \item do not preserve word boundaries, and
-    \item split text into tokens that represent individual phonemes.
-\end{enumerate}
+% This pipeline is compared to the classical NLP pipeline in \cref{fig:12-pipelinecomparison}. The major difference between the classical and current pipelines is the introduction of subword tokeniser models. Formally, these tokeniser models can be defined as a tuple $\tokeniser \defeq (\vocab, \detok, \tok)$. The first item in the tuple is the \defn{vocabulary} $\vocab$: a finite set of subwords, each defined as a concatenation $\subword \defeq \ch_i \circ \cdots \circ \ch_j$ of symbols $\ch$ from an alphabet $\alphabet$. The alphabet typically consists of all unique characters found in the pre-tokens, but can also consist of bytes, as discussed further below. The remaining components are two functions that map between character/byte sequences and subword sequences: the \defn{detokenisation function} $\detok\colon \vocab^* \to \alphabet^*$ reconstructs a character/byte sequence from subwords, by concatenating subwords and applying minor post-processing; the \defn{tokenisation function} $\tok\colon \alphabet^* \to \vocab^*$ performs the reverse mapping and must be injective, satisfying $\chvec = \detok(\tok(\chvec))$.
 
-A major use of the phoneme representation is phonological experimentation. This includes connectionist models of language processing, computational models of word segmentation and word-level phonotactic models, as discussed in \cref{sec:12-phoneval}. A practical use was speech recognition technology. Was important to create phoneme-level models along with language models in a complicated system to do TTS, STT, voice recognition, language recognition, etc. Many resources were built to support this, many phonological datasets. A detailed analysis of existing phonological resources in given in \cref{chapter:resources}.
+% Popular tokeniser models include \bpe and WordPiece. 
 
-Despite this history, less work exploring phoneme representation in modern NLP landscape. One reason could be that the scaling abilities of LLMs have favoured text, which is more readily online and regularly scraped. Speech technology has also largely moved to end-to-end directly from/to audio, without needing discrete phoneme models.
 
-Yet, phoneme LMs do offer some practical benefits which have been explored, \writemore. There are also analytical benefits, as discussed in \cref{sec:12-phoneval}.
 
-% One reason could be a lack of resources, which is the topic of \cref{chapter:resources}. A benefit of exploring alternative input representations is to ablate the effect of each of the features of the default representation, as explored in \cref{chapter:modelling}. The cognitive aspect... \cref{chapter:phonology}... and could improve tokenisation methods... \cref{chapter:infotokenization}.
 
-Phoneme language models. Many word-level models to study phonology. Very few examples of running text. Some examples of working with audio directly, as discussed in the next section.
+% Two tokenisers representative of the current paradigm are the BERT tokeniser and the GPT-2 tokeniser. The BERT tokeniser performs several normalization steps, such as NFD Unicode normalization, lowercasing and accent stripping, similar to pre-processing steps used in the classical NLP pipeline. Since BERT was designed for language understanding tasks, these steps were a useful way to reduce vocabulary size and handle noisy text (e.g. both \ex{The} and \ex{the} map the same token). By contrast, the GPT-2 tokeniser does not perform any normalisation. This is because these models are used for language generation tasks, where retaining orthographic variation is considered to be crucial. This is especially the case in the multilingual setting, where removing accents may not be appropriate. 
 
-Phoneme representation could be compared against default representation along three axes. There is some work comparing these effects. Several studies have challenged (3) by demonstrating that character-based or byte-based models can still be effectively utilised in language models \addcites. These argue to be "token free" but according to \addcites is still an arbitrary subword representation. A few studies have challenged (2) by relaxing the word-boundary pre-tokenization constraint to produce `superword' tokens \addcites or explore the effect of removing whitespace altogether to achieve a `tabula rasa' input representation \addcites but still orthographic text. Finally, Bunzeck paper. \cref{chapter:modelling} properly compares these to establish the effect of the phoneme representation in modern language models.
+% The multilingual setting also introduces an additional complexity; since both tokenisers use a subword tokeniser model, every unique character must be included as a fall-back to avoid unknown tokens, which can dominate the vocabulary size when including orthographic variants (e.g. every Chinese character). Whereas multilingual variants of BERT rely on NFD normalization to reduce vocabulary size (e.g. \ex{\'e} becomes \ex{e} + \ex{\'}), GPT model starting with GPT-2 \citep{radford-2019-gpt2} convert characters to raw bytes in the pre-tokeniser, reducing this fall-back vocabulary to only 256 items. The decoder reverses this process, converting bytes back to characters for language generation tasks.
 
-\subsection{Alternative input representations}\label{sec:12-alternatives}
+% % The BPE pre-tokenizer not only splits text into word units, but also converts each unit into a byte-based representation, ensuring that the initial vocabulary contains only 256 items instead of every unique character in UTF-32. The tokenizer \textbf{model} then converts each pre-token into one or more tokens using a particular inference algorithm, such as longest-prefix matching for WordPiece or deterministic-merge application by BPE. These tokens are mapped to unique IDs to facilitate lookup into a LM's embedding layer. The pipeline may also include \textbf{post-processing} to add special tokens and \textbf{decoding} to convert IDs back into text for text generation tasks. 
+
+% Mention bert used lowercasing. Mention minimal pre-processing now since noisy data seems to be helpful. 
+
+% For example, BPE and WordPiece \addcites. \writemore. An important distinction with these approaches is the difference between their vocabulary-learning algorithm and their inference algorithm, \writemore. Formally, \writemore. 
+
+% Both the inference and vocabulary-learning algorithms typically operate after text has already been split into word-like units; with what was previously called `tokenization' in the classical pipeline now referred to as ``pre-tokenization''. 
+
+
+% The design and availability of this tokenization pipeline has largely been driven by the sheer scaling capabilities of LM architectures, the largest of which are called ``large'' language models (LLMs). Now, the vast majority of language models are distributed on platforms such as Huggingface with an associated tokenizers that consistently process orthographic text, pre-tokenize the text to preserve word boundaries, and return tokens representing subwords.
+
+% Packaging up these pre-processing steps into a single tokenizer provides convenience, but this has had consequences. In classical NLP, it was an important step to carefully considering the data cleaning operations. For example, removing punctuation... \writemore. The scaling ability of modern LMs has largely shifted the focus to language model architectures and machine learning algorithms, with many models using default tokenisers from Huggingface without considering the impact. This is particularly the case for studies using smaller LMs to study language or acquisition (see \cref{sec:12-babylm}) where subwords in particular may not be an appropriate base unit, nor the orthographic domain if simulating spoken speech. In these cases the default representation is no longer as crucial for performance, yet the convenience of the existing frameworks facilitates its use. 
+\section{Subword-based input representation}\label{sec:12-subword}
+
+Modern large language models (LLMs) that operate on textual input rely on subword-based input representations, which offer a balance between generalisability and computational efficiency. In the standard framework, the conversion from raw text to model-ready input is handled by a component known as a \defn{tokeniser}, as implemented in libraries such as \texttt{Hugging Face Tokenizers}.\footnote{\href{https://huggingface.co/docs/tokenizers/index}{huggingface.co/docs/tokenizers/}} A typical tokenisation pipeline comprises several sequential stages:
+
+\begin{itemize}
+\item \textbf{Pre-processing:} operations such as lowercasing, accent removal, Unicode normalisation, or character-to-byte conversion
+\item \textbf{Pre-tokenisation:} splitting the input into word-like units, often using whitespace and punctuation
+\item \textbf{Subword model:} segmenting word-like units into subword tokens using models such as BPE, WordPiece, or Unigram
+\item \textbf{Vocabulary mapping:} converting subword tokens into integer IDs for input to the model
+\item \textbf{Post-processing:} adding special tokens required by the model (e.g., \texttt{<BOS>}, \texttt{<EOS>}, or segment markers)
+\end{itemize}
+
+This pipeline broadly mirrors the classical NLP approach to text processing, although some terminology has shifted: what was once referred to simply as “tokenisation” in traditional NLP is now more precisely termed pre-tokenisation. However, due to the centrality of subword segmentation in modern architectures and minimal pre-processing practices, the terms “tokenisation” and “tokeniser” have become overloaded. In their narrow sense, they refer specifically to the operations of the subword tokenisation model. In their broader sense, they encompass the entire pipeline from raw text to token IDs.
+
+In this thesis, the terms “subword tokenisation” and “subword tokeniser” will be used to refer to the narrow sense, while “tokenisation” and “tokeniser” will be used in the broader sense unless otherwise specified.
+
+\subsection{Subword tokenisation methods}
+
+\subsection{Limitations of subword-based representations}
+
+\subsection{Alternative input representations}
 
 \Zeb{Briefly survey speech models, pixel tokenisation etc. but probably don't go into too much detail.  Maybe patches work goes here as well.}
 
-\section{Phonological experimentation using language models}\label{sec:12-phoneval}
+\Zeb{Character-level, byte-level, phoneme or grapheme, whitespace-agnostic, patching, audio}
 
-\Zeb{Phoneme representation has been used in various contexts. First three sections below are all examples of trying to reach some conclusion about language by using a language model's predictions to justify some kind of argument. Final section is more about language models themselves, what kind of linguistic knowledge they acquire.}
+% \Zeb{Give background on what LMs use by default. Define as subwords + orthographic + pre-tokenization.}
 
-\subsection{Connectionist models of language processing}
+% \Zeb{Define tokenizers more formally and discuss BPE and WordPiece etc and pointing to some surveys about these methods. Greed is all you need method.}
 
-\Zeb{Brief survey of old connectionist models looking at language processing}
+% \Zeb{Plausibility of subwords, issues in certain languages, misalignment etc. Superword paper as an alternative to word boundary-based pretokenization. Morpheme-aligned alternatives that never caught on. Many alternative approaches. Character-level models and byte-level models. Attempts to go `token-free' but byte-level still an arbitrary token choice.}
 
-\subsection{Computational models of word segmentation}
+% \zeb{Change this to be about the tokens rather than the tokenizers}
+% \begin{enumerate}
+%     \item process written (orthographic) text,
+%     \item pre-tokenize the text to preserve word boundaries, and
+%     \item split pre-tokenized into tokens that represent subwords.
+% \end{enumerate}
 
-\Zeb{Discuss word segmentation in detail here and discuss its relationship with subword tokenisation, forward referencing \cref{chapter:infotokenization}.}
+% The combination of these three features will henceforth define the \textbf{default input representation}. Now, the vast majority of language models are distributed with an associated tokenizer. The tokenizer converts noisy text to unique token IDs, which are fed through the model, which produces contextual embeddings. Auto-regressive LMs are trained with a next-token prediction objective, allowing them to generate text one token at a time, which the tokenizer can convert back into readable text. Alternatively, the contextual representations are directly used, or the model is fine-tuned on a downstream task involving labelled data. There are countless variations to this setup in modern NLP but the vast majority use tokenisers...
 
-\subsection{Cross-lingual studies of phonology}
+% In recent years, tokenization has become an increasingly popular topic, with the default configurations of popular tokenizers often critiqued and analysed, and many studies proposing improvements and alternatives to existing tokenizers. An overview of this work is provided in \cref{sec:12-default}. Despite this scrutiny, the focus is still on tokenizers that produce the default input representation. 
+
+\section{Phoneme-based input representation}\label{sec:12-phonemic}
+
+\subsection{Motivation and linguistic rationale}
+
+Cross-linguality, alignment with speech, abstraction
+
+Why model phonology with language models?
+
+Why phonemes rather than orthographic input?
+
+Phoneme representations as more universal, cognitively plausible, and appropriate for speech-based modelling
+
+Introduce the tension: LMs are often tested on phonological knowledge despite being trained on orthographic input.
+
+\subsection{Implementation of phoneme-based input}
+
+%The construction of phoneme-based input typically involves a grapheme-to-phoneme (G2P) conversion step, followed by tokenisation over the resulting phoneme sequence. In this work, G2P conversion and dataset construction are handled by a new tool and dataset, introduced and described in detail in Chapter [X]. Here, we provide only a high-level overview to situate the phoneme-based input representation within existing practices.
+
+Very brief summary of how phoneme inputs are constructed
+
+High-level G2P overview, mention of boundary decisions, tokenisation granularity
+
+Forward-reference your tool and dataset in the next chapter
+
+Possibly add a short note on typical phoneme vocab size and training behaviour
+
+
+\subsection{Word segmentation}
+Phoneme-based models in word segmentation, especially in child-directed speech
+
+Compare to subword segmentation in LLMs
+
+Discuss what phoneme-level segmentation reveals about inductive biases or learning difficulty
+
+\subsection{Phonological experimentation}
+
 
 \Zeb{More recent studies that use LMs to study phonology by using tiny LMs that train just over word types rather than tokens in context. Conclude that there have been few attempts at training cross-lingual LMs on naturalistic running text to get a model of phonology for each language.}
 
-\subsection{Phonological evaluation of language models}
+Connectionist/early models of phonotactics and processing
+
+LSTM/phoneme-level language models (e.g., phonotactic generalisation, nonce-word acceptability)
+
+Tie back to phoneme input’s usefulness for probing phonological knowledge
+
+\subsection{Phonological evaluation of transformer language models}
+
+Overview of studies evaluating phonological knowledge in LLMs
+
+Key point: many of these models are trained on orthographic input, yet tested on phonological tasks (e.g., stress assignment, phonotactic acceptability)
+
+Argue that this introduces a representational mismatch
+
+Suggest that phoneme-based LMs offer a more principled alternative for such evaluations, but note that work in this area remains limited due to lack of G2P tools and phonemically annotated corpora.
+
 
 \Zeb{Discuss prior evaluation used to evaluate language models for phonological knowledge. Possibly start with wider background looking at how people evaluate LMs for knowledge of linguistic structure. Discuss phonologybench as the opposite of what we're looking for. BabySLM is more relevant, discussed in the next section.}
 
-\section{Pre-training on developmentally-plausible data}\label{sec:12-babylm}
+\subsection{Why not use audio-based representations?}\label{sec:12-whynot}
+
+%CHAT: In addition to orthographic and phoneme-based inputs, recent advances have produced language models operating directly on audio signals. Models such as wav2vec 2.0 and HuBERT learn speech representations end-to-end from raw waveforms, capturing acoustic and phonetic features implicitly. While these models excel in speech recognition and generation tasks, they require vast speech corpora and computational resources. Phoneme-based input representations offer a complementary approach, providing a linguistically interpretable symbolic abstraction that facilitates detailed phonological analysis and modeling with relatively modest data and compute. This thesis focuses on phoneme-level representations to leverage these advantages, while acknowledging the ongoing importance of audio-based models.
+%This is revisited in discussion....
+
+% CHAT: While some studies evaluate the phonological competence of large language models, these models are typically trained on orthographic input, creating a potential mismatch between the representational format and the linguistic phenomena being tested. Phoneme-based input representations offer a more direct mapping to the phonological domain and may yield models whose inductive biases better align with phonological generalisation. However, the use of such representations remains relatively rare, in part due to resource limitations — an issue addressed in Chapter [X].
+
+% \Zeb{Combine cross-linguistic work here with phonological evaluation?}
+
+% \Zeb{Some statement here about potential of phoneme tokenisation and the fact that alternative input representations are largely under-studied in NLP, due to the convenience of the default one. Maybe here go into the historical use of the input representation and that it has been vastly understudied. }
+
+% \Zeb{Formal definition of what I mean by the phonemic input representation. This is where the three transformations are described. Similar to character-level. Maybe here worth going more into detail with character-level models and tabula rasa model.}
+
+% %\subsubsection{Practical uses of the phonemic input representation}
+
+% \Zeb{Survey of methods using phonemes. Briefly discuss how important phonemes were for speech recognition technology but now a lot of that is end-to-end. Discuss more recent uses in LMs. End by stating maybe we're resource limited, as discussed in \cref{chapter:resources}}
+
+% \begin{figure}[t]
+%     \centering
+%     \includegraphics[width=0.99\linewidth]{example-image-b}
+%     \caption{The phrase ``example phrase'' encoded using the default input representation compared to the phonemic input representation.}
+%     \label{fig:12-representation}
+% \end{figure}
+
+% An alternative to the default input representation, and the topic of this this thesis, is the \textbf{phonemic input representation}. This is defined in contrast to above as:
+
+% \begin{enumerate}
+%     \item process phonemic text,
+%     \item do not preserve word boundaries, and
+%     \item split text into tokens that represent individual phonemes.
+% \end{enumerate}
+
+% A major use of the phoneme representation is phonological experimentation. This includes connectionist models of language processing, computational models of word segmentation and word-level phonotactic models, as discussed in \cref{sec:12-phoneval}. A practical use was speech recognition technology. Was important to create phoneme-level models along with language models in a complicated system to do TTS, STT, voice recognition, language recognition, etc. Many resources were built to support this, many phonological datasets. A detailed analysis of existing phonological resources in given in \cref{chapter:resources}.
+
+% Despite this history, less work exploring phoneme representation in modern NLP landscape. One reason could be that the scaling abilities of LLMs have favoured text, which is more readily online and regularly scraped. Speech technology has also largely moved to end-to-end directly from/to audio, without needing discrete phoneme models.
+
+% Yet, phoneme LMs do offer some practical benefits which have been explored, \writemore. There are also analytical benefits, as discussed in \cref{sec:12-phoneval}.
+
+% % One reason could be a lack of resources, which is the topic of \cref{chapter:resources}. A benefit of exploring alternative input representations is to ablate the effect of each of the features of the default representation, as explored in \cref{chapter:modelling}. The cognitive aspect... \cref{chapter:phonology}... and could improve tokenisation methods... \cref{chapter:infotokenization}.
+
+% Phoneme language models. Many word-level models to study phonology. Very few examples of running text. Some examples of working with audio directly, as discussed in the next section.
+
+% Phoneme representation could be compared against default representation along three axes. There is some work comparing these effects. Several studies have challenged (3) by demonstrating that character-based or byte-based models can still be effectively utilised in language models \addcites. These argue to be "token free" but according to \addcites is still an arbitrary subword representation. A few studies have challenged (2) by relaxing the word-boundary pre-tokenization constraint to produce `superword' tokens \addcites or explore the effect of removing whitespace altogether to achieve a `tabula rasa' input representation \addcites but still orthographic text. Finally, Bunzeck paper. \cref{chapter:modelling} properly compares these to establish the effect of the phoneme representation in modern language models.
+
+\section{Developmentally-plausible pre-training}\label{sec:12-plausiblepretraining}
+
+\Zeb{Three aspects: small language models good for low-resource or domain-specific work (languages), researching human language learning, and architecture research within academic budgets. }
+
+- 1. LLMs are not actually appropriate for certain domains. In some cases, pre-training is more effective and cheaper than fine-tuning. E.g. humanities
+
+- 2. This is especially the case in multilingual modelling... where small language models...
+
+- 3. LLMs also not appropriate for work using LMs to study human language acquisition or processing. Using NNs to study these date back to ..., where phoneme models were used, as discussed in \cref{sec:12-phonemic}. Later work has drawn comparisons between LM pre-training and human processing and learning, but use unrealistic data in terms of scale and size. This has inspired training small models on developmentally-plausible corpora, so-called `BabyLMs' as popularised by the BabyLM challenge \addcites. However, they do not address the other developmental concern, that the subword-based representation may not be appropriate for this line of research --- in part, this is because these representations have become so standardised that they feared losing participants by exploring more plausible domains (see \citet{wilcox2025}). Additionally, the challenge also has wider goals of democratising LM research and exploring data-efficient pre-training methods, which could clash with using a developmentally-plausible input representation.
+
 
 \Zeb{Idea that ``simulations must closely emulate real-life situations by training on developmentally plausible corpora'' in order to gain insights both about what language models can learn, and improve understanding about how infants learn language. Clearly could be valuable insights for phonology in this area.}
 
@@ -177,6 +322,8 @@ Phoneme representation could be compared against default representation along th
 
 \Zeb{BabyLM framework is appropriate for two reasons. Firstly, the scale: it's appopriate for academic budgets, phoneme models can be useful for low-resource, and phoneme data is too limited for larger scale models (see next chapter). Secondly, the developmental/analytical angle. These models have been branded as useful for cognitive research due to the developmental plausibility. Phoneme representation so far has mostly been used for analytical purposes, so using develpmentally plausible framework is logical - and using the phoneme representation provide an additional aspect of plausibility beyond written text and exploration is worthwhile.}
 
+Besides low-resource languages, pre-training also more efficient and effective than fine-tuning for domain-specific. For example, humanities language transfre \citep{fittschen2025pretraininglanguagemodelsdiachronic}. Overall, we are seeing a shift away from the LLM framework back towards domain-specific models. But in that time, subword representation is still so entrenched... especially due to tokenisation packages. 
+
 \subsection{Datasets}
 
 \subsubsection{The CHILDES database}
@@ -192,6 +339,9 @@ The corpus has been further used to test models of unsupervised induction of gra
 \end{quote}
 
 For researchers seeking developmentally-plausible corpora to use as pre-training data for language models, CHILDES is a natural fit. For instance, BabyBERTa was pre-trained on the AO-CHILDES corpus (Age-Ordered CHILDES, \citep{huebner2021using}). AO-CHILDES contains approximately 5M words from the North American English sections of CHILDES. Specifically, it contains all utterances involving children aged 0 to 6, sorted by child age, with non-adult speech removed (thus simulating the theoretical input received by a child). In their study, \citet{huebner-etal-2021-babyberta} were interested in the outcome of pre-training BabyBERTa on AO-CHILDES compared to Wikipedia (which was considered a more representative dataset for NLP at the time). Using a linguistic benchmark based on BLiMP (see \cref{sec:12-blimp} below), they found that BabyBERTa achieved a higher accuracy when trained on AO-CHILDES, that the choice of corpora had an effect across the pre-training corpus and that ordering multiple corpora by grammatical complexity could `scaffold' learning. These findings validated the importance of using developmentally-plausible corpora for BabyLM research and the scaffolding results were a precursor of many of the curriculum learning approaches taken in the first edition of the BabyLM challenge \addcites.
+
+
+Maybe cite \citep{padovani2025child} as contradicting huebner in terms of CDL scaffolding generalisability in LMs.
 
 \Zeb{Insert other examples of language modelling with CHILDES}
 
@@ -214,3 +364,5 @@ Below are a description of the main benchmarks used in this thesis to evaluate L
 \section{Summary}
 
 \Zeb{Go back to research questions. Need to establish whether resources exist. Need to do a thorough comparison of input representations and determine how to do language modeling with phonemes. Need to see what insights can be gained from phonological experimentation with such models. BabyLM framework gives good start to use for this stuff, but still limited ways to evaluate phoneme LMs.}
+
+- 4. BabyLMs provide a very suitable framework for exploring the use of a phonemic input representation. Firstly, scale of data is similar. Past phoneme LMs trained on datasets similar in size to BabyLM and not much data for training LLMs with phonemes. Even finding enough data for LMs is an issue, as thoroughly explored in \cref{chapter:resources}. Thus, using evaluation designed for models at the same scale is ideal for asserting the feasibility of phoneme-based training with LMs, as explored in \cref{chapter:modelling}. Secondly, work using BabyLMs to explore language acquisition have not considered the use of a more developmentally-plausible input representation, and work that does use phonemes for phonological research have not used a developmentally-plausible framework --- thus using a phoneme-based representation within a developmentally plausible framework could enhance both lines of research, both for using LMs for language acquisition research and for improving phonological research with better LMs; experiments conducted in \cref{chapter:phonology}.

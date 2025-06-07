@@ -1,6 +1,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Some custom packages
-%%
+%
+
 \RequirePackage{amsmath}
 \RequirePackage{amssymb}
 \RequirePackage{xspace}
@@ -28,6 +29,12 @@
 % \renewcommand\rmdefault{psb}
 \RequirePackage{microtype}
 \RequirePackage{inconsolata}
+
+% ==== Math fonts
+\RequirePackage{mathtools} % enhanced amsmath (e.g., adds \coloneqq)
+\RequirePackage{amssymb}   % adds a lot of extra symbols (e.g., \mathbb{R})
+\RequirePackage{amsthm}    % adds envs for theorems, lemmas, etc
+\RequirePackage{bbm}       % mainly used for \mathbbm{1}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Style (Changing the visual style of chapter headings and stuff.)
@@ -165,10 +172,17 @@
 \newcommand{\ngram}{$n$-gram\xspace}
 \newcommand{\ngrams}{$n$-grams\xspace}
 
+\newcommand{\ex}[1]{\textit{\enquote{#1}}}
 \newcommand\cincludegraphics[2][]{\raisebox{-0.3\height}{\includegraphics[#1]{#2}}}
 
 \newcommand{\cmark}{\ding{51}}%
 \newcommand{\xmark}{\ding{55}}%
+\makeatletter                             % automatically escape "_"
+    \DeclareRobustCommand*{\escapeus}[1]{%
+    \begingroup\@activeus\scantokens{#1\endinput}\endgroup}
+    \begingroup\lccode`\~=`\_\relax
+   \lowercase{\endgroup\def\@activeus{\catcode`\_=\active \let~\_}}
+\makeatother
 \newcommand{\myemph}[1]{\textsf{{\escapeus{#1}}}}
 \definecolor{characters}{HTML}{40bcd8}
 \definecolor{space}{HTML}{ff6663}
@@ -178,6 +192,46 @@
 \newtcbox{\spacehighlight}{on line, colback=space!50, boxrule=0.2mm, left=0.5mm, right=0.2mm, top=0.2mm, bottom=0.2mm}
 \newtcbox{\phonemehighlight}{on line, colback=phoneme!50, boxrule=0.2mm, left=0.5mm, right=0.2mm, top=0.2mm, bottom=0.2mm}
 
+\newcommand{\tokeniser}{\mathbbm{T}}
+\newcommand{\tok}{\tau}
+\newcommand{\detok}{\ensuremath{\rotatebox[origin=c]{180}{$\tok$}}}
+
+\newcommand{\vocab}{\mathcal{V}}
+\newcommand{\subword}{v}
+\newcommand{\subwordvec}{\mathbf{\subword}}
+
+\newcommand{\alphabet}{\Sigma}
+\newcommand{\ch}{b}
+\newcommand{\chvec}{\mathbf{\ch}}
+
+\newcommand{\merge}{m}
+\newcommand{\mergevec}{\mathbf{\merge}}
+\newcommand{\dataset}{\mathcal{D}}
+\newcommand{\obfn}{\phi}
+\newcommand{\bpeob}{\phi_{\text{\myemph{bpe}}}}
+\newcommand{\wpob}{\phi_{\text{\myemph{wp}}}}
+\newcommand{\countfn}{\#}
+\newcommand{\surprisalfn}{I}
+\newcommand{\lefttoken}{v_l}
+\newcommand{\righttoken}{v_r}
+\newcommand{\bytelm}{p}
+
+\newcommand{\llama}{LLaMA\xspace}
+
+\newcommand{\bpe}{\myemph{BPE}\xspace}
+\newcommand{\bpewp}{\myemph{BPE-WP}\xspace}
+\newcommand{\wordpiece}{\myemph{WP}\xspace}
+
+\DeclareMathOperator*{\argmin}{argmin}
+\DeclareMathOperator*{\argmax}{argmax}
+\DeclareMathOperator*{\expect}{\mathbb{E}}
+\DeclareMathOperator*{\variance}{\mathbb{V}}
+\newcommand{\defeq}{\mathrel{\stackrel{\textnormal{\tiny def}}{=}}}
+\newcommand{\smallcdots}{\cdots}
+\newcommand{\smalldots}{...}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\size}[1]{{\left\vert #1 \right\vert}}
+\newcommand{\one}{\mathbbm{1}}
 
 \newcommand\mybox[2][]
 {\tikz[overlay]\node[fill=blue!10,inner sep=1.3pt, anchor=text, rectangle, rounded corners=1mm,text height=1.5ex, #1] {#2};\phantom{#2}}
@@ -207,3 +261,5 @@
 \newcommand{\response}[1]{\vspace{3pt}\hrule\vspace{3pt}\textbf{#1:}}
 \newcommand{\addcites}{{\color{red} (add cites)}\xspace}
 \newcommand{\writemore}{{\color{red} ... (write more)}\xspace}
+\newcommand{\defn}[1]{\textbf{#1}}
+\newcommand{\vs}{\emph{vs.}\@\xspace}
