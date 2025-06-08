@@ -82,7 +82,7 @@ Although there have been many attempts to integrate character-level or morpheme-
 
 Despite subwords because the default tokenisation scheme, other aspects of the input representation continued to be tailored for specific domains. For instance, a suite of models based on the BERT architecture were trained to provide better encodings of biomedical literature \citep{lee2020biobert}, legal text \citep{chalkidis2020legal}, clinical notes \citep{alsentzer2019publicly} and programming languages \citep{feng-etal-2020-codebert}. By using specific pre-processing steps and vocabularies, these models achieved better performance on tasks related to these domains.
 
-Pre-processing practices were also driven by computational considerations. Subword-based representations have a vocabulary of single-character units as a fall-back, but the number of unique characters in schemes like UTF-32 is enormous. BERT addressed this using unicode normalization (e.g. \writemore) whereas later models follow GPT-2 \citep{radford-2019-gpt2} in mapping characters to a byte-level vocabulary before splitting into subwords, a process that can then be reversed during decoding.  
+Pre-processing practices were also driven by computational considerations. Subword-based representations have a vocabulary of single-character units as a fall-back, but the number of unique characters in schemes like UTF-32 is enormous. BERT addressed this using unicode normalization (e.g. \writemore) whereas later models follow GPT-2 \citep{radford-2019-gpt2} in mapping characters to a byte-level vocabulary before splitting into subwords, a process that can then be reversed during decoding \citep{wang2020neural}.  
 
 The advent of large language models (LLMs) has significantly reduced the emphasis on carefully tailored input representations. Rather than training separate models for individual downstream tasks, current practice centres on pre-training a single, general-purpose model on massive text corpora. These models can then be adapted to a wide range of applications through fine-tuning or even used directly in zero-shot or few-shot settings \citep{raffel2020exploring}. This shift has motivated the use of a consistent, task-agnostic input representation, as empirical findings suggest that scaling up data yields greater performance gains than relying on finely tuned tokenisation or pre-processing pipelines \citep{brown-2020-gpt3}. 
 
@@ -94,7 +94,7 @@ Model capacity and architectural advances have also impacted the input represent
 
 Consequently, whereas past models typically used linguistically-motivated representations curated for a specific task, the primary motivators for input representations in the modern NLP landscape are generalisability and computational efficiency. In the text-based domain, these motivations have led to subword-based representations becoming the norm. These data-driven methods are also easier to apply to noisy datasets than linguistically-motivated methods. In the audio domain, increased model capacity had led to representations being learned directly from audio. Hence, the use of phoneme-based representations remains under-explored. 
 
-\subsection{Small language models and a return to domain-specific pre-training}
+\subsection{Small language models and a return to domain-specific pre-training}\label{sec:12-domainspecific}
 
 In recent years\footnote{This is the case at the time this thesis was submitted, but with the pace of developments in the field this is likely to change.} there has been a shift away from the LLM paradigm back towards the training of smaller LMs. At the time of writing, `small' LMs  refer to models with significantly fewer parameters than their LLM counter-parts, typically ranging from tens to a few hundred million parameters. There are several motivations for this shift to small LMs, three of which are considered below; computational constraints, over-generalisation and linguistic research.
 
@@ -147,33 +147,70 @@ In this thesis, the terms “subword tokenisation” and “subword tokeniser”
 
 \subsection{Subword tokenisation methods}
 
+Formally, subword tokenisers can be defined as a tuple $\tokeniser \defeq (\vocab, \detok, \tok)$. The first item in the tuple is the \defn{vocabulary} $\vocab$: a finite set of subwords, each defined as a concatenation $\subword \defeq \ch_i \circ \cdots \circ \ch_j$ of symbols $\ch$ from an alphabet $\alphabet$. The alphabet can be defined as the unique characters appearing in the pre-tokens --- this can be all unique characters appearing in the data (e.g. letters, punctuation and whitespace) or the set of all bytes, if using character-to-byte conversion. Without loss of generalisation, the alphabet is assumed to be bytes.
 
-%Formally, these tokeniser models can be defined as a tuple $\tokeniser \defeq (\vocab, \detok, \tok)$. The first item in the tuple is the \defn{vocabulary} $\vocab$: a finite set of subwords, each defined as a concatenation $\subword \defeq \ch_i \circ \cdots \circ \ch_j$ of symbols $\ch$ from an alphabet $\alphabet$. The alphabet typically consists of all unique characters found in the pre-tokens, but can also consist of bytes, as discussed further below. The remaining components are two functions that map between character/byte sequences and subword sequences: the \defn{detokenisation function} $\detok\colon \vocab^* \to \alphabet^*$ reconstructs a character/byte sequence from subwords, by concatenating subwords and applying minor post-processing; the \defn{tokenisation function} $\tok\colon \alphabet^* \to \vocab^*$ performs the reverse mapping and must be injective, satisfying $\chvec = \detok(\tok(\chvec))$.
+The remaining components are two functions that map between byte sequences and subword sequences: the \defn{detokenisation function} $\detok\colon \vocab^* \to \alphabet^*$ reconstructs a byte sequence from subwords, by concatenating subwords; the \defn{tokenisation function} $\tok\colon \alphabet^* \to \vocab^*$ performs the reverse mapping and must be injective, satisfying $\chvec = \detok(\tok(\chvec))$.
 
-% Popular tokeniser models include \bpe and WordPiece. 
+A common class of subword tokenisers are \defn{bottom-up tokenisers}. These tokenisers choose their vocabulary sequentially, starting from an initial set of symbols (e.g., bytes) and iteratively merging pairs of symbols until a pre-specified vocabulary size is achieved. For example, BPE \citep{gage1994new, sennrich-etal-2016-neural} and WordPiece \citep{schuster-nakajima-2012-voice} are two popular instances of this class.
 
+Training a tokeniser amounts to selecting the tokens to add to the vocabulary by optimising an \defn{objective function} $\obfn$. Selecting tokens is hard, NP-hard: even for simple objectives like compression, selecting the sequence of merges that maximises $\obfn$ globally is NP-complete \citep{kozma-etal-2024-theoretical, whittington2024tokenisation}. Thus, bottom-up tokenisers are typically trained by greedily optimising $\phi$ in a sequential fashion.
 
+Formally, given an initial $\alphabet$ and a corpus $\dataset$, a bottom-up tokenisers learns a sequence of merges $\mergevec$ by greedily optimising an objective function $\obfn$. Common objective functions used by current LMs are the BPE or WordPiece objectives:
+\begin{align}
+    \bpeob(\merge, \dataset_k) &\defeq 
+    \countfn(\lefttoken \righttoken, \dataset_k) \label{eq:bpe_obj} \\
+     \wpob(\merge, \dataset_k) &\defeq 
+    \frac{
+    \countfn(\lefttoken \righttoken, \dataset_k)}{\countfn(\lefttoken, \dataset_k)\,\countfn(\righttoken, \dataset_k)} \label{eq:wp_obj}
+\end{align}
+where $\countfn(\subword, \dataset)$ denotes the number of occurrences of token $\subword$ in dataset $\dataset$ and the merge $m$ produces a new token from the tokens $\lefttoken$ and $\righttoken$. At each iteration, BPE (\cref{eq:bpe_obj}) selects the most frequent merge pair, while WordPiece (\cref{eq:wp_obj}) selects the merge pair with the largest pointwise mutual information in the dataset.
 
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{12Background/tokenisers.png}
+    \caption{Comparison of BPE and WordPiece training and inference procedures on the word \ex{molecule}. Merge operations are illustrative and not derived from real training data.}
+    \label{fig:12-tokenisers}
+\end{figure}
 
-% Two tokenisers representative of the current paradigm are the BERT tokeniser and the GPT-2 tokeniser. The BERT tokeniser performs several normalization steps, such as NFD Unicode normalization, lowercasing and accent stripping, similar to pre-processing steps used in the classical NLP pipeline. Since BERT was designed for language understanding tasks, these steps were a useful way to reduce vocabulary size and handle noisy text (e.g. both \ex{The} and \ex{the} map the same token). By contrast, the GPT-2 tokeniser does not perform any normalisation. This is because these models are used for language generation tasks, where retaining orthographic variation is considered to be crucial. This is especially the case in the multilingual setting, where removing accents may not be appropriate. 
+For a given vocabulary, BPE and WordPiece apply distinct tokenisation functions $\tok$ to segment pre-tokens into subword tokens. BPE operates via iterative merging: it begins by splitting pre-tokens into bytes, then greedily applies the merges learned during training. WordPiece uses a longest-prefix matching strategy: for a given pre-token, it recursively identifies and segments off the longest prefix found the vocabulary, repeating this process until the entire pre-token is segmented.
 
-% The multilingual setting also introduces an additional complexity; since both tokenisers use a subword tokeniser model, every unique character must be included as a fall-back to avoid unknown tokens, which can dominate the vocabulary size when including orthographic variants (e.g. every Chinese character). Whereas multilingual variants of BERT rely on NFD normalization to reduce vocabulary size (e.g. \ex{\'e} becomes \ex{e} + \ex{\'}), GPT model starting with GPT-2 \citep{radford-2019-gpt2} convert characters to raw bytes in the pre-tokeniser, reducing this fall-back vocabulary to only 256 items. The decoder reverses this process, converting bytes back to characters for language generation tasks.
+Tokenizer function strategies are also known as \defn{inference methods}. The training and inference methods for BPE and WordPiece are illustrated in \cref{fig:12-tokenisers}. Like their training procedures, both inference methods are greedy and do not necessarily yield the most compressive segmentation for a given vocabulary. For instance, both tokenisers segment \ex{molecules} into three tokens --- ${\ex{mole},\ex{cu},\ex{les}}$ --- even though more compressive segmentations are possible with the respective vocabulary. Because training and inference methods are independent, one can pair the inference method of one subword model with the training method of another, as explored by \citet{uzan-etal-2024-greed}. In \cref{fig:12-tokenisers}, these cross-model pairings yield more efficient two-token segmentations (although note that this is a constructed example for illustrative purposes). 
 
-% % The BPE pre-tokenizer not only splits text into word units, but also converts each unit into a byte-based representation, ensuring that the initial vocabulary contains only 256 items instead of every unique character in UTF-32. The tokenizer \textbf{model} then converts each pre-token into one or more tokens using a particular inference algorithm, such as longest-prefix matching for WordPiece or deterministic-merge application by BPE. These tokens are mapped to unique IDs to facilitate lookup into a LM's embedding layer. The pipeline may also include \textbf{post-processing} to add special tokens and \textbf{decoding} to convert IDs back into text for text generation tasks. 
+\Zeb{Maybe talk about SentencePiece as skipping pre-tokenisation}
+
+While BPE and WordPiece are widely used and representative examples of subword tokenisation, many alternative methods have been proposed. A comprehensive review of these approaches lies beyond the scope of this thesis; for a broader survey of subword tokenisation techniques in NLP, see \citet{mielke2021between}.
 
 \subsection{Limitations of subword-based representations}
 
-However, these BabyLMs are typically trained on orthographic text, limiting their ability to be studied at the phonological level, and generally use subword tokens, which do not generally correspond to cognitively plausible units \citep{beinborn-pinter-2023-analyzing} limiting their value for psycholinguistic research \citep{giulianelli-etal-2024-proper}
+Several studies exploring limitations of subword-based tokenisers. Evaluating tokenisers is difficult 
 
-%In part, this can be attributed to the fact that most state-of-the-art LLMs are trained on graphemic text with a subword tokenization scheme. While this representation has proven to be useful for downstream tasks and allows for linguistic probing at the syntactic and semantic levels, these tokens are not cognitively plausible \citep{beinborn-pinter-2023-analyzing}, and prevent models from learning the structure of words compared to using character-based tokenizers \citep{bunzeck2025subwordmodelsstruggleword}.
+\paragraph{Pre-tokenisation.} Splitting words into pre-tokens may not only involve arbitrary decisions about the notion of a ``word'', but also reduce the possible efficiency. SentencePiece \citep{kudo-richardson-2018-sentencepiece}.
 
-While this representation is practical for large-scale training, these tokens are not very cognitively plausible \citep{beinborn-pinter-2023-analyzing}, are less effective than character-based tokens for learning word structure \citep{bunzeck2025subwordmodelsstruggleword} and cannot be used to explore representations of phonological units. Additionally, modern LLMs are inappropriate for theories of acquisition, due to the scales of data they are trained on \citep{warstadt-2023-babylm-findings}.
+\paragraph{Cognitive modelling.} \citep{beinborn-pinter-2023-analyzing}, limiting their value for psycholinguistic research \citep{giulianelli-etal-2024-proper} less effective than character-based tokens for learning word structure \citep{bunzeck2025subwordmodelsstruggleword}. \citet{fan-sun-2023-constructivist} argue for the necessity of a constructivist approach to tokenization, training an LSTM model on gold labelled data to tokenise text into morphemes, claiming that this enables the training of computational models that more closely align with language comprehension and acquisition.
+
+\paragraph{Morphological alignment.} \citet{bauwens-delobelle-2024-bpe} note that BPE can often concatenate partial morphemes, preventing the formation of morphemes and introduce BPE-knockout, a method that removes problematic subwords, which improves morphological alignment. Similarly, \citet{asgari2025morphbpe} also propose a morphology-aware extension of BPE that maintains compression while providing better morphological alignment across several languages. Similarly \citet{kildeberg2025sm} for Dutch, \citet{nzeyimana-niyongabo-rubungo-2022-kinyabert} for Kinyarwanda, \citet{erkaya2022comprehensive} for Turkish, \citet{pan2020morphological} Turkish and Uyghur
+
+\paragraph{Multilingual modelling.} \citep{limisiewicz-etal-2024-myte} as morphological tokeniser. Nevertheless, the over-segmentation problem still
+exists even at the byte level, as byte sequences for
+single characters are overly long for many nonLatin script languages
+
+\paragraph{Intermediate merges.} 
+
+
+\paragraph{Evaluation.} Evaluating subword tokenisers is difficult since comparing a suite of tokenisers would require pre-training language models from scratch using each, and the scaling laws mean that downstream effects may only not be apparent unless large models are used \citep{wei2022emergent}. Typically, studies address this by trying to find \emph{intrinsic} properties (e.g. properties that can be computed without a language model) that correlate with \emph{extrinsic} behaviour (performance of language models), allowing later studies to use these metrics as a proxy. 
+
+However, despite the number of criticisms and intrinsic properties discovered, it remains unclear what properties are desirable in a tokeniser. Compression certainly helps make language modelling efficient, but morphological alignment or cognitive alignment might be preferable when using the language model for cognitive modelling or linguistic research.
+In general, just as the ``one size fits all'' paradigm for LLMs is not appropriate for all domains (as discussed in \cref{sec:12-domainspecific}), there is unlikely to be a subword tokeniser suitable for all purposes, and subwords themselves may not be the appropriate representation for certain domains. Instead, these limitations should encourage researchers to consider the input representation more carefully depending on the task and domain being modelled.
 
 \subsection{Alternative input representations}
 
 \Zeb{Briefly survey speech models, pixel tokenisation etc. but probably don't go into too much detail.  Maybe patches work goes here as well.}
 
-\Zeb{Character-level, byte-level, phoneme or grapheme, whitespace-agnostic, patching, audio. Maybe not character since we briefly mentioned that? Should argue rfou found character to be ok, that maybe its just not used because of computational cost}
+\paragraph{Patching.} The quadratic cost of self-attention and the high per-position cost of large feed-forward networks have limited the ability of LLMs to model very long sequences. To address this, \citet{yu2023megabyte} introduce the concept of \defn{patching}. In this framework, byte embeddings are concatenated to form patches—units that roughly correspond to subword token, which are then processed by a global transformer. The resulting patch representations are decoded by a local transformer, which can even model raw audio. \citet{pagnoni2024byte} extend this idea to latent patches: instead of using fixed-length windows, the model segments variable-length patches in a latent space, with boundaries determined by the next-byte entropy estimated by a byte-level model. Overall, patching aims to improve the computational efficiency of language models beyond what subword tokenisation alone can achieve \citep{shao2025beyond}.
+
+\paragraph{Character and byte-level.}
+Despite the higher computational costs associated with character-level tokenisation, it has been actively explored as an alternative to subword units, motivated in part by the desire to build models that are more robust to noise and better capture morphological variation \citep{gupta2019character}. \citet{al-rfou_character-level_2019} show that sufficiently deep transformers can match the performance of subword- or word-level models, suggesting that the transformer architecture is largely agnostic to input granularity. \citet{libovicky-fraser-2020-towards} further demonstrate that this depth can be reduced by fine-tuning subword-level models.
+This line of work also includes byte-level models, such as ByT5 \citep{xue-2022-byt5}, which operate directly on raw bytes—a natural choice when following the "principle of modelling the smallest meaningful units in the data" \citep{graves2013generating}. Character- and byte-level approaches are often described as \emph{token-free} \citep{clark-2022-canine, xue-2022-byt5}, although \citet{mielke2021between} argue that this label is misleading: these models still rely on a fixed, predefined tokenisation scheme—one that simply aligns with how data is conventionally stored on disk.
 
 \Zeb{Perhaps the next few (previously input representation comparisons) could be moved to modelling chapter as related work.}
 
@@ -366,6 +403,8 @@ These benchmarks also only test English models, in part due to the lack of phone
 % Phoneme representation could be compared against default representation along three axes. There is some work comparing these effects. Several studies have challenged (3) by demonstrating that character-based or byte-based models can still be effectively utilised in language models \addcites. These argue to be "token free" but according to \addcites is still an arbitrary subword representation. A few studies have challenged (2) by relaxing the word-boundary pre-tokenization constraint to produce `superword' tokens \addcites or explore the effect of removing whitespace altogether to achieve a `tabula rasa' input representation \addcites but still orthographic text. Finally, Bunzeck paper. \cref{chapter:modelling} properly compares these to establish the effect of the phoneme representation in modern language models.
 
 \section{Developmentally-plausible pre-training}\label{sec:12-plausiblepretraining}
+
+\citet{salhancopil2025} for a discussion on how BabyLMs can be used for investigating linguistic theories. 
 
 \Zeb{Three aspects: small language models good for low-resource or domain-specific work (languages), researching human language learning, and architecture research within academic budgets. }
 
