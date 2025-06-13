@@ -67,15 +67,9 @@ We find that large language models are powerful statistical learners capable of 
 % We discuss the limitations of our transcription method and discuss the use of raw audio as an alternative input representation. Finally, we present the advantages of this input representation for multi-lingual and low-resource applications and encourage further work in phoneme-based language modeling. 
 
 
-\section{tmpintro}
+\section{Background}
 
 We identify three key transformations that bring us from the standard input representation used by language models to this alternative \textbf{phoneme stream} representation:
-
-% \begin{itemize}
-%     \item Using a character-based tokenization instead of using subwords.
-%     \item Removing word boundaries from the input.
-%     \item Using phonemic transcriptions instead of written text.
-% \end{itemize}
 
 \begin{itemize}
 \setlength\itemsep{0.1em}
@@ -89,6 +83,13 @@ Each transformation can be made independently or in combination, as illustrated 
 % We can also create novel representations of the input which may not have been considered (such as learning subword units from text stripped of word boundaries). 
 % The three input transformations have mostly been studied separately. 
 
+To the best of our knowledge, a full systematic comparison of the three input transformations has not yet been conducted.  \citet{hahn-baroni-2019-tabula} investigated the effect of removing word boundaries and using a word-level or character-level tokenization, evaluating on several psycholinguistic benchmarks. However, they only used graphemic text from Wikipedia and did not ablate the two transformations, only comparing a word-level model (with word boundaries) to a character-level model (without word boundaries). \citet{nguyen-2022-word-boundaries} extend this work, comparing character-level graphemic input (with and without word boundaries) to character-level phonemic input (with and without word boundaries) by training on the Librispeech corpus \citep{panayotov2015librispeech}. They also compare larger units of tokenization (BPE and word-level) for both graphemic and phonemic text, but only with word boundaries included, missing out on several key combinations. 
+
+In our work, we provide a complete comparison of these three input representation transformations by considering all combinations, leading to new input representations that have not been studied before (such as subword tokenization trained without word boundaries). We also use a larger model than previous work, a 12-layer transformer rather than a 3-layer LSTM.
+
+%Another simple heuristic for processing text to be more speech-like is to remove word boundaries. At the simplest level of approximation, some past efforts have studied the effects of removing word boundaries from language models \citep{hahn-baroni-2019-tabula, nguyen-2022-word-boundaries}, finding that LSTM-based models see a marked decrease in performance on several psycholingustic benchmarks. 
+
+% However, these architectures were developed for downstream tasks and not for linguistic theories \citep{baroni-2022-proper}. Before using such models, we must establish the extent to which using standard orthographic text gives language models an advantage over input representations that more closely mimic human speech. 
 
 \section{Phoneme Stream Pipeline}
 \label{sec:14-pipeline}
