@@ -56,7 +56,7 @@ Word-level tokenisation can also be a technical challenge. Early LM research foc
 
 A lesser-used alternative to word-level tokens in \ngram models was to split sentences into individual \textbf{characters}. This reduces the vocabulary size considerably, allowing for slightly higher-order \ngrams to be computed, as well as providing a robust solution to OOV items. However, since words are split into many tokens, few syntactic dependencies are captured, limiting the utility of these models for many NLP tasks. Instead, these models were primarily used for character-sensitive tasks, such as spelling correction and auto-completion \citep{cucerzan_spelling_2004}.
 
-\ngram models have also been used to model spoken language for tasks such as text-to-speech, accent recognition and language identification. Instead of the raw data consisting of written text, these models use an input representation where tokens consist of individual \textbf{phonemes} --- the basic units of sound that distinguish words in spoken communication. Speech recognition systems often paired these phoneme-level language models with \textbf{acoustic models}, which map from acoustic features to phonemes as implemented in tool-kits such as HTK \citep{young2006htk}.
+\ngram models have also been used to model spoken language in tasks related to speech processing, including text-to-speech, accent recognition, language identification and automatic speech recognition (ASR). Instead of the raw data consisting of written text, these models use an input representation where tokens consist of individual \textbf{phonemes} --- the basic units of sound that distinguish words in spoken communication. Speech recognition systems often paired these phoneme-level language models with \textbf{acoustic models}, which map from acoustic features to phonemes as implemented in tool-kits such as HTK \citep{young2006htk}.
 
 For many years, \ngram models were a cornerstone of NLP, providing the statistical backbone for early systems in translation and speech \citep{jurafsky2009speech}. They were used with a range of input representations, with tokens typically representing core linguistic units like words, morphemes, characters and phonemes, driven by the task. However, as neural architectures gradually replaced statistical language models across the NLP landscape, so too did the input representations leveraged by these models.
 
@@ -212,32 +212,33 @@ This line of work also includes byte-level models, such as ByT5 \citep{xue-2022-
 
 While most work in natural language processing focuses on text-based tasks, recent advances have extended large language model (LLM) architectures to the multimodal setting. These Multimodal Large Language Models (MLLMs) require input representations to handle these modalities. For joint image and text processing, the standard approach combines subword-based tokenisation for text with independently derived image tokens \citep{cui2024survey, team2024chameleon, liu2023visual}. Inspired by the robustness of human visual perception, some studies have explored using image-based representations even for purely textual tasks. For example, in the context of machine translation, \citet{mansimov-etal-2020-towards} investigate pixel-to-pixel translation models, and \citet{salesky-etal-2021-robust} render text as images. Both approaches demonstrate improved robustness to noise, though they typically underperform compared to models that operate directly on text.
 
-In the audio domain, older systems often relied on supervised acoustic models in combination with phoneme-level language models (see \cref{sec:12-ngrams}). In contrast, current state-of-the-art models learn directly from raw audio representations. Some approaches convert continuous speech into discrete units using self-supervised models such as Wav2Vec \citep{baevski2020wav2vec} or HuBERT \citep{hsu-2021-hubert}, and then apply standard language models to these sequences \citep{lakhotia2021generative}. Others, like Whisper, are trained end-to-end to map encoded audio directly to text \citep{radford2023robust}. Whereas audio-based representations are primarily used in multimodal or speech-focused settings, there have been efforts to integrate audio into pre-trained LLMs \citep{nguyen-etal-2025-spirit} or during pre-training \citep{bapna2021slam}. Typically, these models perform well on both modalities, but do not successfully learn better representations from exposure to multiple modalities --- an issue known as the transfer interference problem \citep{arivazhagan2019massively} --- and as a result, perform worse on text-based tasks than models solely trained using text-based representations. 
+In the speech domain, older speech processing systems often relied on supervised acoustic models in combination with phoneme-level language models (see \cref{sec:12-ngrams}). In contrast, current state-of-the-art models learn directly from raw audio representations. Some approaches convert continuous speech into discrete units using self-supervised models such as Wav2Vec \citep{baevski2020wav2vec} or HuBERT \citep{hsu-2021-hubert}, and then apply standard language models to these sequences \citep{lakhotia2021generative}. Others, like Whisper, are trained end-to-end to map encoded audio directly to text \citep{radford2023robust}. Whereas speech-based representations are primarily used in multimodal or speech-focused settings, there have been efforts to integrate phonological units into pre-trained LLMs \citep{nguyen-etal-2025-spirit} or during pre-training \citep{bapna2021slam}. Typically, these models perform well on both modalities, but do not successfully learn better representations from exposure to multiple modalities --- an issue known as the transfer interference problem \citep{arivazhagan2019massively} --- and as a result, perform worse on text-based tasks than models solely trained using text-based representations. 
 
-Finally, discrete phonemes provide an intermediate representation between raw audio and written text. This thesis explores their potential as a linguistically meaningful alternative to audio-based representations, with a comparison presented in \cref{sec:12-whynot}.
+Finally, discrete phonemes provide an intermediate representation between raw audio and written text, as introduced in the next section. %Phonemic representations are compared against audio-based representations in \cref{sec:12-whynot}.
+
+%CHAT: This thesis explores their potential as a linguistically meaningful alternative to audio-based representations, with a comparison presented in \cref{sec:12-whynot}.
 
 \section{Phoneme-based input representation}\label{sec:12-phonemic}
 
-Several language models have been trained with phonemic input \citep{sundararaman-2021-phonemebert, gale-etal-2023-bort} but it remains a challenge to do so due to the lack of large phonemic corpora. While a number of well-known speech-based datasets include phonemic transcriptions, such as Switchboard \citep{godfrey1992switchboard} and TIMIT \citep{garofolo1993darpa}, these datasets are small compared to the trillions of tokens contained in standard language model pre-training corpora \citep{elazar-2024-redpajama}. The majority of works that use phonemic representations typically rely on grapheme to phoneme conversion tools \citep{bisani-2008-g2p, hasegawa-2020-g2pmultilingual} to generate coarse phonemic transliterations of text data.
+\Zeb{Main arguments: phonemes used to have more of a practical application in speech recognition technology, but end-to-end with raw audio has replaced these, as discussed in the last section. The use of phonemes for  have had some practical applications, they are primarily used for linguistic research that presupposes phonemes as the base unit. We focus on word segmentation as one case study, finding that there are close ties with modern subword tokenisation algorithms. In \cref{sec:12-phonexperiment} we present other examples of the phonemic representation being used in phonological experimentation, noting that there are few examples of LMs being trained on running text for this purpose. It is of interest }
 
-It is also a challenge to evaluate the broad capabilities of language models trained with phonemes, as most benchmarks assume a graphemic representation, even some that assess phonological knowledge \citep{suvarna-etal-2024-phonologybench}. One benchmark that assesses both the syntactic and phonological capabilities of language models is BabySLM \citep{lavechin}. %One distinguishing advantage of this benchmark is that it can be applied to models trained on either graphemes or phonemes.
-We discuss this benchmark further in \cref{sec:14-effect}.
+Phoneme-based input representations consist of tokens representing individual phonemes. This has similarities to character-based representations and in many languages there is a close correspondence between characters and phonemes, but many languages have much more opaque orthographies, like English. Additionally, in contrast to character-based representations, phoneme-based representations typically do not include punctuation, whitespace or other artefacts of written text. In particular, this means that words are not delimited, since spoken language typically does not contain such clear word boundaries \addcites. 
 
-\citep{nguyen-2022-word-boundaries,bunzeck2024graphemes}
+As discussed in the previous section, constructing phoneme language models used to be foundational to speech processing technology, but recent architectural advances now operate directly from audio, making these models largely obsolete for practical speech processing systems. A central task for training these language models was \defn{grapheme-to-phoneme conversion} \citep[G2P][]{lucassen1984information}, allowing orthographic transcriptions to be converted into to phonemes. Despite phoneme language models becoming obsolete for large-scale speech processing technology, there is still interest in the G2P task. This is because models that train with speech-based representations require substantially more data than prior frameworks, which makes low-resource languages difficult to model.
 
-\subsection{Motivation and linguistic rationale}
+\citep[e.g.][]{bisani-2008-g2p,hasegawa-2020-g2pmultilingual}.
+%Cross-linguality, alignment with speech
 
-Cross-linguality, alignment with speech, abstraction
+Additionally, phonemes are a far more universal representation than orthographic text, with scripts that varies considerably across languages and cultures. Phonemic representation has been argued to be effective for low-resource multilingual modelling, but a lack of data... There are also a few specific tasks where phoneme-based representations seem useful, like lyric generation and ...
 
-Why model phonology with language models?
+Where phoneme representations have seen continual use is in linguistic research that presupposes phonemes as the base abstraction. We focus on word segmentation as one case study in \cref{sec:12-wordseg}, finding that there are close ties with modern subword tokenisation algorithms. In \cref{sec:12-phonexperiment} we present other examples of the phonemic representation being used in phonological experimentation, from early connectionist networks to modern LMs, where the later could still provide unique insights about the distributional properties of language.
 
-Why phonemes rather than orthographic input?
+Finally, phoneme-based representations are useful for gaining insights into language model training as a diagnostic valuation. For instance, what advantage does orthographic text give language models --- phoneme-based representations could act as a confounding factor to study this. Note that there are relatively few examples of using the phoneme-based representation to train LMs on full utterances, most G2P work operates on words, similarly to the phonological experimentation, and word segmentation models primarily exist pre-LM. \cref{sec:12-phoneval} discusses the limited work that does train phoneme LMs and how they have been evaluated. 
 
-Phoneme representations as more universal, cognitively plausible, and appropriate for speech-based modelling
+% CHAT: Introduce the tension: LMs are often tested on phonological knowledge despite being trained on orthographic input.
+%And subword-level models struggle at word-level tasks. \citep{sims2025stochastokimprovingfinegrainedsubword,bunzeck2025subwordmodelsstruggleword}.
 
-Introduce the tension: LMs are often tested on phonological knowledge despite being trained on orthographic input. And subword-level models struggle at word-level tasks.
-\citet{sims2025stochastokimprovingfinegrainedsubword}.
-\subsection{Implementation of phoneme-based input}
+\subsection{Implementation of phoneme-based input}\cref{sec:12-implementphoneme}
 
 %The construction of phoneme-based input typically involves a grapheme-to-phoneme (G2P) conversion step, followed by tokenisation over the resulting phoneme sequence. In this work, G2P conversion and dataset construction are handled by a new tool and dataset, introduced and described in detail in Chapter [X]. Here, we provide only a high-level overview to situate the phoneme-based input representation within existing practices.
 
@@ -257,7 +258,7 @@ Possibly add a short note on typical phoneme vocab size and training behaviour
 
 Soon after word2vec, \citet{ma2016learning} presented a model that learned phoneme embeddings using the  a word segmentation task
 
-\subsection{Word segmentation}
+\subsection{Word segmentation}\label{sec:12-wordseg}
 
 Phoneme-based models in word segmentation, especially in child-directed speech
 
@@ -280,7 +281,7 @@ between two adjacent syllables often indicated a word boundary. These experiment
 % Some models leverage n-gram statistics \citep{Brent1999, Venkataraman2001}, some  Blanchard2010, Elsner2017, Coltekin2017}. Many of these models were evaluated on 10,000 utterances from the Bernstein-Ratner \citeyear{bernstein1987phonology} corpus in CHILDES, transcribed phonemically by \citet{Brent1999}, who also established the evaluation metrics for word segmentation performance (see \cref{sec:15-evaluation}).
 %Brent also established the typical metrics used to evaluate word segmentation performance (see \cref{sec:15-evaluation}) and phonemically transcribed 10,000 utterances from the Bernstein-Ratner \citeyear{bernstein1987phonology} corpus in CHILDES which continues to be used to evaluate segmentation models. 
 
-\subsection{Phonological experimentation}
+\subsection{Phonological experimentation}\label{sec:12-phonexperiment}
 
 
 \Zeb{More recent studies that use LMs to study phonology by using tiny LMs that train just over word types rather than tokens in context. Conclude that there have been few attempts at training cross-lingual LMs on naturalistic running text to get a model of phonology for each language.}
@@ -300,7 +301,18 @@ Tie back to phoneme input’s usefulness for probing phonological knowledge
 Here, we are interested in evaluating models that train directly on individual phonemes, without word boundaries. When trained on individual words, phoneme LMs have been used to study the acquisition of morphological rules \citep{kirov-2018-recurrent} and compare phonotactic complexity across languages \citep{pimentel2020phonotactic}. When trained on running text, phoneme LMs have been used for text-to-speech \citep{li-2023-phoneme-level-bert} and lyric generation \citep{ding-2024-songcomposer}. When compared to grapheme-based models on standard linguistic benchmarks, phoneme models slightly under-perform \citep{nguyen-2022-word-boundaries, bunzeck2024graphemes} but this could be attributed to pre-processing, punctuation and the fact that LLM architectures and evaluation sets have been optimised for written text \citep{goriely2024babble}. Despite the benefits of phoneme-based training, phonological evaluation is limited, and few phoneme LMs exist beyond English. \citet{goriely2025} trained phoneme LMs on child-directed speech across 11 languages, but were only able to use an English benchmark for studying how phonological and syntactic knowledge scales in phoneme LMs. 
 
 
-\subsection{Phonological evaluation of transformer language models}
+\subsection{Evaluation of phoneme language models}\label{sec:12-phoneval}
+
+One benchmark that assesses both the syntactic and phonological capabilities of language models is BabySLM \citep{lavechin}. %One distinguishing advantage of this benchmark is that it can be applied to models trained on either graphemes or phonemes.
+We discuss this benchmark further in \cref{sec:14-effect}.
+
+
+It is also a challenge to evaluate the broad capabilities of language models trained with phonemes, as most benchmarks assume a graphemic representation, even some that assess phonological knowledge \citep{suvarna-etal-2024-phonologybench}. 
+
+
+Several language models have been trained with phonemic input \citep{sundararaman-2021-phonemebert, gale-etal-2023-bort} but it remains a challenge to do so due to the lack of large phonemic corpora. While a number of well-known speech-based datasets include phonemic transcriptions, such as Switchboard \citep{godfrey1992switchboard} and TIMIT \citep{garofolo1993darpa}, these datasets are small compared to the trillions of tokens contained in standard language model pre-training corpora \citep{elazar-2024-redpajama}. 
+
+\citep{nguyen-2022-word-boundaries,bunzeck2024graphemes}
 
 Overview of studies evaluating phonological knowledge in LLMs
 
