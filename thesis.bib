@@ -904,6 +904,15 @@
   year      = {2023}
 }
 
+@inproceedings{li2020universal,
+  title={Universal phone recognition with a multilingual allophone system},
+  author={Li, Xinjian and Dalmia, Siddharth and Li, Juncheng and Lee, Matthew and Littell, Patrick and Yao, Jiali and Anastasopoulos, Antonios and Mortensen, David R and Neubig, Graham and Black, Alan W and others},
+  booktitle={ICASSP 2020-2020 IEEE International Conference on Acoustics, Speech and Signal Processing (ICASSP)},
+  pages={8249--8253},
+  year={2020},
+  organization={IEEE}
+}
+
 @inproceedings{feng-etal-2024-child,
   title     = {Is Child-Directed Speech Effective Training Data for Language Models?},
   author    = {Feng, Steven Y.  and
@@ -1203,15 +1212,6 @@
   title     = {From Phoneme to Morpheme},
   volume    = {31},
   year      = {1955}
-}
-
-@inproceedings{hasegawa-2020-g2pmultilingual,
-  title        = {Grapheme-to-phoneme transduction for cross-language ASR},
-  author       = {Hasegawa-Johnson, Mark and Rolston, Leanne and Goudeseune, Camille and Levow, Gina-Anne and Kirchhoff, Katrin},
-  booktitle    = {International Conference on Statistical Language and Speech Processing},
-  pages        = {3--19},
-  year         = {2020},
-  organization = {Springer}
 }
 
 @article{haspelmath2023defining,
@@ -4261,4 +4261,111 @@ eprint = {https://www.pnas.org/doi/pdf/10.1073/pnas.2307876121},
   pages={304--307},
   year={1984},
   organization={IEEE}
+}
+
+@inproceedings{mccarthy-etal-2023-sigmorphon,
+    title = "The {SIGMORPHON} 2022 Shared Task on Cross-lingual and Low-Resource Grapheme-to-Phoneme Conversion",
+    author = "McCarthy, Arya D.  and
+      Lee, Jackson L.  and
+      DeLucia, Alexandra  and
+      Bartley, Travis  and
+      Agarwal, Milind  and
+      Ashby, Lucas F.E.  and
+      Del Signore, Luca  and
+      Gibson, Cameron  and
+      Raff, Reuben  and
+      Wu, Winston",
+    editor = {Nicolai, Garrett  and
+      Chodroff, Eleanor  and
+      Mailhot, Frederic  and
+      {\c{C}}{\"o}ltekin, {\c{C}}a{\u{g}}r{\i}},
+    booktitle = "Proceedings of the 20th SIGMORPHON workshop on Computational Research in Phonetics, Phonology, and Morphology",
+    month = jul,
+    year = "2023",
+    address = "Toronto, Canada",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2023.sigmorphon-1.27/",
+    doi = "10.18653/v1/2023.sigmorphon-1.27",
+    pages = "230--238",
+    abstract = "Grapheme-to-phoneme conversion is an important component in many speech technologies, but until recently there were no multilingual benchmarks for this task. The third iteration of the SIGMORPHON shared task on multilingual grapheme-to-phoneme conversion features many improvements from the previous year{'}s task (Ashby et al., 2021), including additional languages, three subtasks varying the amount of available resources, extensive quality assurance procedures, and automated error analyses. Three teams submitted a total of fifteen systems, at best achieving relative reductions of word error rate of 14{\%} in the crosslingual subtask and 14{\%} in the very-low resource subtask. The generally consistent result is that cross-lingual transfer substantially helps grapheme-to-phoneme modeling, but not to the same degree as in-language examples."
+}
+
+@inproceedings{li-etal-2022-zero,
+    title = "Zero-shot Learning for Grapheme to Phoneme Conversion with Language Ensemble",
+    author = "Li, Xinjian  and
+      Metze, Florian  and
+      Mortensen, David  and
+      Watanabe, Shinji  and
+      Black, Alan",
+    editor = "Muresan, Smaranda  and
+      Nakov, Preslav  and
+      Villavicencio, Aline",
+    booktitle = "Findings of the Association for Computational Linguistics: ACL 2022",
+    month = may,
+    year = "2022",
+    address = "Dublin, Ireland",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.findings-acl.166/",
+    doi = "10.18653/v1/2022.findings-acl.166",
+    pages = "2106--2115",
+    abstract = "Grapheme-to-Phoneme (G2P) has many applications in NLP and speech fields. Most existing work focuses heavily on languages with abundant training datasets, which limits the scope of target languages to less than 100 languages. This work attempts to apply zero-shot learning to approximate G2P models for all low-resource and endangered languages in Glottolog (about 8k languages). For any unseen target language, we first build the phylogenetic tree (i.e. language family tree) to identify top-$k$ nearest languages for which we have training sets. Then we run models of those languages to obtain a hypothesis set, which we combine into a confusion network to propose a most likely hypothesis as an approximation to the target language. We test our approach on over 600 unseen languages and demonstrate it significantly outperforms baselines."
+}
+
+@inproceedings{zhang2022mixed,
+  title={Mixed-Phoneme BERT: Improving BERT with Mixed Phoneme and Sup-Phoneme Representations for Text to Speech},
+  author={Zhang, Guangyan and Song, Kai and Tan, Xu and Tan, Dun and Yan, Yongqiang and Liu, Yuxuan and Wang, Guangzhi and Zhou, Wei and Qin, Tao and Lee, Tan and Zhao, Sheng},
+  booktitle={Proc. Interspeech 2022},
+  pages={456--460},
+  year={2022},
+  doi={10.21437/Interspeech.2022-621}
+}
+
+@inproceedings{jia2021png,
+  title={PnG BERT: Augmented BERT on Phonemes and Graphemes for Neural TTS},
+  author={Jia, Ye and Zen, Heiga and Shen, Jonathan and Zhang, Yu and Wu, Yonghui},
+  booktitle={Proc. Interspeech 2021},
+  pages={151--155},
+  year={2021},
+  doi={10.21437/Interspeech.2021-1757}
+}
+
+@article{li2022recent,
+  title={Recent advances in end-to-end automatic speech recognition},
+  author={Li, Jinyu and others},
+  journal={APSIPA Transactions on Signal and Information Processing},
+  volume={11},
+  number={1},
+  year={2022},
+  publisher={Now Publishers, Inc.}
+}
+
+@book{international1999handbook,
+  title={Handbook of the International Phonetic Association: A guide to the use of the International Phonetic Alphabet},
+  author={International Phonetic Association},
+  year={1999},
+  publisher={Cambridge University Press}
+}
+
+@book{lehmann2013historical,
+  title={Historical linguistics: An introduction},
+  author={Lehmann, Winfred P},
+  year={2013},
+  publisher={Routledge}
+}
+
+@book{abondolo1998uralic,
+  title = {The {Uralic} Languages},
+  editor = {Abondolo, Daniel},
+  year = {1998},
+  edition = {1},
+  publisher = {Routledge},
+  doi = {10.4324/9781315003283}
+}
+
+@misc{kirshenbaum2011ascii,
+  author       = {Evan Kirshenbaum},
+  title        = {Representing IPA phonetics in ASCII},
+  year         = {2011},
+  howpublished = {\url{https://web.archive.org/web/20160419125856/http://www.kirshenbaum.net/IPA/ascii-ipa.pdf}},
+  note         = {Archived PDF, accessed via the Internet Archive on June 15, 2025},
 }

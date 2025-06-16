@@ -14,12 +14,12 @@
 \RequirePackage{graphicx}
 \RequirePackage{multirow}
 \RequirePackage[tone]{tipa}
-\RequirePackage{csquotes}
 
 % For proper rendering and hyphenation of words containing Latin characters (including in bib files)
 \RequirePackage[T1]{fontenc}
 % This assumes your files are encoded as UTF8
 \RequirePackage[utf8]{inputenc}
+\RequirePackage{csquotes}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Fonts (like different typewriter fonts etc.)
@@ -136,13 +136,9 @@
 %%
 \graphicspath{{./Figures/}}
 
-
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Content commands
 %%
-
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Index
@@ -159,7 +155,6 @@
 \RequirePackage{xcolor}
 \newenvironment{roughdraft}{\color{red}\itshape}{}
 \newcommand{\rough}[1]{\textcolor{red}{\textit{#1}}}
-
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Other custom commands
@@ -237,12 +232,8 @@
 \newcommand\mybox[2][]
 {\tikz[overlay]\node[fill=blue!10,inner sep=1.3pt, anchor=text, rectangle, rounded corners=1mm,text height=1.5ex, #1] {#2};\phantom{#2}}
 
-
-
-
 % %epigraph in chapter header
 % \RequirePackage{epigraph}
-
 
 % %Header
 % \RequirePackage{fancyhdr}
@@ -252,8 +243,6 @@
 %                                             \thechapter.\ #1}{}}
 % \renewcommand{\sectionmark}[1]{\markright{%\thesection\ 
 %                                 #1}}
-
-
 
 % Notes
 \newcommand{\note}[4][]{\todo[author=#2,color=#3,size=\scriptsize,fancyline,caption={},#1]{#4}}
