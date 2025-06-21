@@ -1,0 +1,315 @@
+%\chapter{Two Resources for Cross-Lingual Phonology and Phonemic Language Modelling}\label{chapter:resources}
+\chapter{Two new resources for cross-lingual phonology}\label{chapter:resources}
+
+% Focus is maybe too broad here? Maybe focus more on CHILDES, with phoneme BabyLM as a side-effect.
+
+Phonological research can be enriched by large-scale data-oriented studies that investigate phoneme function across the globe's languages. In this thesis, auto-regressive transformer language models (LMs) are trained using a phoneme-based input representation to gain insights for language model pre-training and distributional phonology. The previous chapter concluded that a suitable training framework is to use developmentally-plausible data, such as the BabyLM dataset or transcripts from CHILDES. However, both of these corpora largely consist of orthographic text --- requiring a review of whether suitable phonemic corpora exist to support these experiments.
+
+This chapter begins by reviewing existing phoneme-based datasets in \cref{sec:13-phonemicdatasets}. While written text is plentiful and easily accessible across hundreds of languages, phonemic data is much more limited in availability. In particular, it is difficult to find phonemic data for child-centred speech and, in general, spontaneous speech across several languages. Hence, new datasets are required for the experiments conducted in this thesis.
+
+%This new resource fills several gaps in existing phonemic datasets, which often lack multilingual coverage, spontaneous speech, and a focus on child-directed language.
+%There is also a lack of phonemic data for certain domains, preventing phonological research in these areas. In particular, we note that it is difficult to find phonemic data for child-centred speech and, in general, spontaneous speech across several languages.
+
+\Cref{sec:13-g2p} reviews methods used to create phonemic datasets. Phonemic datasets can be created by employing expert phoneticians to carefully transcribe speech, but this is a time-consuming process and completely infeasible for creating large datasets. Instead, the typical approach is to use grapheme-to-phoneme (G2P) conversion tools, which use statistical rules and pronunciation dictionaries to convert orthographic text to a phonemic representation. Open-source G2P tools have been used to create the majority of the phonemic datasets reviewed in \cref{sec:13-phonemicdatasets}. However, the fact that these tools are open-sourced and use a variety of statistical approaches and transcription schemes means that phonemic corpora vary considerably according to their phonemic vocabularies and level of phonetic detail, making it difficult to compare findings and incorporate other linguistic resources into analysis.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\linewidth]{13Resources/overview.png}
+    \caption{An overview of \ipachildes and \gpp, which are introduced in this chapter.}
+    \label{fig:13-overview}
+\end{figure}
+
+
+%We claim that these two problems need addressing in order to facilitate future phonological research across linguistics and language modelling, the first being the need for good quality grapheme-to-phoneme conversion tools that output established phonemic inventories, and the second being the lack of a large-scale phonemic corpus of child-centred speech. Addressing these problems is the focus of this study. 
+
+There are thus two major challenges impeding phonological research. First, the lack of consistent G2P conversion, which this chapter addresses by introducing \gpp, a tool for converting orthographic text to a phonemic representation. \gpp leverages existing G2P tools for conversion but carefully maps the output to established phonemic inventories in the \phoible database. Using \phoible inventories not only ensures consistency for each language regardless of the G2P backend used, but the database also contains phonological feature information, supporting fine-grained phonological analysis. Second, to address the lack of a multilingual phonemic dataset of child-centred speech, \gpp is used to convert the majority of the CHILDES database to phonemes. The resulting dataset, \ipachildes, contains phonemic transcriptions of 31 languages in CHILDES, totalling 45 million words. These resources are illustrated in \cref{fig:13-overview}. Finally, \gpp is also used to convert the BabyLM corpus and evaluation benchmarks to phonemes, to support the technical experiments in \cref{chapter:modelling}.
+
+%We demonstrate the utility of this dataset for phonological research by training phoneme language models on 11 languages and probing them for distinctive features, finding that the distributional properties of phonemes are sufficient to learn major class and place features cross-lingually.
+
+%The \emph{de-facto} repository for child-centred data is the Child Language Data Exchange System (CHILDES), which currently contains over 1.4TB of transcript data in over 40 languages \citep{macwhinney1985child, macwhinney_understanding_2019}. The impact of CHILDES across clinical and linguistic research has been profound \citep{bernstein_ratner_augmenting_2024} but the largely orthographic nature of the data has prevented phonological experimentation.\footnote{CHILDES does contain phonetic transcriptions for some languages as part of the PhonBank project, but is limited in size and only contains transcriptions of child utterances, impeding the phonological analysis of child-\emph{directed} speech.} 
+
+%These utterances are aligned with the original orthographic transcriptions and additional data stored in CHILDES supporting further work regarding training BabyLMs with alternative input representation as well as broader multilingual linguistic research and phonological analysis of child-directed speech.
+
+% 4. In the second half of this paper, we explore the uses of Phonemized CHILDES for linguistic analysis of child-directed speech and phoneme-based language modelling. In the former, we compute the average information of utterances directed to children across 10 languages. We find that ..... In the later, we first establish scaling conditions for phoneme-based language models, use these to train models on the 11 largest languages in the dataset and finally probe these models for knowledge of phonological features using the corresponding entries for each phoneme in phoible. We find that... 
+
+% In \cref{sec:13-info}, we explore how \ipachildes opens new possibilities for phonological analysis. We note that prior work relied on phonemic word types or orthographic text to explore phonotactic theories of language and models of language processing, often citing a lack of phonemic data as a limitation. Here, we demonstrate that our dataset allows for information-theoretic calculations over phonemic word tokens, a more naturalistic framework, addressing past limitations. We compute the average information of utterances directed to children aged 0--6 across 10 languages and find a general trend of increasing informative content in Parentese.
+
+% We exemplify how to use these resources by training cross-lingual phoneme language models. Phoneme LMs have a wide variety of applications in NLP, including lyric generation \citep{ding-2024-songcomposer}, text-to-speech \citep{li-2023-phoneme-level-bert}, and low-resource language modeling \citep{leong-whitenack-2022-phone}. Developmentally plausible training corpora also provide a means of studying emergent phonology, but past work has been limited by the availability of training and evaluation resources in languages besides English. Here, after establishing the scaling conditions of phoneme LMs, we train monolingual models on the 11 largest languages in \ipachildes. Using the fact that \gpp maintains a correspondence with \phoible during conversion, we use linear probes to predict an input phoneme's phonological features from its contextual embedding. We evaluate this approach against the phoneme's feature description in \phoible and find that the probes consistently correctly predict the `syllabic' and `consonantal' features, indicating the broad separation of vowels and consonants across languages and demonstrating the utility of phoneme LMs for studying emergent phonology.
+
+% These experiments demonstrate the utility of our tools for phonological analysis. We release \gpp, \ipachildes, and all trained models to support future work.
+
+%For the later, we first identify ideal model sizes for phoneme-based language models across different data sizes and use the best model size for 500 thousand words to train models on the 11 largest languages in the dataset. We  and probe the representations learned for each phoneme for knowledge of phonological features by using the feature data in \phoible. 
+
+%Phonemic data is crucial for investigating linguistic theories that use phonemes as a base unit. Phonemic data has been used to study morphological theories of acquisition \citep{kirov2018recurrent}, explore the role of distributional information in phonology \citep{mayer-2020-phonology-distribution}, calculate cross-language phonological distance \citep{eden-2018-phonological-distance} and simulate early lexicon learning \citep{goriely2023word}. A phonemic representation has also been found to be beneficial for several NLP tasks, including text-to-speech \citep{li-2023-phoneme-level-bert}, lyric generation \citep{ding-2024-songcomposer}, multi-lingual language modelling \citep{zhu-etal-2024-taste} and real-word identification \citep{lavechin}. Despite the benefits of phonemic data, few such datasets exist.
+
+\section{Phonemic Datasets}\label{sec:13-phonemicdatasets}
+
+%Phonemic data is required to investigate a range of linguistic phenomena. Recently, researchers have used data-driven approaches to study morphological theories of acquisition \citep{kirov2018recurrent}, explore the role of distributional information in phonology \citep{mayer-2020-phonology-distribution}, calculate cross-language phonological distance \citep{eden-2018-phonological-distance} and simulate early lexicon learning \citep{goriely2023word}. Despite the benefits of phonemic data, few such datasets exist. 
+
+Phonemic data is required to investigate a range of linguistic phenomena. As introduced in \cref{sec:12-phonemic}, researchers have used data-driven approaches to study morphological theories of acquisition, explore the rule of distributional information in phonology, calculate cross-language phonological distance and simulate early lexicon learning. Despite the benefits of phonemic data, few such datasets exist. 
+
+Written text and audio datasets are far more plentiful than phonemic datasets. Written text, being widely distributed and easy to collect through practices such as web-scraping \citep{bansal-2022-datascaling}, has steered years of NLP research, ranging from the parsers trained on the Penn Treebank \citep{taylor2003penn} to the large language models trained on billion-word datasets like the Pile \citep{pile}. Despite the availability of written text, it is often inappropriate for speech technology and phonological research. Instead, since tape recorders became widely available, researchers have created datasets of human speech. These now include \textbf{elicited} speech corpora such as TIMIT, \citep{garofolo1993darpa}, FLEURS \citep{conneau2023fleurs}, the MSWC \citep{mazumder2021multilingual}, GlobalPhone \citep{schultz2002globalphone} and CommonVoice \citep{ardila-etal-2020-common}; \textbf{audio book} corpora such as LibriSpeech \citep{panayotov2015librispeech}, MLS \citep{pratap2020mls} and the CMU Wilderness Corpus \citep{8683536}; and \textbf{naturalistic} speech corpora such as Switchboard \citep{godfrey1992switchboard}, the Fisher corpus \citep{cieri2004fisher}, the British National Corpus \citep{bnc2007}, the Buckeye corpus \citep{pitt2007buckeye}, Babel \citep{harper2011babel} and VoxLingua107 \citep{9383459}. Of these datasets, only TIMIT, MLS and Switchboard include phonemic annotations, limiting their use in phonological analysis. Later work augmented these datasets with phonemic transcriptions. These include Audio BNC derived from the British National Corpus \citep{coleman2011mining}, LibriLight derived from LibriSpeech \citep{Kahn_2020}, VoxClamantis derived from the CMU Wilderness Corpus \citep{salesky-etal-2020-corpus}, VoxCommunis derived from CommonVoice \citep{ahn-chodroff-2022-voxcommunis} and IPAPACK derived from FLEURS and MSWC \citep{zhu-etal-2024-taste}.
+
+%These datasets have been instrumental in improving speech recognition technology, documenting phonological variety across the world's languages and training computers to process and produce speech. The spoken domain is also ideal for phonological analysis using phonemes but of the datasets described above, only GlobalPhone, TIMIT, MLS and Switchboard include phonological annotations. This (among other reasons) led to later derived datasets which do provide phonemic transcriptions. These include Audio BNC derived from the British National Corpus \citep{coleman2011mining}, LibriLight derived from LibriSpeech \citep{Kahn_2020}, VoxClamantis derived from the CMU Wilderness Corpus \citep{salesky-etal-2020-corpus}, VoxCommunis derived from CommonVoice \citep{ahn-chodroff-2022-voxcommunis} and IPAPACK derived from FLEURS and MSWC \citep{zhu-etal-2024-taste}. 
+
+\begin{sidewaystable}
+    \centering
+    \footnotesize
+    \begin{threeparttable}
+        \begin{tabular}{lcccc}
+             \toprule
+            % Rotate text using \rotatebox from graphicx package
+            {\textbf{Dataset}} & {\textbf{Modality}} & {\textbf{Scale (words)}} & {\textbf{Domain}} & {\textbf{Languages}} \\
+            %\midrule
+            %\textit{Requirements} & \textit{\underline{Phonemic}  and \underline{Parallel} } & \textit{\underline{Large}  (> 1M words)} & \textit{\underline{Naturalistic}  \underline{Child-Directed}  \underline{Speech}}  & \textit{\underline{Multilingual}}  \\
+            \midrule
+            The Pile \citep{pile} & Orth  & 100B\textdagger  & Web-scraped written text  & English only  \\
+            %Common Crawl & Orth  & >100 trillion\textdagger  & Web-scraped written text  & >160 languages  \\
+            %C4 \citep{raffel2020exploring} & Orth  & 1T\textdagger  & Web-scraped written text  & >160 languages  \\
+            GlobalPhone \citep{schultz2002globalphone} & Orth, Phon, Audio  & 5M\textdagger  & Read speech  & 22  \\
+            CommonVoice \citep{ardila-etal-2020-common} & Orth, Audio  & 30M\textdagger  & Read speech  & 38  \\
+            VoxCommunis \citep{ahn-chodroff-2022-voxcommunis} & Orth, Phon, Audio & 23M\textdagger & Read speech & 40 \\
+            CMU Wilderness \citep{8683536} & Orth, Audio & 170M\textdagger & Read speech & 699 \\
+            VoxClamantis \citep{salesky-etal-2020-corpus} & Orth, Audio, Phon & 152M\textdagger & Read speech & 635 \\
+            TIMIT \citep{garofolo1993darpa} & Orth, Phon, Audio  & 40k & Read speech  & English only  \\
+            FLEURS \citep{conneau2023fleurs} & Orth, Audio  & 15M\textdagger  &Read speech  & 102  \\
+            MSWC \citep{mazumder2021multilingual} & Orth, Audio  & 20M  & Read speech  & 102  \\
+            IPAPACK \citep{zhu-etal-2024-taste} & Orth, Phon  & 15M\textdagger  & Read speech  & 115  \\
+            LibriSpeech \citep{panayotov2015librispeech} & Orth, Audio  & 10M\textdagger  & Audio books  & English only  \\
+            Libri-Light \citep{Kahn_2020} & Orth,\textsuperscript{*} Phon,\textsuperscript{*} Audio  & 700M\textdagger  & Audio books  & English only  \\
+            MLS \citep{pratap2020mls} & Orth,\textsuperscript{*} Phon,\textsuperscript{*} Audio  & 600M\textdagger  & Audio books  & 8  \\
+            Switchboard \citep{godfrey1992switchboard} & Orth, Phon, Audio  & 3M\textdagger  & Telephone conversations  & English only  \\
+            Fisher \citep{cieri2004fisher} & Orth, Audio  & 12M\textdagger  & Telephone conversations  & English only  \\
+            Buckeye \citep{PITT200589} & Orth, Phon, Audio  & 300k  & Spontaneous speech  & English only  \\
+            British National Corpus \citep{bnc2007} & Orth, Audio & 100M & Written \& spontaneous speech & English only \\
+            Audio BNC \citep{coleman2012audio} & Orth, Phon, Audio  & 7M  & Spontaneous speech  & English only  \\
+            VoxLingua107 \citep{9383459} & Audio & 80M & Spontaneous speech & 107 \\
+            Babel \citep{harper2011babel} & Orth, Audio  & 60M  & Telephone conversations  & 25  \\
+            CHILDES \citep{macwhinney1985child} & Orth  & 59M  & Child-centered speech & 45 \\
+            %Gutenberg Stories \citep{gerlach2018standardizedprojectgutenbergcorpus} & Orth  & 20B??  & Child stories  & 22 languages  \\
+            BabyLM \citep{hu-etal-2024-findings} & Orth  & 100M  & Speech and text\textsuperscript{**} & English only  \\
+            \midrule
+            %Phonemized BabyLM & \cmark & \cmark & \cmark &  &  & \xmark \\
+            \ipachildes & Orth, Phon & 45M  & Child-centered speech & 31 \\
+            \bottomrule
+        \end{tabular}
+        \normalsize
+        \caption{A comparative summary of the datasets discussed in \cref{sec:13-phonemicdatasets}. The datasets are described in terms of their modality, scale, domain and languages. \ipachildes is the first multilingual phonemic dataset of spontaneous speech and the first phonemic dataset of child-centered speech. \\\emph{\textdagger Word counts estimated from the size in bytes or the hours of audio in the dataset, using a heuristic based on the size of Switchboard of 5 bytes per word and 12,000 words per hour.}\\\emph{\textsuperscript{*}Libri-Light and MLS only have orthographic and phonemic transcriptions for 10 hours of audio per language.}.\\\emph{\textsuperscript{**}BabyLM contains a mix of speech and text data from a mix of adult-directed and child-directed sources, only 29\% is child-directed speech.}}
+        \label{tab:13-dataset-properties}
+    \end{threeparttable}
+\end{sidewaystable}
+
+%In \cref{sec:13-phonemicdatasets} we discuss previous phonemic datasets in relation to \ipachildes. We provide a full comparison of these datasets in \cref{tab:13-dataset-requirements}.
+%
+These datasets and their phonemically-annotated successors all vary considerably according to the language coverage, number of words, domain and the presence of text-based transcriptions. We provide a summary of these properties in \cref{tab:13-dataset-properties}. The dataset introduced in this chapter, \ipachildes, is the first phonemic dataset for \emph{child-centered} speech and the first \emph{multilingual} phonemic dataset for spontaneous speech, facilitating new avenues for research. 
+
+\section{Grapheme to Phoneme Conversion}\label{sec:13-g2p}
+
+Ideally, phonemic transcriptions of speech would originate from expert human annotators, but such annotation is incredibly slow. For instance, it was estimated that it would take 120 person-years to transcribe and align the 1200 hours of speech in the Audio BNC corpus \citep{coleman2011mining}. Of the phonemic datasets described above, only the smallest, TIMIT, was fully transcribed by human experts, at a rate of only 100 sentences per week \citep{zue1996transcription, lamel1989speech}. Switchboard also provides human-annotated phonemic transcriptions but only for 5,000 utterances \citep{greenberg1996insights}.
+
+In practice, phonemic transcriptions are produced using G2P. In the simplest case, this involves the use of pronunciation dictionaries such as the Carnegie Mellon University (CMU) Pronouncing Dictionary\footnote{\url{http://www.speech.cs.cmu.edu/cgi-bin/cmudict}} or the English Pronouncing Dictionary \citep{jones2011cambridge}. These were used to create the phonemic transcriptions for the Buckeye Corpus, Audio BNC and Babel, but pronunciation dictionaries are limited by the items included in the dictionary and so may fail to convert part-words, interruptions or rare proper nouns, which frequently occur in spontaneous speech. More sophisticated G2P methods combine pronunciation dictionaries with statistical models. These systems have been developed for many languages using rules or finite-state transducers to generalize to unseen words \citep{Mortensen-et-al:2018, johnson2020g2p, Bernard2021}. Other G2P systems have applied neural networks to automatically learn these rules and generalize to new languages \citep{NOVAK_MINEMATSU_HIROSE_2016, Zhu2022}.
+
+As G2P systems operate only from text, they may fail to capture accents and the variation found in natural speech (see \cref{sec:13-limitations} for a discussion). Nevertheless, G2P systems provide a useful method for producing phonemic transcriptions at scale, and were used to produce the transcriptions for LibriSpeech, VoxClamantis and IPAPACK. The fact that transcription errors may occur is often acknowledged as a limitation, but rarely are the outputs of different G2P systems compared to each other or to established inventories. For instance, \texttt{epitran} and \texttt{phonemizer}, two popular tools described in \cref{sec:13-backends}, produce very different inventories for French, as demonstrated in \cref{fig:13-venn}. 
+
+In this chapter, existing statistical G2P tools are leveraged and their outputs are mapped to established \phoible inventories to produce consistent outputs. The resulting tool to is used to produce phonemic transcriptions for the utterances in the CHILDES database.
+
+\section{\gpp}
+
+I introduce \gpp as a tool for converting datasets from an orthographic representation to a phonemic representation. It operates either as a python library or as a command-line program; the user selects one of four backends and the language to use for conversion. Each backend supports a different set of languages as described in \cref{sec:13-backends}. The recommended backends for each of the languages in \ipachildes are given in \cref{sec:13-ipachildes}.
+
+Each line of orthographic text is converted to phonemes, represented using the International Phonetic Alphabet (IPA). Regardless of the backend selected, the representation is consistent, with phonemes separated by whitespace (for convenient tokenization, as discussed in \cref{sec:12-implementphoneme}). Word boundaries and utterance boundaries are represented using the unique symbols \texttt{WORD\_BOUNDARY}, and \texttt{UTT\_BOUNDARY}, respectively. 
+
+The output representation is also consistent in terms of the set of phonemes types produced, using \emph{folding}, as described in \cref{sec:13-folding}. Without folding, each backend produces a different set of phonemes (as demonstrated in \cref{fig:13-venn}) which may not align with established phoneme inventories. The implemented folding maps not only ensure the output is consistent regardless of the backend chosen, but also makes it easy to leverage information in \phoible in analysis, as demonstrated in \cref{chapter:phonology}. Finally, qualitative evaluation of the tool is provided in \cref{sec:13-qualitative} and example usage is given in \cref{sec:13-usage}.
+
+% Individual phonemes are represented using the International Phonetic Alphabet (IPA) and are separated by whitespace for convenient tokenization. Unique delimiters are also used to separate words and utterances (see \cref{sec:13-phonemestream} for details).
+
+% In order to support a wide variety of languages, we implement wrappers around four backend G2P tools, as discussed in \cref{sec:13-backends}. The user selects a backend and language when converting a particular dataset (the backends we recommend for the 31 languages in \ipachildes are presented in \cref{app:13-:breakdown}).  
+
+% The specific set of phonemes produced will be drawn from a vocabulary determined by the specific rules or pronunciation dictionaries created for the chosen backend and language. Since these tools are open-sourced, and since the exact \textbf{phoneme inventory} of languages are often up for debate, it is important to ensure that the phoneme inventory produced is consistent with established phoneme inventories for that language. This is accomplished using \emph{folding}, as discussed in \cref{sec:13-folding}.
+
+% Finally, we give a description of the command-line tool and accompanying scripts in \cref{app:13-:usage}.
+
+\subsection{G2P Backends}\label{sec:13-backends}
+
+In order to support a wide variety of languages, wrappers are implemented over four backend G2P tools:
+
+\paragraph{\texttt{phonemizer}:} Phonemizer \citep{Bernard2021} is a python library for G2P in various languages based on \texttt{eSpeak}\footnote{For Japanese text written in Romanji, as is the case in CHILDES, we use phonemizer with the the Segments backend \citep{robert_forkel_2019_3549784}.}, an open-source speech synthesizer which supports over one hundred languages and accents \citep{Dunn2019}.
+
+\paragraph{\texttt{epitran}:} Epitran \citep{Mortensen-et-al:2018} supports the automatic phonemization of text across many languages, accents and scripts, with a particular focus on low-resource languages. For the majority of the 92 languages supported\footnote{For English, Epitran uses the Flite Speech Sythesis System \citep{black2001flite} and for Simplified and Traditional Chinese it uses the CC-CEDict dictionary (\url{https://cc-cedict.org}).}, it uses greedily-interpreted grapheme-to-phoneme maps augmented with context-sensitive pre-processor and post-processor rewrite rules.
+
+\paragraph{\texttt{pinyin-to-ipa}:} Pinyin-to-ipa \citep{taubert_2024_pinyin-to-ipa_2024} is a python library for converting Mandarin written in pinyin to IPA using a few contextual grapheme-to-phoneme maps. The phoneme inventory is based on the phonology of Mandarin as described by \cite{lin2007sounds} and \cite{duanmu2007phonology} and tone markers are attached to the vowel of the syllable, rather than the end of the syllable. The tool only converts individual pinyin syllables, so our wrapper first splits the input into syllables before using the tool to convert each syllable to IPA.
+
+\paragraph{\texttt{pingyam}:} Pingyam\footnote{\url{https://github.com/kfcd/pingyam}} is a table storing conversion information between the various romanization systems of Cantonese (including IPA) based on data from the Open Cantonese Dictionary.\footnote{\url{https://www.kaifangcidian.com/han/yue/}} Our wrapper converts from the Jyutping system to IPA by first splitting the input text into syllables before using the table to convert each syllable to IPA. For consistency with \texttt{pinyin-to-ipa}, we move tone markers to the vowel of each syllable. 
+
+Although \texttt{pinyin-to-ipa} and \texttt{pingyam} only support one Chinese language each, they are included as backends because \texttt{epitran} and \texttt{phonemizer} have relatively poor G2P quality for these languages. This has prevented Chinese languages from being included in previous cross-lingual phonemic datasets \citep{ahn-chodroff-2022-voxcommunis} and has led to them being disregarded in cross-lingual analysis \citep{pimentel2020phonotactic}. I hope that by including these backends, this gap is addressed. Tone markers are also combined with their preceding phoneme to create a unique token (e.g., \ttipa{a\tone{55}} is a single token, not two). Tone markers are thus treated as phonological features rather than as individual phonemes, similar to how diphthongs are unique phonemes. However, this decision is still debatable and does lead to a comparatively larger phonemic vocabulary, so an options is provided to disable this merging, as demonstrated in \cref{sec:13-usage}. 
+
+\subsection{Phoneme inventory validation}\label{sec:13-folding}
+
+In order to validate the set of phonemes produced by each choice of backend and language, I compare the output to the phoneme inventories for that language listed in \phoible, a database containing phoneme inventories extracted from source documents and tertiary databases for 2186 distinct languages \citep{phoible}.
+
+\phoible also contains typological data and phonological feature information for each phoneme, a useful resource for phonological analysis. As there are often multiple inventories in \phoible for each language, I choose the inventory that best matches the output phoneme of all backends that supports that language, according to the number of phoneme types, the number of consonants, the number of vowels and the number of diphthongs.
+
+Once the best inventory has been found, a process called \emph{folding} is used to align the output phoneme set with the inventory and correct errors in the output. This is achieved using a manually-crafted look-up table (a \emph{folding map}) which is applied to the output of the G2P wrapper. These maps are primarily used to solve surface-level errors, instances where the G2P tool outputs a specific Unicode string for a specific phoneme but the inventory lists a different string. For example, the \texttt{phonemizer} backend with the \texttt{ja} language code (Japanese) outputs the tied characters \ttipa{\textroundcap{ts}} as one of the phonemes, but the Japanese inventory lists \ttipa{ts} instead. These errors can be solved with a simple one-to-one mapping. These mappings will not affect the information-theoretic properties of the output but do allow the output symbols to be matched with entries in \phoible.
+
+Besides these surface-level errors, other transcription errors can also be solved with folding maps in order to create a better alignment with a particular \phoible inventory. For example, the \texttt{epitran} backend for Serbian always outputs \ttipa{d Z} as two phonemes instead of the single phoneme \ttipa{dZ}, which can also be solved with a single mapping. The error types that can be solved using folding maps are detailed in \cref{tab:13-transcription-errors}.
+
+%but they can also be used to solve several other error types in order to create a better alignment with a \phoible inventory. 
+
+\begin{table*}[t]
+    \centering
+    \scriptsize
+    \begin{tabular}{p{0.32\textwidth}p{0.26\textwidth}p{0.32\textwidth}}
+    \toprule
+        \textbf{Error type} & \textbf{Consequence} & \textbf{Example} \\
+        \midrule
+        \textbf{One-to-one:} The backend uses one symbol for a phoneme but the inventory lists a different symbol for that phoneme. & The one-to-one mapping does not change the number of types or tokens in the output. & \texttt{phonemizer} with language code \texttt{sv} (Swedish) outputs \ttipa{n} but the matching inventory uses \ttipa{\textsubbridge{n}}.\\
+        \midrule
+        \textbf{Many-to-one:} The backend produces two different phonemes that should only map to a single phoneme in the inventory. & The many-to-one mapping reduces the number of phoneme types. & \texttt{phonemizer} with language code \texttt{pt} (Portuguese) outputs both \ttipa{\*r} and \ttipa{r} but the matching inventory only lists \ttipa{K}.\\
+        \midrule
+        \textbf{Consonant merging:} The backend outputs two symbols for a consonant that should be written as a single phoneme. & The mapping merges the pair of consonants, reducing the number of phoneme tokens produced. & \texttt{epitran} with language code \texttt{srp-Latn} (Serbian) outputs the sequence \ttipa{d Z} but these are should be written as a single phoneme \ttipa{dZ}.\\
+        \midrule
+        \textbf{Vowel merging:} The backend outputs a pair of vowels as separate phonemes but they are typically analysed as a single diphthong. & The mapping merges the pair of vowels, reducing the number of phoneme tokens produced. & \texttt{pingyam} with language code \texttt{cantonese} outputs the sequence \ttipa{o u} but these are should be treated as a diphthong \ttipa{ou}.\\
+        \midrule
+        \textbf{Vowel splitting:} The backend outputs a diphthong that is not listed in the inventory and should be split into individual phonemes. & The mapping splits the pair of vowels, increasing the number of phoneme tokens produced. & \texttt{phonemizer} with language code \texttt{en-us} (North American English) outputs \ttipa{aIU} as a single phoneme but this should be \ttipa{aI U}.\\
+        \midrule
+        \textbf{Phoneme duplication:} The backend outputs duplicate phonemes to represent long vowels or consonants or because of an error. & The mapping replaces the pair of phonemes with just one, reducing the number of phoneme tokens. & \texttt{phonemizer} with language code \texttt{et} (Estonian) outputs \ttipa{d d} but should output the long consonant \ttipa{d:}.\\
+        \midrule
+        \textbf{Diacritic error:} The backend incorrectly outputs the diacritic as a separate symbol instead of attaching it to the phoneme. & The mapping may change the number of phoneme types or tokens. & \texttt{phonemizer} with language code \texttt{ko} (Korean) outputs the diacritic for aspiration as \ttipa{h} instead of \ttipa{\super{h}} so sequences \ttipa{kh} and \ttipa{ph} are mapped to \ttipa{k\super{h}} and \ttipa{p\super{h}}.\\
+        \midrule
+        \textbf{Orthographic error:} Due to an invalid symbol in the orthographic text, the backend outputs an incorrect phoneme. & The contextual mapping changes the frequency statistics for the resulting phoneme, possibly reducing the number of phoneme types. & \texttt{epitran} with language code \texttt{hun-Latn} (Hungarian) outputs \ttipa{\^o} when the orthographic letter \textipa{\H{o}} is incorrectly written as \textipa{\^o} and so the phoneme is mapped to \ttipa{\o:}.\\
+        \bottomrule
+    \end{tabular}
+    \caption{A list of errors that can occur during phonemization that can be fixed with a folding map but that may change the information-theoretic properties of the output.}
+    \label{tab:13-transcription-errors}
+\end{table*}
+
+The many-to-one mappings and those that split or merge tokens may alter the number of output tokens or types. Since such a mapping will change the information-theoretic properties of the output, it is important that they are linguistically motivated and carefully implemented. 
+
+In order to construct the folding map for each backend-language pair, I run \gpp on orthographic text for that language and compare the output set of phonemes $P_O$ to the phonemes in the closest inventory in \phoible $P_I$. I define the set of phonemes present in $P_O$ but not $P_I$ the ``unknown phonemes'' $U_K$ where $U_K = P_O \setminus P_I $ and the set of phonemes present in $P_I$ but not $P_O$ the ``unseen phonemes'' $U_S$ where $U_S = P_I \setminus P_O $. The folding map are then constructed as follows:
+\begin{enumerate}
+    \item Find pairs $(k,s) \in U_K \times U_S$ that differ according to an accent or diacritic and obviously represent the same phoneme (determined by ruling out alternatives or examining where $k$ is produced in the output). Create a one-to-one mapping $k:s$ for each such pair, e.g. \ttipa{t} : \ttipa{t\super{h}}.
+    \item Find pairs $(k,s) \in U_K \times U_S$ that clearly represent the same phoneme (determined as above) but may use entirely different symbols, possibly due to an alternative transcription scheme. Create a one-to-one mapping for each pair, e.g. \ttipa{a} : \ttipa{\ae}.
+    \item For remaining items $k \in U_K$, determine whether these result from one of the other errors in \cref{tab:13-transcription-errors}. Carefully examine instances where $k$ is produced in the output and create a suitable mapping $k : p$ for some $p \in P_I$ to solve the error (the mapping may need to be contextual or include several characters, e.g. \ttipa{\textrhookschwa} : \ttipa{@ \*r} or \ttipa{U O} : \ttipa{w O}). 
+    \item For remaining items $s \in U_S$, determine whether these result from one of the other errors in \cref{tab:13-transcription-errors}. Carefully examine instances where $s$ should be produced in the output and create a suitable mapping $k : s$ for some $k \in P_O$ to solve the error (the mapping may need to be contextual or include several characters). 
+    \item Examine the output for cases of \textbf{phoneme duplication} and other errors that may not contain phonemes in $U_K$ or $U_S$ but could still be solved with the phoneme map and create suitable mappings.
+\end{enumerate}
+
+The goal is for $U_K = \{\} = U_S$ or equivalently $P_I = P_O$, i.e the set of phonemes produced by the tool perfectly aligns with the phoneme inventory in \phoible. This is not always possible, often there are a few remaining phonemes in $U_K$ and/or $U_S$. This can occur when no obvious mappings could be found in steps 1--4 above. For example, the \texttt{epitran} backend for German does not produce the phoneme \ttipa{Z} (it is ``unseen'') and none of the unknown phonemes seem to be a good match. Another possibility is that the output set of phonemes $P_O$ may not align well with any of the \phoible phoneme inventories and so the closest match may not include some of the unknown phonemes $k \in U_K$ despite being valid phonemes for that language and listed in other inventories. For example, the \texttt{epitran} backend for German produce the phonemes \ttipa{x} and \ttipa{5} which are not listed in the matching inventory but are listed in other established inventories for German. In other cases, the unknown phonemes may come from loan words (e.g. \ttipa{ts} for ``pizza'' in Portuguese). Finally, there are some cases where the output considerably disagrees with all of the \phoible inventories but is a valid phonemic analysis of the language according to other sources.
+
+%\textbf{POSSIBLY MENTION THAT ENGLISH-US LANGUAGE CODE IS AN EXCEPTION BECAUSE WE HAVE TO MATCH BABYSLM}
+
+% In \cref{app:13-endix:folding-dictionaries} I give the folding dictionary for each backend-language pair used in this thesis. I give the resulting phoneme inventory, describe the matching \phoible inventory and provide justification for any unknown or unseen phonemes.
+
+\subsection{Qualitative Analysis}\label{sec:13-qualitative}
+
+%See \cref{sec:13-qualitative} for an example of using \gpp for French, using the \texttt{phonemizer} backend with a folding map to approach Phoible inventory \href{https://phoible.org/inventories/view/2269}{2269}.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.5\linewidth]{13Resources/venn.png}
+    \caption{Venn diagram of the inventories produced by \texttt{phonemizer}, \texttt{epitran} and \gpp compared to \phoible inventory \href{https://phoible.org/inventories/view/2269}{2269} for French.}
+    \label{fig:13-venn}
+\end{figure}
+
+In \cref{fig:13-venn}, the \phoible inventory for French is compared to the output of \gpp (using \texttt{phonemizer} as a backend) and the outputs produced by \texttt{phonemizer} and \texttt{epitran} when applied to the French section of CHILDES. The outputs of \texttt{phonemizer} and \texttt{epitran} both differ considerably from the inventory and from each other whereas the \gpp only fails to produce a single phoneme, \ttipa{\textturnh}, and produces two additional phonemes \ttipa{dZ} and \ttipa{tS}, which we allow as they come from loanwords such as ``pizza'' and ``sandwich''. 
+
+\Zeb{Below is inserted from babble paper, could be adjusted for here}
+For instance, the phonemic representation of ``what a conundrum!'' is:
+
+\vspace{-2mm}
+\begin{center}
+\texttt{\textipa{w 2 t} \textvisiblespace~\textipa{2} \textvisiblespace~\textipa{
+k @ n 2 n d \*r @ m} \textvisiblespace~}
+\end{center}
+\vspace{-1mm}
+
+\noindent
+One limitation of our phonemization tool is that `a' is not reduced to the shwah, `\textipa{@}', as it would be in continuous speech. We discuss the limitations of this phonemization process in \cref{sec:14-phonemeslimitations}. 
+
+\subsection{Usage}\label{sec:13-usage}
+
+\gpp is a python library that can be used as an API or as a command-line tool in order to convert orthographic text to a phonemic representation. The tool allows the user to select the backend and language code to use for G2P with text provided through filepaths or standard input. Additional options include \verb|--keep_word_boundaries| to output a dedicated \texttt{WORD\_BOUNDARY} token between words and \verb|--uncorrected| to skip the folding process and output the phonemes exactly as produced by the backend tool. Each backend also supports individual options. For instance, \verb|--split-tones| outputs tones as individual tokens instead of merging them with the syllabic phoneme for our two Chinese language backends. See the repository's \texttt{README.txt} for further details.
+
+\section{\ipachildes}\label{sec:13-ipachildes}
+
+\ipachildes contains 45 million words of monolingual child-centred speech for 31 languages. The data is sorted by child age in order to support curriculum learning experiments, such as in the work of \citet{huebner-etal-2021-babyberta}, and an `is\_child' feature is provided to allow for filtering child or adult utterances.
+
+In order to create the dataset, I first download all monolingual and non-SLI corpora in CHILDES to ensure each language partition contains naturalistic, monolingual speech. CHILDES has 48 languages but only 31 are supported by a backend in \gpp (either because the language is not supported, or because they have been transcribed using an irregular script). For languages supported by multiple backends, I produce a sample transcription using each backend and carefully examine the output. The `best-fitting' backend (the one that produces a phonemic vocabulary closest to one of the inventories in \phoible) is selected and is the backend for which a folding map is produced, as described in \cref{sec:13-folding}. Having selected the best backend, \gpp is used to convert all orthographic utterances for each language to a phonemic representation, producing a CSV containing the original representation, the phonemic representation as well as additional data stored in CHILDES (such as target child age, morpheme count, part of speech information, and the IDs of each utterance, transcript, corpus and collection). 
+
+% The resulting dataset contains over 45 million words of child-centred speech across 31 languages, hosted on Huggingface.%\footnote{\emph{url anonymised for review}}.
+An illustration of the dataset is given in \cref{fig:13-overview} and a description of each language section is given in \cref{tab:13-phonemized-childes-sections}, detailing the matching \phoible inventory and CHILDES section for each language. Note that English is divided into British English (EnglishUK) and North American English (EnglishNA) to mirror the split present in CHILDES and Portuguese is also split into European and Brazilian varieties, following previous work \citep{caines2019cross}. For these splits, different \texttt{phonemizer} accents are used. Data is not uniformly distributed across languages. EnglishNA is the most represented, with close to 10 million words, and Farsi is the least represented, with only 43 thousand words. Limitations of the dataset are discussed in \cref{sec:13-limitations}.
+
+%due to the phonological differences between Brazilian and Portugal Portuguese, the availability of language codes to phonemize the two, and the fact that the corpora are distinct within CHILDES.
+\begin{table}[t]
+    \centering
+    \footnotesize
+    \begin{tabular}{lllccc}
+        \toprule
+        \textbf{Language} & \textbf{CHILDES Collection} & \textbf{Backend} & \textbf{Phoible} & \textbf{Words} & \textbf{\% Child} \\ 
+        \midrule
+        EnglishNA & \href{https://childes.talkbank.org/access/Eng-NA}{EnglishNA} (49) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2175}{2175} & 9,993,744 & 36 \\
+        EnglishUK & \href{https://childes.talkbank.org/access/Eng-UK}{EnglishUK} (16) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2252}{2252} & 7,147,541 & 39 \\
+        German & \href{https://childes.talkbank.org/access/German}{German} (10) & \texttt{epitran} & \href{https://phoible.org/inventories/view/2398}{2398} & 5,825,166 & 44 \\
+        Japanese & \href{https://childes.talkbank.org/access/Japanese}{Japanese} (11) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2196}{2196} & 2,970,674 & 44 \\
+        Indonesian & \href{https://childes.talkbank.org/access/EastAsian}{EastAsian/Indonesian} (1) & \texttt{epitran} & \href{https://phoible.org/inventories/view/1690}{1690} & 2,347,642 & 34 \\
+        French & \href{https://childes.talkbank.org/access/French}{French} (15) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2269}{2269} & 2,973,318 & 40 \\
+        Spanish & \href{https://childes.talkbank.org/access/Spanish}{Spanish} (18) & \texttt{epitran} & \href{https://phoible.org/inventories/view/164}{164} & 2,183,992 & 46 \\
+        Mandarin & \href{https://childes.talkbank.org/access/Chinese}{Chinese/Mandarin} (16) & \texttt{pinyin\_to\_ipa} & \href{https://phoible.org/inventories/view/2457}{2457} & 2,264,518 & 39 \\
+        Dutch & \href{https://childes.talkbank.org/access/DutchAfrikaans}{DutchAfricaans/Dutch} (5) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2405}{2405} & 1,475,174 & 35 \\
+        Polish & \href{https://childes.talkbank.org/access/Slavic}{Slavic/Polish} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/1046}{1046} & 1,042,841 & 63 \\
+        Serbian & \href{https://childes.talkbank.org/access/Slavic}{Slavic/Serbian} (1) & \texttt{epitran} & \href{https://phoible.org/inventories/view/2499}{2499} & 1,052,337 & 29 \\
+        Estonian & \href{https://childes.talkbank.org/access/Other}{Other/Estonian} (9) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2181}{2181} & 843,189 & 45 \\
+        Welsh & \href{https://childes.talkbank.org/access/Celtic}{Celtic/Welsh} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2406}{2406} & 666,350 & 69 \\
+        Cantonese & \href{https://childes.talkbank.org/access/Chinese}{Chinese/Cantonese} (2) & \texttt{pingyam} & \href{https://phoible.org/inventories/view/2309}{2309} & 777,997 & 34 \\
+        Swedish & \href{https://childes.talkbank.org/access/Scandinavian}{Scandinavian/Swedish} (3) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/1150}{1150} & 581,451 & 45 \\
+        PortuguesePt & \href{https://childes.talkbank.org/access/Romance}{Romance/Portuguese} (4) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2206}{2206} & 499,522 & 39 \\
+        Korean & \href{https://childes.talkbank.org/access/EastAsian}{EastAsian/Korean} (3) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/423}{423} & 263,030 & 37 \\
+        Italian & \href{https://childes.talkbank.org/access/Romance}{Romance/Italian} (5) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/1145}{1145} & 352,861 & 39 \\
+        Croatian & \href{https://childes.talkbank.org/access/Slavic}{Slavic/Croatian} (1) & \texttt{epitran} & \href{https://phoible.org/inventories/view/1139}{1139} & 305,112 & 39 \\
+        Catalan & \href{https://childes.talkbank.org/access/Romance}{Romance/Catalan} (6) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2555}{2555} & 319,726 & 36 \\
+        Icelandic & \href{https://childes.talkbank.org/access/Scandinavian}{Scandinavian/Icelandic} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2568}{2568} & 279,939 & 35 \\
+        Basque & \href{https://childes.talkbank.org/access/Other}{Other/Basque} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2161}{2161} & 230,500 & 49 \\
+        Hungarian & \href{https://childes.talkbank.org/access/Other}{Other/Hungarian} (3) & \texttt{epitran} & \href{https://phoible.org/inventories/view/2191}{2191} & 237,062 & 48 \\
+        Danish & \href{https://childes.talkbank.org/access/Scandinavian}{Scandinavian/Danish} (1) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2265}{2265} & 275,170 & 42 \\
+        Norwegian & \href{https://childes.talkbank.org/access/Scandinavian}{Scandinavian/Norwegian} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/499}{499} & 227,856 & 43 \\
+        PortugueseBr & \href{https://childes.talkbank.org/access/Romance}{Romance/Portuguese} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2207}{2207} & 174,845 & 44 \\
+        Romanian & \href{https://childes.talkbank.org/access/Romance}{Romanian} (3) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2443}{2443} & 152,465 & 43 \\
+        Turkish & \href{https://childes.talkbank.org/access/Other}{Other/Turkish} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2217}{2217} & 79,404 & 51 \\
+        Irish & \href{https://childes.talkbank.org/access/Celtic}{Celtic/Irish} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/2521}{2521} & 105,867 & 34 \\
+        Quechua & \href{https://childes.talkbank.org/access/Other}{Other/Quechua} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/104}{104} & 46,848 & 40 \\
+        Farsi & \href{https://childes.talkbank.org/access/Other}{Other/Farsi} (2) & \texttt{phonemizer} & \href{https://phoible.org/inventories/view/516}{516} & 43,432 & 40 \\
+        \bottomrule
+    \end{tabular}
+    \caption{A breakdown of each language available in \ipachildes. The bracketed number in the \textbf{CHILDES Collection column} refers to the number of corpora downloaded from that collection. The \textbf{Backend} refers to the \gpp backend  used to convert utterances for that language to phonemes. \textbf{Phoible} links to the \phoible inventory used for that language in folding. The \textbf{Phonemes} columns refer to the number of words and tokens in each subset and \textbf{\% Child} refers to the percentage of the data that is spoken by a child.}
+    \label{tab:13-phonemized-childes-sections}
+\end{table}
+
+\section{Discussion}
+
+\ipachildes addresses several limitations of past datasets, as the first large multilingual corpus of child-centred phonemic speech. \Cref{chapter:modelling} and \cref{chapter:phonology} demonstrate how this data can be used to train phoneme LMs, but \ipachildes could also support information-theoretic studies of language processing and acquisition, which have previously based their calculations on word types \citep{piantadosi2011word, dautriche2017words, pimentel2020phonotactic} or orthographic text \citep{mahowald2013info, dautriche2017wordform, futrell2020lossy}, often citing a lack of phonemic data as a limiting factor. The child-centred domain of \ipachildes could also be beneficial for studying the `Goldilocks' hypothesis \citep{kidd2014goldilocks} and the properties of `Parentese' \citep{ramirez2017look}. I provide an example of an experiment investigating the later in \cref{app:parentese}, where the average information of utterances directed to children aged 0--6 across 10 languages is computed, revealing a general trend of increasing informative content.
+
+\section{Conclusion}
+
+This work introduces \gpp and \ipachildes, two new resources for phonological research. \gpp improves open-source G2P tools by ensuring phonemic vocabularies align with the established inventories in the \phoible database. Using this tool, we create \ipachildes by converting the orthographic transcriptions in CHILDES into phonemic representations, resulting in a large corpus of child-centred spontaneous speech across 31 languages.
+
+We anticipate that \gpp and \ipachildes will enable a wide range of future studies in linguistics and NLP, particularly in phonological acquisition, cross-linguistic analysis, and speech processing.
+
+
+%Our results indicate the utility of phoneme LMs for emergent phonology and we anticipate many other future studies that our resources could facilitate across linguistics and NLP.
+
+%We intend for this dataset to facilitate future work in experimental phonetics, where prior work based calculations on word types or orthographic text, future calculations could use the phonemic word tokens in our dataset to provide better frequency statistics and more closely resemble speech. We also use our dataset to extend recent work exploring phoneme-based pre-training of language models to the multilingual setting. %By linking to \phoible, we show that these models can be probed for phonological features, finding that while certain features (e.g. \texttt{consonantal}) seem to play a role in distributed phonetics, others (e.g. \texttt{delayedRelease}) do not. Finally, we use the BabySLM metric to demonstrate the model sizes required to learn phonology and syntax with phoneme LMs.
+
+\section{Limitations}\label{sec:13-limitations}
+
+
+We consider the following limitations of our work. 
+
+\paragraph{Phonemes as a representation of speech:} While phonemic data more closely represents how words are pronounced compared to orthographic text (the degree of this difference varies between languages), phonemes are still abstract symbolic units which do not contain many of the detailed and continuous features of speech, such as prosody. They also abstract away from phones, which are detailed realizations of phonemes, representing the physical sound produced rather than a language-specific meaningful unit. When comparing modalities that may be close to the sensory signal available to infants for developmentally plausible language modeling, some researchers consider phonemic data to be as implausible as orthographic data \citep{lavechin} and instead create language models that can be trained directly on audio \citep{kamper2017segmental, nguyen2020zero, hsu2021hubert, dunbar2021zero}. Nevertheless, phonemes still provide a useful unit of analysis and are necessary for certain linguistic theories and information-theoretic calculations. While phones could offer another useful representation, they are even harder to source than phonemes.
+
+\paragraph{G2P conversion inaccuracies:} Despite improving G2P conversion by mapping to inventories in the \phoible database, there are still limitations with \gpp. Firstly, our method integrates existing G2P tools, which may vary in quality between languages. When converting each language in CHILDES, we selected the most appropriate backend for each language, in particular adding two backends to support G2P for Mandarin and Cantonese, but the quality may still vary. Many of the G2P tools for certain languages convert words individually, so we do not capture vowel reduction, allophonic variation or other differences found in natural speech. We also use a single accent for each language, losing inter-speaker variability. The \texttt{phonemizer} backend supports multiple accents for certain languages (here we use a different accent for EnglishNA and EnglishUK) and future work could try to maintain accent differences during grapheme-to-phoneme conversion, but this would require speaker information or audio, as was done during the creation of Audio BNC \citep{coleman2012audio}. Finally, we note that G2P methods may not produce correct transcriptions for child-produced utterances, which are often corrected by the transcriber, especially for young infants. Initially we intended to distribute \ipachildes without child-produced utterances (and in this study only train models with the child-directed utterances) but as they might be useful in future research, we instead note this limitation.
+
+\paragraph{Phoible inventories:} Although the \phoible database collects established phonemic inventories and provides distinctive feature vectors, there are still often multiple phoneme inventories for a single language. This the exact phonemic inventory for a particular language is still a matter of debate among expert phonologists. When creating folding maps we choose the `best-fitting' inventory to map to, as detailed in \cref{tab:dataset-phonemized-childes-sections}, but we acknowledge that these inventories may not be exact.
+
+\paragraph{Phoneme LMs:} We train phoneme LMs on 11 languages from \ipachildes but the specific architecture we use is based on our scaling experiment for the EnglishNA model. Although we do not directly compare these LMs, we note the possibility that other parameters may have better suited the non-English languages. We were only able to conduct the scaling experiments for English due to the lack of phonological benchmarks for other languages but we hope that the release of \ipachildes facilitates further work in multilingual phonological evaluation of phoneme LMs.
+
+\paragraph{Languages:} Although our dataset is multilingual, there are still limitations in terms of language coverage. The languages are predominantly European and Asian, with no languages indigenous to the Americas, Australia or Africa. English is also still the dominant language of the dataset and the Farsi section is very small, only containing 43 thousand words. In creating this dataset, we were limited by the languages available in CHILDES. The languages in CHILDES we were not able to convert were Greek, Arabic, Hebrew, Thai, Georgian, Tamil, Taiwanese, Jamaican, Sesotho, Berber, Cree and Slovenian and Russian due to missing G2P backends or unsupported orthographies.

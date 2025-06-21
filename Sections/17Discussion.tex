@@ -1,1 +1,39 @@
 \chapter{Discussion}\label{chapter:discussion}
+
+
+\section{Further Implications}
+\label{sec:14-further}
+
+\subsection{Comparing Human Acquisition to Language Model Learning}
+\label{sec:14-acquisition}
+
+% Here we could go into the BabyLM challenge as related work that looks into reducing the advantages language models have over humans, say that our work here contributes to the BabyLM challenge, and finally briefly mention the literature regarding 'advantages' and point to our discussion section on audio-based models. 
+
+The capacity of LMs to learn language from text alone has spurred interest in using such models for acquisition and psychology studies, such as comparing model learning trends to child learning behaviour \citep{evanson-etal-2023-language} and using model outputs to predict human reading times \citep{hollenstein-etal-2021-multilingual}.
+
+To push this research further, recent efforts aim to make language modeling more cognitively plausible \citep{beinborn2024cognitive} by reducing the advantages that typical language models have over humans during the learning process \citep{warstadt-2022-artificial}. One approach is to limit and curate the dataset to that which a typical human may be exposed to, such as is done in the BabyLM challenge \citep{warstadt-2023-babylm-findings}. Another approach is to use an input representation that more closely mimics speech rather than written text \citep{dupoux-2018-cognitive}. Finally, we must consider whether the architectures themselves are suitable linguistic theories, given that they were developed for downstream tasks \citep{baroni-2022-proper}.
+
+In this work we contribute to all three approaches by training a language model with streams of phonemes and assess whether the language model architecture used is advantaged or disadvantaged by these changes according to a wide variety of benchmarks. We hope that this leads to further work studying acquisition using phoneme streams as an input representation. However, while streams of phonemes may seem more cognitively plausible than written text, many studies go further than we do and seek to train directly on raw audio.
+
+\subsection{Learning directly from audio}
+\label{sec:14-audiomodels}
+
+Our study focused on alternative input representations for text-based language models, but there is also a field of work dedicated to training models directly from raw audio.
+%, a completely separate class of input representations.
+In recent years, the Zero Resource Speech Challenge has helped pioneer the development of models that learn unsupervised from raw audio \citep{dunbar_self-supervised_2022}. Models such as STELA \citep{schatz2021early, lavechin2022can} use a two-stage approach, learning a discrete symbolic representation by clustering 10ms chunks of audio, then feeding these to a multi-layered LSTM language model.
+
+These models are also used to study acquisition, regarding raw audio as an input representation that is more cognitively plausible than phonemes; a continuous signal full of noise and non-linguistic information that children must learn to filter. Whether adults even use phonemes as a core linguistic representation, and whether children learn phonemic categories before other stages of acquisition both continue to be a matter of debate \citep{kazanina2018phonemes, matusevych2023infant} and the symbolic representations learned by models such as STELA have a duration four times shorter than phonemes, challenging the assumption that phonemic categories are precursors to later stages of acquisition. 
+
+The gap in linguistic performance between text-based models and audio-based models continues to be substantial. \citet{lavechin} developed BabySLM to compare text-based models to speech-based models and highlighted this gap, but further noted that even speech-based models may not always train on plausible input, many often using audiobooks as their training data \citep{Kahn_2020}. When training the STELA model on 1024 hours of ecological long-form child-centered audio compared to 1024 hours of audiobooks, \citet{lavechin} found that the model trained on long-form audio achieved chance-level syntactic and lexical capabilities, highlighting how far we are from producing architectures that can learn from the same signals as human children.
+
+%While language modeling with phonemes may be regarded as more cognitively plausible than training on written text, even sequences of segmented phonemes are an abstraction from the true nature of the input that children receive, consisting of continuous audio streams full of noise and non-linguistic information that children must learn to filter. Whether adults even use phonemes as a core linguistic representation, and whether children learn phonetic categories before other stages of acquisition both continue to be a matter of debate \citep{kazanina2018phonemes, matusevych2023infant}. 
+
+% In recent years, the Zero Resource Speech Challenge has helped pioneer the development of models that learn unsupervised from audio \citep{dunbar_self-supervised_2022}. Models such as STELA \citep{schatz2021early, lavechin2022can} use a two-stage approach, learning a discrete symbolic representation by clustering 10ms chunks of audio, then feeding these to a multi-layered LSTM language model. The symbolic representations learned by the model have a duration four times shorter than phonemes, challenging the assumption that phonetic categories are precursors to later stages of acquisition. 
+
+%\citet{lavechin} developed the BabySLM evaluation metrics to allow text-based LMs to be compared to speech-based LMs, listing text-based models (including models that train on phoneme strings) as equally low in terms of plausibility compared to audio-based models and highlighting a large gap in performance between text-based and audio-based models. They also note that even speech-based models may not always train on plausible input, many often using audiobooks as their training data \citep{kahn2020libri}. When training the STELA model on 1024 hours of ecological long-form child-centered audio compared to 1024 hours of audiobooks, \citet{lavechin} found that the model trained on long-form audio achieved chance-level syntactic and lexical capabilities, highlighting how far we are from producing architectures that can learn from the same signals as human children.
+
+%\subsection{Lingering advantages}
+
+%[Despite us approaching human-like input, sequences of phonemes are still an abstraction from the true nature of input we receive as children and in our day-to-day lives, which in reality is continuous audio, and full of noise and non-linguistic information. Furthermore, phonemes are themselves an abstraction of phones and are learned representations that may even be learned after some initial stages of acquisition, raising questions as to whether they should be used as a primary representation of the input. Arguably we do get to a point where we process audio into streams of phonemes, but that might happen later, and phonemes are also language-dependent.]
+
+%[Some studies do try to learn from true audio input, but data is very limited. Some do show performance (e.g. the audio book one) but even those have advantages, and once removed (using true raw audio from a child's environment) those same models seem to learn nothing. Perhaps we just need more data, as those represent very little, but perhaps we are further than we thought in terms of producing a model that is able to learn language in exactly the same conditions as our amazing brains.]

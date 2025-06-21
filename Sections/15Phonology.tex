@@ -1,4 +1,4 @@
-\chapter{Word Segmentation as a Phonological Probing Task}\label{chapter:phonology}
+\chapter{Phonological probing of phoneme LMs}\label{chapter:phonology}
 
 \section{Abstract}
 
@@ -18,7 +18,7 @@ In this work, we explore the phonological capabilities of phoneme-based BabyLMs 
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.95\linewidth]{Figures/15Segmentation/overvieww.png}
+    \includegraphics[width=0.95\linewidth]{Figures/15Phonology/overvieww.png}
     \caption{Three strategies for unsupervised word segmentation using cues extracted from an autoregressive language model trained to predict phonemes.}
     \label{fig:15-example}
 \end{figure}
@@ -124,27 +124,80 @@ For the linear probes, we follow \citet{hahn-baroni-2019-tabula} and report accu
 %During training, we reserve 5000 tokens from each language to use for evaluation, kept consistent across suite sizes.
 % For the linear probes, we follow \citet{hahn-baroni-2019-tabula} and report accuracy. They claim that chance performance is 50\% due to the balanced training data, but our results suggest otherwise.
 
-\section{Results}
+\section{Experiment: Probing for phonological features}\label{sec:featureprobing}
+
+Phoneme LMs trained on developmentally plausible corpora allow for the testing of phonological representations but recent work has only explored English models trained on 10 -- 100 million words (see \cref{sec:babylm}). Here, we establish the size requirements for models trained on data available in \ipachildes and then demonstrate how models trained on the 11 largest languages in our dataset can be used to explore emergent phonology.
+
+We refer to the suite of models as ``cross-lingual'' as each individual model is monolingual, only trained on data from a single language. This is in contrast to ``multilingual'' models that are trained on multiple languages at once.
+
+As the phonemic utterances in \ipachildes maintain a correspondence with \phoible, we can use the \textbf{distinctive feature} information in \phoible to probe cross-lingual phoneme LMs for phonological knowledge. 
+
+We select the 11 largest languages in the dataset and train a GPT-2 model on each, subsampling 500 thousand words\footnote{As the number of phonemes per word varies across these languages, we actually subsample 1.8 million tokens (phonemes) for each language, which is roughly 500 thousand words.} and using the best-fitting model for this data size according to the previous experiment (the 5-million-parameter model with a dropout of 0.3). The training configuration remains the same (see \cref{sec:models}). These models allow us to compute contextual embeddings $c(x)$ for phonemes.
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{15Phonology/features.png}
+    \caption{Accuracy of the phonological distinctive feature probe across 11 languages in \ipachildes and 9 distinctive features from \phoible.}
+    \label{fig:features}
+\end{figure}
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.99\linewidth]{15Phonology/silhouette.png}
+    \caption{Average silhouette scores when using each distinctive feature to cluster contextual embeddings of the phonemes in each language.}
+    \label{fig:silhouette}
+\end{figure}
+
+\begin{figure*}[t]
+    \centering
+    \begin{subfigure}[][][]{0.49\textwidth}
+        \includegraphics[width=0.99\linewidth]{15Phonology/japanesedendo.png}
+        \caption{Japanese}
+    \end{subfigure}
+    \begin{subfigure}[][][]{0.49\textwidth}
+        \includegraphics[width=0.99\linewidth]{15Phonology/frenchdendo.png}
+        \caption{French}
+    \end{subfigure}
+    \caption{Similarity of the contextual embeddings for each phoneme learned by the Japanese and French phoneme LMs. Similarities are computed using Euclidean distance considering the average of 50 contextual embeddings for each phoneme and linkages are created using the incremental algorithm. The `syllabic' distinctive feature is marked below each phoneme.} 
+    \label{fig:dendrogram}
+\end{figure*}
+
+We then look up the distinctive features of each phoneme in each language using the matching inventories in \phoible (see \cref{tab:13-phonemized-childes-sections}). We find the set of features for which, in all 11 languages, there are at least 4 phonemes that exhibit the feature and 4 that do not. 
+For each feature $f$, we train a linear probe $p_f$ to predict that feature from the contextual embeddings $c(x)$ of phonemes. Each probe is trained with an equal number of positive and negative examples and is evaluated using leave-one-group-out cross-validation (i.e for each phoneme $x$ in the phoneme inventory $V$, the probe is trained on the contextual embeddings of all other phonemes $\{c(y) | y\in V \setminus \{x\}\}$, then evaluated by predicting the feature from contextual embeddings of the left-out phoneme $p_f(c(x))$, and the final score is a macro-average across all phonemes $x\in V$).
+
+The results of each probe are provided in \cref{fig:features}. The majority of the probes achieve accuracies significantly\footnote{Statistical significance was assessed using a binomial test, where the null hypothesis assumes a probability of success \( p_0 = 0.5 \) and the number of trials \( n \) is equal to the number of phonemes tested by the probe. A result was considered significant if the computed \( p \)-value was less than 0.05.} higher than chance (50\%), indicating that the models learn representations that encode distinctive features. While the scores for each feature are broadly consistent across languages, some notable differences emerge. For example, nearly all feature probes achieve statistically significant results in Mandarin, whereas only two do so in Spanish. This disparity can be partly attributed to the number of unique phonemes in each language. Because we treat each combination of vowel and tone as a distinct phoneme, Mandarin has 99 phoneme types, compared to just 24 in Spanish. The smaller phoneme inventory in Spanish greatly reduces $n$ for each probe, making it more challenging to obtain statistically significant results.
+
+In all 11 languages, the highest result is achieved by the probe for the `syllabic' feature which generally\footnote{In some languages there are also syllabic consonants, which like vowels can act as the nucleus of a syllable.} separates vowels from consonants. As these models only learn to predict phonemes and have no concept of how each phoneme is pronounced, the fact that this separation is learned clearly indicates that vowels and consonants provide a strong distributional signal across languages. The \texttt{consonantal} feature similarly separates vowels from consonants\footnote{This feature indicates an audible constriction of the vocal tract, separating obstruents, nasals, liquids, and trills from vowels, glides and laryngeal segments \citep{gussenhoven2017understanding}.} and is learned by a probe in every language. However, not every feature can be learned by these probes. For instance, the \texttt{delayedRelease} feature, which distinguishes stops from affricates, is not learned by any probe. Our models do not encode the rate of phoneme delivery, so it is unsurprising that a feature that relates to the temporal properties of phonemes is difficult to probe.
+
+\subsubsection*{Distributional Phoneme Clusters}
+
+To better understand why the probes capture certain phonological features, we examine whether contextual embeddings cluster according to these features. For each language, we sample 50 contextual embeddings per phoneme and label them with their associated phonological features. For each labeling, we then compute the \textbf{silhouette score} for each embedding --- a metric ranging from –1 to 1, where higher values indicate that an embedding is more similar to others in its assigned cluster than to those in neighboring clusters \citep{rousseeuw1987}. Averaging these scores across all embeddings allows us to compare how well different features cluster the phoneme representations, as shown in \cref{fig:silhouette}.
+
+The scores are all relatively close to zero, likely due to the curse of dimensionality --- our embeddings have 256 dimensions, far exceeding the number of distinct phonemes in each language. Despite this, the results are consistent with the probe findings: the syllabic feature yields the highest clustering quality.
+
+We further visualize this clustering using dendrograms, created by averaging the contextual embeddings for each phoneme and applying an incremental clustering algorithm. \Cref{fig:dendrogram} shows examples for Japanese and French, with the syllabic feature marked for each phoneme. In both cases, vowels are almost entirely separated from consonants, with one notable exception: \ttipa{n} in Japanese. We also observe some alignment with traditional phoneme groupings (e.g., \ttipa{b} and \ttipa{p}), though overall the dendrograms diverge from standard phonological classifications. This suggests that the distributional behavior of phonemes in context may not neatly align with their articulatory or categorical properties.
+
+\section{Experiment: Probing for word boundaries}
 
 % \emph{Given the range of experiments/results we'll probably want to do this section with headings corresponding to individual findings, like in the CLIMB paper. Tables might be quite big due to the number of ways to extract word boundaries. Do some language family analysis, bringing in typological features. End on an interesting experiment where maybe we use the words identified by our segmentation model to train a subword model and evaluate that on some other metric?}
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{Figures/15Segmentation/probe_results.png}
+    \includegraphics[width=\linewidth]{15Phonology/probe_results.png}
     \caption{Accuracy scores for the word boundary probe trained on the contextual embeddings of phonemes across models in each suite. Training and test instances are balanced and each word used for training embeddings is removed from the test set. Probe results for each untrained model in the Tiny suite are included as a baseline.}
     \label{fig:15-probes}
 \end{figure*}
 
 \begin{figure*}[t]
     \centering
-    \includegraphics[width=\linewidth]{Figures/15Segmentation/unsupervised.png}
+    \includegraphics[width=\linewidth]{15Phonology/unsupervised.png}
     \caption{Boundary placement F1 scores achieved using the unsupervised segmentation strategies across models in each suite. For each score, we report the maximum across the 4 cues and 3 segmentation strategies. The Untrained row give the maximum scores achieved by each model in the Tiny suite before training.}
     \label{fig:15-unsupervised}
 \end{figure*}
 
 % \begin{figure*}[t]
 %     \centering
-%     \includegraphics[width=\linewidth]{Figures/15Segmentation/small_peak.png}
+%     \includegraphics[width=\linewidth]{Figures/15Phonology/small_peak.png}
 %     \caption{Boundary placement F1 scores achieved by each model in the Small suite using the \textbf{peak} segmentation strategy. The ``untrained'' column give the scores achieved by each model before training, averaged across all languages.}
 %     \label{fig:15-peakscores}
 % \end{figure*}
@@ -166,14 +219,14 @@ We note that across all languages, the accuracy of the word boundary probes incr
 
 % \begin{figure}[t]
 %     \centering
-%     \includegraphics[width=\linewidth]{Figures/15Segmentation/sizes.png}
+%     \includegraphics[width=\linewidth]{Figures/15Phonology/sizes.png}
 %     \caption{Maximum boundary placement F1 scores achieved by each model across suite sizes. Only languages that appear in at least two suites are included.}
 %     \label{fig:15-sizes}
 % \end{figure}
 
 % \begin{figure}[t]
 %     \centering
-%     \includegraphics[width=\linewidth]{Figures/15Segmentation/english_growth.png}
+%     \includegraphics[width=\linewidth]{Figures/15Phonology/english_growth.png}
 %     \caption{Boundary placement F1 scores achieved for the English model using the \textbf{peak} segmentation strategy across suite sizes.}
 %     \label{fig:15-englishgrowth}
 % \end{figure}
@@ -215,7 +268,7 @@ We compare the four segmentation cues using the peak strategy segment utterances
 
 \begin{figure*}
     \centering
-    \includegraphics[width=\linewidth]{Figures/15Segmentation/qualitative.png}
+    \includegraphics[width=\linewidth]{Figures/15Phonology/qualitative.png}
     \caption{Per-phoneme boundary probability, entropy, loss and rank assigned by the Medium English model for the sequence of utterances ``can I help you by opening your fingers'', ``there'', ``you got it''. Spaces indicate utterance boundaries, vertical lines indicate gold word boundaries and phonemes are marked as green if they are correctly identified as word boundaries using the \textbf{peak} strategy or if they follow an utterance boundary (red otherwise).}
     \label{fig:15-qualitative}
 \end{figure*}
@@ -227,11 +280,11 @@ We compare the four segmentation cues using the peak strategy segment utterances
 \begin{figure}[t]
 \centering
 \begin{subfigure}{0.95\linewidth}
-    \includegraphics[width=\linewidth]{Figures/15Segmentation/italian.png}
+    \includegraphics[width=\linewidth]{Figures/15Phonology/italian.png}
 \end{subfigure}
 \hfill
 \begin{subfigure}{0.95\linewidth}
-    \includegraphics[width=\linewidth]{Figures/15Segmentation/french.png}
+    \includegraphics[width=\linewidth]{Figures/15Phonology/french.png}
 \end{subfigure}
 \hfill
 \caption{Relative frequencies of phonemes appearing in word-final positions and all other positions for Italian (top) and French (bottom).}
@@ -243,7 +296,7 @@ We compare the four segmentation cues using the peak strategy segment utterances
 %where the the number of word-final embeddings used to train the probe is equal to the number non-word-final embeddings
 
 \paragraph{Italian has a strong prior for learning word boundaries.}
-\citet{hahn-baroni-2019-tabula} claim that since the probes are trained on balanced examples, % (they must predict that word-final contextual embeddings are word boundaries and these are balanced with non-word-final embeddings during training),
+\citet{hahn-baroni-2019-tabula} claim that since the probes are trained on balanced examples,
 chance accuracy should be 50\%. However, we find that the probes trained on completely untrained models (see \cref{fig:15-probes}) achieve accuracies ranging from 51\% for French up to 68\% for Italian. This is because the balancing procedure does not account for the fact that phonemes have different probability distributions depending on their position within words. For example, in \cref{fig:15-frequencies} we find that at the end of Italian words, a small number of phonemes have particularly high frequencies (the vowels \ttipa{\textturna, o, e} and \ttipa{i} end 84\% of words) whereas the distribution of French word-final phonemes is not as skewed. This skewed distribution provides a useful prior for the Italian probe, which can achieve high accuracies by relying on these phoneme frequencies (the only signal available when using embeddings from an unsupervised model). To measure the relative benefit of each prior, we can compute the \textbf{normalised entropy} of the word-final phoneme distributions in each language, 
 
 $$H_\mathrm{norm}=\frac{H(P)}{H_\mathrm{max}} = \frac{\sum_{i=1}^np_i\log_ip_i}{log_2(n)},$$ 
@@ -264,17 +317,19 @@ This confounding factor means that we cannot easily compare word segmentation sc
 
 \section{Discussion}
 
-In this work, we train BabyLMs on phonemic transcriptions of 31 languages in \ipachildes and explore the word segmentation task as a method for probing these models for phonological knowledge. Our results indicate that prediction-error and utterance boundary probability can be used as cues for unsupervised word segmentation. Our study is the first to use prediction-error extracted from LLMs for unsupervised word segmentation, extending previous work that explicitly calculated these cues using n-gram models \citep{ccoltekin2014explicit, Coltekin2017, goriely2023word}. We also update previous neural models of word recognition \citep{elman-1990-finding, christiansen1998learning} by using modern architectures and evaluating cross-lingually.
+In this work, we train BabyLMs on phonemic transcriptions of 31 languages in \ipachildes and explore the word segmentation task as a method for probing these models for phonological knowledge. Our results indicate that prediction-error and utterance boundary probability can be used as cues for unsupervised word segmentation. Our study is the first to use prediction-error extracted from LLMs for unsupervised word segmentation, extending previous work that explicitly calculated these cues using n-gram models \citep{ccoltekin2014explicit, Coltekin2017, goriely2023word}. We also update previous neural models of word recognition \citep{elman-1990-finding, christiansen1998learning} by using modern architectures and evaluating cross-lingually. We now turn to the broader implications of our findings.
 
-%Our study is the first to use prediction-error extracted from LLMs for unsupervised word segmentation and we compare three strategies for placing boundaries. 
+\paragraph{Statistical learning.} Viewing our models as statistical learners, we find that no single cue or strategy consistently yields the best segmentation performance across different model sizes and languages. This is perhaps unsurprising, as many of the cues are highly interrelated (for example, entropy and surprisal often correlate) and all segmentation strategies are grounded in the same underlying principle: identifying boundaries at points of high prediction uncertainty. It is this general principle, rather than any specific cue or strategy, that proves sufficient for segmenting utterances into word-like units. Nevertheless, most cues and strategies perform reasonably well on their own. Previous segmentation models have explored combining multiple distributional cues through unsupervised majority voting \citep{Coltekin2017, goriely2023word}, an approach that could be fruitfully applied to the cues investigated here in future work.
 
-Comparing models across languages is a challenge. Our study is the first cross-lingual word segmentation study to compare 31 languages, but we identify two confounding factors that inhibit cross-lingual comparison. Firstly, we find that the distribution of phonemes in word-final slots provides a prior not previously accounted for in studies that probed contextual embeddings for word boundary information. Secondly, we find that word length provides a prior for the unsupervised strategies, since randomly placing boundaries yields a higher F1 score when words are shorter, which has not previously been accounted for in cross-lingual word segmentation studies. Nevertheless, both the probes and the unsupervised strategies achieve significant scores for all 31 languages, indicating the importance of the distributional cue for learning to segment speech in any language. These findings also highlight the importance of accounting for frequency information as a prior when training probes or comparing models trained on different datasets.
+\paragraph{Cross-lingual comparison.} Comparing models across languages is a challenge. Our study is the first cross-lingual study using the word segmentation task to compare 31 languages, but we identify two confounding factors that inhibit cross-lingual comparison. Firstly, we find that the distribution of phonemes in word-final slots provides a prior not previously accounted for in studies that probed contextual embeddings for word boundary information. Secondly, we find that word length provides a prior for the unsupervised strategies, since randomly placing boundaries yields a higher F1 score when words are shorter, which has not previously been accounted for in cross-lingual word segmentation studies. Nevertheless, both the probes and the unsupervised strategies achieve significant scores for all 31 languages, indicating the importance of the distributional cue for learning to segment speech in any language. These findings also highlight the importance of accounting for frequency information as a prior when training probes or comparing models trained on different datasets.
 
-%ut these boundaries may not necessarily correspond with lexical units in speech
+\paragraph{Simulating acquisition.} Our results focus on the performance of our models at the end of training, whereas past work has compared the learning dynamics of phoneme-based models to developmental patterns observed in human acquisition \citep{kirov-2018-recurrent}. Although our findings indicate the utility of the distributional cue for identifying word-like units, we do not claim that our models simulate language acquisition. In particular, given recent advances in models that operate directly on raw audio, the use of phoneme-level representations may be insufficient for capturing the full complexity of language learning, as discussed in \cref{app:limitations}.
 
-Throughout this work, we have used word boundaries from orthographic text as the gold labels for evaluation, but these boundaries may not correspond with lexical units in speech. In early stages of acquisition, children may treat both predictable multi-word phrases as single lexical units \citep{macwhinney1978} and unsupervised word segmentation strategies may be segmenting morphemes, rather than words \citep{fleck2008lexicalized}. From an information-theoretic angle, word boundaries may only exist to optimise the trade-off between syntax and morphology across languages \citep{koplenig2017statistical, mosteiro2025word} and in general, what exactly defines a `word' is still up for debate \citep{dixon2002word, haspelmath2023defining}.  %When it comes to using these strategies to model acquisition, it may not be appropriate to use word boundaries from text, and future work could use morph
+Rather, we use this framework to investigate the distributional patterns of phonemes across languages and whether language models trained to predict upcoming phonemes implicitly track meaningful sub-sequences that align with words. While many computational models of word segmentation treat segmentation as a necessary precursor for language understanding, this assumption has been questioned. For example, \citet{Baayen02012016} show that a tri-phone model, operating on unsegmented utterances can make predictions consistent with infants' sensitivity to linguistic structure. Likewise, recent phoneme-level language models perform well on both linguistic benchmarks and downstream tasks without explicit segmentation \citep{goriely2024babble} --- although our results suggest that some degree of implicit segmentation may be occurring to enhance these models' predictive performance. 
 
-Instead of evaluating against word boundaries, we can treat our cues as \emph{graded} measures of co-occurrence statistics, as noted by \citet{elman-1990-finding}. This idea can be leveraged to improve the tokenization step in modern LLM pre-training. Instead of forming subwords by merging frequently occurring byte pairs, token sequences that are highly predictable can be combined. \citet{pagnoni2024byte} apply this concept to a ``token-free'' model, where bytes are joined into `patches' according to the entropy of the probability distribution for each byte (probabilities are computed using a byte-level LLM). They use two constraints for merging bytes which exactly correspond to our threshold and relative segmentation strategies, but only use entropy as a cue. In our experiments, entropy was less effective than utterance boundary probability (UBP) for unsupervised word segmentation and in an initial investigation (see \cref{app:15-tokenizers}) we found that creating a subword tokenizer using both cues improves the linguistic abilities of models trained on phonemes compared to regular BPE and that the UBP cue is more effective than entropy. This creates a parallel between word segmentation research and practical applications for tokenization in NLP and we encourage further work in this area.
+\paragraph{Word boundaries as gold labels.} Throughout this work, we have used word boundaries from orthographic text as the gold labels for evaluation, but these boundaries may not correspond with lexical units in speech. In early stages of acquisition, children may treat both predictable multi-word phrases as single lexical units \citep{macwhinney1978} and unsupervised word segmentation strategies may be segmenting morphemes, rather than words \citep{fleck2008lexicalized}. From an information-theoretic angle, word boundaries may only exist to optimize the trade-off between syntax and morphology across languages \citep{koplenig2017statistical, mosteiro2025word} and in general, what exactly defines a `word' is still up for debate \citep{dixon2002word, haspelmath2023defining}. 
+
+\paragraph{Unsupervised segmentation for tokenization.} Instead of evaluating against word boundaries, we can treat our cues as \emph{graded} measures of co-occurrence statistics, as noted by \citet{elman-1990-finding}. This idea can be leveraged to improve the tokenization step in modern LLM pre-training. Instead of forming subwords by merging frequently occurring byte pairs, token sequences that are highly predictable can be combined. \citet{pagnoni2024byte} apply this concept to a ``token-free'' model, where bytes are joined into `patches' according to the entropy of the probability distribution for each byte (probabilities are computed using a byte-level LLM). They use two constraints for merging bytes which exactly correspond to our threshold and relative segmentation strategies, but only use entropy as a cue. In our experiments, entropy was less effective than utterance boundary probability (UBP) for unsupervised word segmentation and in an initial investigation (see \cref{app:tokenizers}) we found that creating a subword tokenizer using both cues improves the linguistic abilities of models trained on phonemes compared to regular BPE and that the UBP cue is more effective than entropy. This creates a parallel between word segmentation research and practical applications for tokenization in NLP and we encourage further work in this area.
 
 
 
@@ -310,7 +365,9 @@ Phoneme-level language models trained on developmentally plausible corpora are a
 
 We acknowledge the following limitations of our work.
 
-\paragraph{Limitations of phonemic data:} Using phonemic data for the word segmentation task is the typical framework for exploring relevant acquisition theories. However, the phonemic transcriptions in \ipachildes do have limitations. Having been generated using grapheme-to-phoneme (G2P) conversion, they may have been subject to conversion error, and the original transcriptions may also contain errors. The G2P process also removes natural variation in speech, such as accents and allophonic variation. The symbolic nature of phonemes may also be an unrealistic starting point for acquisition; it is unclear if infants have access to phonetic categories at this stage of acquisition \citep{feldman_infants_2021, mcmurray_myth_2022}. When simulating acquisition, a better framework may be to learn to segment directly from audio, as explored in the Zero Resource Speech Challenge \citep{nguyen2020zero, dunbar2021zero}. We do not claim that our phoneme LMs simulate acquisition. Instead, they serve as a useful method for studying phonology at the phoneme level, and examining the distributional properties of speech that could be available to language-learning infants.
+\paragraph{Limitations of phonemic data:} Using phonemic data for the word segmentation task is the typical framework for exploring relevant acquisition theories. However, the phonemic transcriptions in \ipachildes do have limitations. Having been generated using grapheme-to-phoneme (G2P) conversion, they may have been subject to conversion error, and the original transcriptions may also contain errors. The G2P process also removes natural variation in speech, such as accents and allophonic variation. The symbolic nature of phonemes may also be an unrealistic starting point for acquisition; it is unclear if infants have access to phonetic categories at this stage of acquisition \citep{feldman_infants_2021, mcmurray_myth_2022}. Researchers who advocate for using language models as cognitive models argue that the training data should be as developmentally plausible as possible \citep{dupoux-2018-cognitive, warstadt-2022-artificial}, and that phonemes may be as implausible as text for simulating early acquisition \citep{lavechin}.
+
+From this perspective, a more appropriate framework is to learn segmentation directly from raw audio, as pursued in the Zero Resource Speech Challenge \citep{nguyen2020zero, dunbar2021zero}. Audio-based models naturally incorporate prosodic cues, which play a key role in language acquisition \citep{Cutler1987, Jusczyk1993stress, jusczyk-1999-stress-voice}. Unsupervised models have demonstrated the ability to perform statistical learning directly from raw speech \citep{lavechin2022can, seyssel-2023-realistic}, and have found that the resulting units tend to be shorter than phonemes, consistent with early perceptual categories \citep{schatz2021early}. While such models show promising signs of early phonetic learning and perform well on word-level tasks, they currently require significantly more data to match the performance of text-based models \citep{lavechin}. Moreover, training on curated audiobook datasets gives these models a considerable advantage over learning from noisier, long-form audio that better resembles real-world input—but ongoing work is making such realistic simulations increasingly viable \citep{lavechin2024modeling}.
 
 \paragraph{Distribution of languages:} When training models cross-lingually, we were limited by the scale of each language partition of the \ipachildes dataset. The dataset has a very skewed distribution: the EnglishNA section contains 18M words but the Farsi section only contains 43k words. We addressed this skew by training four suites of models in order to provide a cross-lingual comparison while also exploring how segmentation performance increased in scale for the languages with more data available.
 
@@ -409,28 +466,28 @@ All boundary placement F1 scores for the Tiny, Small, Medium and Large suites ar
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.99\linewidth]{Figures/15Segmentation/tiny.png}
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/tiny.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Tiny} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-tiny}
 \end{figure*}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.99\linewidth]{Figures/15Segmentation/small.png}
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/small.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Small} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-small}
 \end{figure*}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.99\linewidth]{Figures/15Segmentation/medium.png}
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/medium.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Medium} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-medium}
 \end{figure*}
 
 \begin{figure*}
     \centering
-    \includegraphics[width=0.99\linewidth]{Figures/15Segmentation/large.png}
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/large.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Large} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-large}
 \end{figure*}
@@ -488,7 +545,7 @@ All word boundary probes for a particular language are trained and tested on the
 
 % \begin{figure*}
 %     \centering
-%     \includegraphics[width=\linewidth]{Figures/15Segmentation/qualitative-threshold.png}
+%     \includegraphics[width=\linewidth]{Figures/15Phonology/qualitative-threshold.png}
 %     \caption{Per-phoneme boundary probability, entropy, loss and rank assigned by the Medium English model for the sequence of utterances ``can I help you by opening your fingers'', ``there'', ``you got it''. Spaces indicate utterance boundaries, vertical lines indicate gold word boundaries and phonemes are marked as green if they are correctly identified as word boundaries using the \textbf{threshold} segmentation strategy for that cue or if they follow an utterance boundary (red otherwise).}
 %     \label{fig:15-qualitative-threshold}
 % \end{figure*}
