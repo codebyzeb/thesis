@@ -70,7 +70,7 @@ In this study, we combine ideas from past computational models for word segmenta
 
 Peaks in predictability can also be observed in neural language models. In the foundational work of \citet{elman-1990-finding}, a simple recurrent network (SRN) is trained to predict letters in an unsegmented sequence (one of the first examples of autoregressive language modeling). Elman observes that the prediction-error increases at the onset of each new word, concluding that ``there is information in the signal that could serve as a cue to the boundaries of linguistic units which must be learned''.
 
-\section{Word Segmentation Task}
+\section{Word segmentation task}
 
 % \emph{Discuss how past work has captured uncertainty in statistical models. Present the various approaches we have come up with for calculating uncertainty in LMs. Discuss the two ways that those uncertainty measures can be used to place word boundaries and the fully supervised method, using a probe or correlation calculations. Perhaps save the `increase in' measures for the appendix since they bloat the paper.}
 
@@ -97,7 +97,7 @@ Finally, in order to explore whether word boundary information is present in the
 
 % \emph{Briefly describe typical metrics for word segmentation and the ones we use here (likely just boundary fscore). For probe, it's either f1 or accuracy.}
 
-\section{Experimental Setup}
+\section{Experimental setup}
 
 We train a suite of GPT-2 models on each of the 31 languages in the \ipachildes corpus. As the size of each subset varies considerably,\footnote{The North American English section contains 10M words but Farsi only contains 40k.} for a fair comparison we must subsample our training data to the size of the smallest subset and use a very small model to prevent over-fitting. In order to explore the use of larger models and more training data, we train four suites of models, each using a different sample size and model size, setting model parameters according to the scaling experiments of \citet{goriely2025}. These suites are detailed in \cref{tab:15-suites} with parameter configurations and training parameters given in \cref{app:15-implementation_details}. The smallest model (only 2 layers) is trained on 100k tokens from all 31 languages, and the largest model (6 layers) is trained on 18M tokens of English. 
 
@@ -123,6 +123,40 @@ For the linear probes, we follow \citet{hahn-baroni-2019-tabula} and report accu
 %Past studies also report precision and recall, as well as type and token scores computed using the lexicon produced by segmentation, but it is difficult to compare scores based on the lexicon due to differences between languages.
 %During training, we reserve 5000 tokens from each language to use for evaluation, kept consistent across suite sizes.
 % For the linear probes, we follow \citet{hahn-baroni-2019-tabula} and report accuracy. They claim that chance performance is 50\% due to the balanced training data, but our results suggest otherwise.
+
+\subsection{Model Parameters and Training Procedure}
+
+\begin{table}[!ht]
+    \centering
+    \small
+    \begin{tabular}{lcccc}
+    \toprule
+         Parameter & Tiny & Small & Medium & Large \\
+    \midrule
+         Layers & 2 & 3 & 6 & 6\\
+         Heads & 4 & 4 & 8 & 8 \\
+         Dropout & 0.3 & 0.3 & 0.3 & 0.1 \\
+         Embedding Size & 128 & 128 & 256 & 512 \\
+         Inner Size & 512 & 512 & 1024 & 2048 \\
+         \midrule
+         Max Example Length & \multicolumn{4}{c}{128} \\
+         Learning Rate & \multicolumn{4}{c}{0.001}\\
+         Optimizer & \multicolumn{4}{c}{AdamW} \\
+         Scheduler Type & \multicolumn{4}{c}{Linear}\\
+         Max Steps & \multicolumn{4}{c}{200k} \\
+         Warm-up Steps & \multicolumn{4}{c}{60k} \\
+         Per Device Batch Size & \multicolumn{4}{c}{32} \\
+    \bottomrule
+    \end{tabular}
+    \caption{Hyperparameter settings for training the GPT-2 architecture in each suite. Vocabulary size varies according to the language, but all other parameters are constant across experiments. Where values are not reported, they may be assumed to be default values.}
+    \label{tab:15-baseline_hyperparams}
+\end{table}
+
+We describe the model and training parameters in \cref{tab:15-baseline_hyperparams}. The model parameters were chosen according to the scaling experiments of \citet{goriely2025}, who trained a suite of GPT-2 models for different subsets of the English section of \ipachildes and used the lexical score in BabySLM \citep{lavechin} to determine the best parameters. We note that since these parameters were optimised for English, there may be better parameters for the other languages, but differences in perplexity between languages were generally larger than the differences in perplexity between models in the scaling experiments we reference.
+
+Data is prepared into batches by first tokenizing the entire dataset, combining all tokens into one long vector, and then splitting the vector into chunks of 128 tokens. Only the very last example is padded, if required. At each step during training, random chunks are selected and combined into batches. 
+
+Checkpoints are taken every 20,000 steps during training. At each checkpoint, the perplexity is evaluated on the held-back evaluation set, and at the end of training the checkpoint with the lowest perplexity is returned as the best model. For the Tiny suite, many of the best models were from the very first checkpoint, since due to the small training dataset and small model, the model had already fit the data by this point.
 
 \section{Experiment: Probing for phonological features}\label{sec:featureprobing}
 
@@ -169,7 +203,7 @@ The results of each probe are provided in \cref{fig:features}. The majority of t
 
 In all 11 languages, the highest result is achieved by the probe for the `syllabic' feature which generally\footnote{In some languages there are also syllabic consonants, which like vowels can act as the nucleus of a syllable.} separates vowels from consonants. As these models only learn to predict phonemes and have no concept of how each phoneme is pronounced, the fact that this separation is learned clearly indicates that vowels and consonants provide a strong distributional signal across languages. The \texttt{consonantal} feature similarly separates vowels from consonants\footnote{This feature indicates an audible constriction of the vocal tract, separating obstruents, nasals, liquids, and trills from vowels, glides and laryngeal segments \citep{gussenhoven2017understanding}.} and is learned by a probe in every language. However, not every feature can be learned by these probes. For instance, the \texttt{delayedRelease} feature, which distinguishes stops from affricates, is not learned by any probe. Our models do not encode the rate of phoneme delivery, so it is unsurprising that a feature that relates to the temporal properties of phonemes is difficult to probe.
 
-\subsubsection*{Distributional Phoneme Clusters}
+\subsubsection*{Distributional phoneme clusters}
 
 To better understand why the probes capture certain phonological features, we examine whether contextual embeddings cluster according to these features. For each language, we sample 50 contextual embeddings per phoneme and label them with their associated phonological features. For each labeling, we then compute the \textbf{silhouette score} for each embedding --- a metric ranging from –1 to 1, where higher values indicate that an embedding is more similar to others in its assigned cluster than to those in neighboring clusters \citep{rousseeuw1987}. Averaging these scores across all embeddings allows us to compare how well different features cluster the phoneme representations, as shown in \cref{fig:silhouette}.
 
@@ -204,7 +238,11 @@ We further visualize this clustering using dendrograms, created by averaging the
 
 We present the results of the word boundary probe in \cref{fig:15-probes} and the maximum boundary F1 scores of our unsupervised segmentation strategies in \cref{fig:15-unsupervised}. The individual scores for each combination of language, suite size, boundary cue and segmentation strategy are provided in \cref{app:15-othersegresults}. %We find that threshold correlation correlates strongly with peak segmentation (at least 0.78) and so in our analysis we focus on peak segmentation, given that it is the fully unsupervised approach and follows from past computational models. We provide full results for both strategies across suite sizes and correlation details in \cref{app:15-othersegresults}.
 
-Overall, both the word boundary probe and the unsupervised strategies successfully identify word boundaries --- all probes achieve accuracies significantly higher than the untrained baseline, as do the unsupervised strategies (see \cref{app:15-significance} for details on significance tests). The probe accuracies show that models implicitly track word boundaries in their contextual embeddings, suggesting that they are learning phonological rules to aid in next-phoneme prediction. The unsupervised segmentation results indicate that word boundaries can be extracted through prediction across many languages, corroborating previous statistical learning results about the role of distributional cues in language acquisition.
+% INSERTED HERE, PREVIOUSLY IN APPENDIX
+All word boundary probes for a particular language are trained and tested on the same evaluation set. We compute significance between two probes using McNemar’s Test \citep{McNemar_1947} over the predicted word boundaries for the evaluation set, with a significance threshold of $p<0.05$. The same procedure is used when comparing the unsupervised methods.
+
+
+Overall, both the word boundary probe and the unsupervised strategies successfully identify word boundaries --- all probes achieve accuracies significantly higher than the untrained baseline, as do the unsupervised strategies. The probe accuracies show that models implicitly track word boundaries in their contextual embeddings, suggesting that they are learning phonological rules to aid in next-phoneme prediction. The unsupervised segmentation results indicate that word boundaries can be extracted through prediction across many languages, corroborating previous statistical learning results about the role of distributional cues in language acquisition.
 
 Below, we analyse these results in more detail.
 
@@ -374,75 +412,7 @@ From this perspective, a more appropriate framework is to learn segmentation dir
 \paragraph{Language coverage:}
 To the best of our knowledge, our work is the most cross-lingual exploration word segmentation to date, but is still limited in language coverage: the languages we compare are predominantly European and Asian, with no languages indigenous to the Americas, Australia or Africa. Word segmentation of languages that are more globally distributed should be explored in future work.
 
-% \paragraph{Cues for segmentation:} Discuss stress?
-
-\section{Implementation Details}\label{app:15-implementation_details}
-
-We conduct our experiments using the \texttt{PyTorch} framework \citep{paszke-etal-2019-pytorch} and the \texttt{Transformers} library \citep{wolf-etal-2020-transformers}.
-
-\subsection{Hardware Details}
-
-We use a server with one NVIDIA A100 80GB PCIe GPU, 32 CPUs, and 32 GB of RAM for all experiments. Below, we report a subset of the output of the \emph{lscpu} command:
-
-\begin{tcolorbox}[left=5pt,right=5pt,top=5pt,bottom=5pt]
-\small
-\begin{verbatim}
-Architecture:        x86_64
-CPU op-mode(s):      32-bit, 64-bit
-Address sizes:       46 bits physical, 
-                     48 bits virtual
-Byte Order:          Little Endian
-CPU(s):              32
-On-line CPU(s) list: 0-31
-Vendor ID:           GenuineIntel
-Model name:          Intel(R) Xeon(R)
-                     Silver 4210R CPU
-                     @ 2.40GHz
-CPU family:          6
-Model:               85
-Thread(s) per core:  1
-Core(s) per socket:  1
-Socket(s):           8
-Stepping:            7
-BogoMIPS:            4800.11
-\end{verbatim}
-\end{tcolorbox}
-
-\subsection{Model Parameters and Training Procedure}
-
-\begin{table}[!ht]
-    \centering
-    \small
-    \begin{tabular}{lcccc}
-    \toprule
-         Parameter & Tiny & Small & Medium & Large \\
-    \midrule
-         Layers & 2 & 3 & 6 & 6\\
-         Heads & 4 & 4 & 8 & 8 \\
-         Dropout & 0.3 & 0.3 & 0.3 & 0.1 \\
-         Embedding Size & 128 & 128 & 256 & 512 \\
-         Inner Size & 512 & 512 & 1024 & 2048 \\
-         \midrule
-         Max Example Length & \multicolumn{4}{c}{128} \\
-         Learning Rate & \multicolumn{4}{c}{0.001}\\
-         Optimizer & \multicolumn{4}{c}{AdamW} \\
-         Scheduler Type & \multicolumn{4}{c}{Linear}\\
-         Max Steps & \multicolumn{4}{c}{200k} \\
-         Warm-up Steps & \multicolumn{4}{c}{60k} \\
-         Per Device Batch Size & \multicolumn{4}{c}{32} \\
-    \bottomrule
-    \end{tabular}
-    \caption{Hyperparameter settings for training the GPT-2 architecture in each suite. Vocabulary size varies according to the language, but all other parameters are constant across experiments. Where values are not reported, they may be assumed to be default values.}
-    \label{tab:15-baseline_hyperparams}
-\end{table}
-
-We describe the model and training parameters in \cref{tab:15-baseline_hyperparams}. The model parameters were chosen according to the scaling experiments of \citet{goriely2025}, who trained a suite of GPT-2 models for different subsets of the English section of \ipachildes and used the lexical score in BabySLM \citep{lavechin} to determine the best parameters. We note that since these parameters were optimised for English, there may be better parameters for the other languages, but differences in perplexity between languages were generally larger than the differences in perplexity between models in the scaling experiments we reference.
-
-Data is prepared into batches by first tokenizing the entire dataset, combining all tokens into one long vector, and then splitting the vector into chunks of 128 tokens. Only the very last example is padded, if required. At each step during training, random chunks are selected and combined into batches. 
-
-Checkpoints are taken every 20,000 steps during training. At each checkpoint, the perplexity is evaluated on the held-back evaluation set, and at the end of training the checkpoint with the lowest perplexity is returned as the best model. For the Tiny suite, many of the best models were from the very first checkpoint, since due to the small training dataset and small model, the model had already fit the data by this point.
-
-\section{Full Word Segmentation Results}\label{app:15-othersegresults}
+\section{Full word segmentation results}\label{app:15-othersegresults}
 
 All boundary placement F1 scores for the Tiny, Small, Medium and Large suites are given in \cref{fig:15-tiny}, \cref{fig:15-small}, \cref{fig:15-medium} and \cref{fig:15-large}, respectively. The best combination of cue and segmentation strategy for each language is given in \cref{tab:15-bestcuesfull}.
 
@@ -537,20 +507,7 @@ All boundary placement F1 scores for the Tiny, Small, Medium and Large suites ar
     \label{tab:15-bestcuesfull}
 \end{table*}
 
-\section{Significance Tests}\label{app:15-significance}
-
-All word boundary probes for a particular language are trained and tested on the same evaluation set. We compute significance between two probes using McNemar’s Test \citep{McNemar_1947} over the predicted word boundaries for the evaluation set, with a significance threshold of $p<0.05$. The same procedure is used when comparing the unsupervised methods.
-
-% \section{Qualitative Analysis of Threshold Segmentation}\label{app:15-qualitative}
-
-% \begin{figure*}
-%     \centering
-%     \includegraphics[width=\linewidth]{Figures/15Phonology/qualitative-threshold.png}
-%     \caption{Per-phoneme boundary probability, entropy, loss and rank assigned by the Medium English model for the sequence of utterances ``can I help you by opening your fingers'', ``there'', ``you got it''. Spaces indicate utterance boundaries, vertical lines indicate gold word boundaries and phonemes are marked as green if they are correctly identified as word boundaries using the \textbf{threshold} segmentation strategy for that cue or if they follow an utterance boundary (red otherwise).}
-%     \label{fig:15-qualitative-threshold}
-% \end{figure*}
-
-\section{Using Word Segmentation Cues for Subword Tokenization}\label{app:15-tokenizers}
+\section{Using word segmentation cues for subword tokenization}\label{app:15-tokenizers}
 
 We briefly explore the use of our unsupervised word boundary cues to create a subword tokenizer. Typically, the vocabularies for these tokenizers are generated using methods like Byte-Pair Encoding \citep{sennrich-etal-2016-bpe}, where the vocabulary initially consists of each individual byte, and pairs of bytes that frequently co-occur in a training dataset are `merged' into a new token, with this process repeated until a fixed vocabulary size is reached. We use the same principle, but base merges on the word boundary cues from a language model trained on the dataset.
 
@@ -585,7 +542,7 @@ In order to test this method, we use the phoneme-level LM trained by \citet{gori
     \label{tab:15-tokenizerresults}
 \end{table}
 
-The results of this experiment are provided in \cref{tab:15-tokenizerresults}. We find that our two tokenizers improve all three scores compared to the BPE tbut instead okenizer with the UBP cue leading to a particularly large improvement for the BabySLM syntactic score.
+The results of this experiment are provided in \cref{tab:15-tokenizerresults}. We find that our two tokenizers improve all three scores compared to the BPE but instead tokenizer with the UBP cue leading to a particularly large improvement for the BabySLM syntactic score.
 
 Our method is similar to \citet{pagnoni2024byte}, who calculate the entropy cue over bytes using a small byte-level LLM, and use either a \textit{global constraint} (corresponding to our threshold segmentation strategy) or a \textit{monotonic constraint} (corresponding to our relative segmentation strategy) in order to group bytes into latent `patches'. These patches are then fed into the main model, a large transformer, and the encoded patches are `unpatched' and fed back into the byte-level LLM to predict the next byte. Future work should investigate whether their method is improved by using the cues explored in this study. When training with word boundaries, the prediction of the space character (or other word boundary characters) could also be used to group bytes.
 

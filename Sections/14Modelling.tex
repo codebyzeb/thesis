@@ -1,5 +1,5 @@
 %\chapter{Modelling Phonemic Streams using Transformer Language Models}\label{chapter:modelling}
-\chapter{Establishing phoneme-based LM pre-training}\label{chapter:modelling}
+\chapter{The effect of phoneme-based input in LM pre-training}\label{chapter:modelling}
 
 Language models are typically trained on large corpora of text in their default orthographic form. However, this is not the only option; representing data as streams of phonemes can offer unique advantages, from deeper insights into phonological language acquisition to improved performance on sound-based tasks. The challenge lies in evaluating the impact of phoneme-based training, as most benchmarks are also orthographic. To address this, we develop a pipeline to convert text datasets into a continuous stream of phonemes. We apply this pipeline to the 100-million-word pre-training dataset from the BabyLM challenge, as well as to standard language and grammatical benchmarks, enabling us to pre-train and evaluate a model using phonemic input representations. Our results show that while phoneme-based training slightly reduces performance on traditional language understanding tasks, it offers valuable analytical and practical benefits. 
 
@@ -205,7 +205,7 @@ Comparing the \mbox{GPT-2} model with no input transformations (top row) to the 
 
 In \cref{sec:14-effect} we investigate this result further through an ablation of the three transformations, noting the effect of punctuation and context size. In \cref{sec:14-babyslm} we focus on the BabySLM metrics, which demonstrate a different pattern to the other benchmarks. Finally, in \cref{sec:14-punctuation} we investigate the consequences of removing punctuation in our phonemic transcriptions.
 
-\subsection{Teasing Apart the Three Transformations}\label{sec:14-effect}
+\subsection{Teasing apart the three transformations}\label{sec:14-effect}
 
 By running our GPT-2 model with all eight combinations of the three input adjustments, we can tease apart the effect of each transformation.
 
@@ -217,13 +217,46 @@ By running our GPT-2 model with all eight combinations of the three input adjust
 \vspace{-4mm}
 \end{figure}
 
+
+
 For each transformation, we can create four pairs of runs that only differ with respect to that transformation (e.g.\ the four runs with a phonemic transcription and the four runs with orthographic text). For each pair, we calculate the percentage increase in each metric caused by the transformation. In \cref{fix:14-condition-differences} we plot the average of these four percentage differences, allowing us to identify the overall effect of each transformation. We can also use the averaged scores for each subtask within a benchmark (such as the 67 BLiMP subtasks) to assess whether differences are significant for BLiMP, BLiMP Supplement, GLUE and BabySLM (Syntactic) using a paired $t$-test (see \cref{sec:14-significance} for details and $p$-values for each test conducted).
 
-\paragraph{Character Tokenization} We find that character tokenization does not significantly decrease performance on BLiMP or BLiMP Supplement compared to subword tokenization. This validates previous work which found that despite the higher computation costs, character-based language models are just as capable of learning language \citep{al-rfou_character-level_2019, hahn-baroni-2019-tabula}. We do find a significant decrease for GLUE but this may be due to the fact that many of the finetuning examples for GLUE are very long and our model's context size is only 128 tokens, leading to severe truncation. As character-based tokenizers output more tokens for the same sentence than BPE tokenizers, this means that for many GLUE tasks, necessary information is lost.
+\paragraph{Character tokenization} We find that character tokenization does not significantly decrease performance on BLiMP or BLiMP Supplement compared to subword tokenization. This validates previous work which found that despite the higher computation costs, character-based language models are just as capable of learning language \citep{al-rfou_character-level_2019, hahn-baroni-2019-tabula}. We do find a significant decrease for GLUE but this may be due to the fact that many of the finetuning examples for GLUE are very long and our model's context size is only 128 tokens, leading to severe truncation. As character-based tokenizers output more tokens for the same sentence than BPE tokenizers, this means that for many GLUE tasks, necessary information is lost.
 
 \paragraph{Word boundary removal} We find that removing word boundaries significantly decreases the BLiMP score, but the decreases for BLiMP Supplement and GLUE are not significant.\footnote{Since there are only 5 tasks for BLiMP Supplement it is difficult to get a $p$-value below 0.05.} In their investigation, \citet{nguyen-2022-word-boundaries} found a decrease of 7-8\% on their own phonemic version of BLiMP when word boundaries were removed, but here we observe only an average decrease of 3.7\%. As they only trained 3-layer LSTMs, it is possible that larger models like ours are required to overcome the loss of word boundaries.
 
-\paragraph{Phonemic Transcription} Finally, we find that using a phonemic transcription instead of the original written text significantly decreases performance on BLiMP and GLUE, although the percentage decreases are small (3.5\% and 1.5\% respectively). It also leads to the largest decrease of 11.3\% for BLiMP Supplement. We discuss a possible explanation for this particular decrease in \cref{sec:14-punctuation}.
+\paragraph{Phonemic transcription} Finally, we find that using a phonemic transcription instead of the original written text significantly decreases performance on BLiMP and GLUE, although the percentage decreases are small (3.5\% and 1.5\% respectively). It also leads to the largest decrease of 11.3\% for BLiMP Supplement. We discuss a possible explanation for this particular decrease in \cref{sec:14-punctuation}.
+
+
+\subsection{Significance Tests}
+\label{sec:14-significance}
+
+\begin{table*}[t]
+    \centering
+    \small
+    \begin{tabular}{l|cccc}
+     & BLiMP&BLiMP Supplement & GLUE & BabySLM (Syntactic) \\
+\hline
+orthographic vs.\ phonemic & \textbf{0.0001} & 0.0780 & \textbf{0.0149} & 0.1884 \\
+word boundaries vs.\ no word boundaries & \textbf{0.0000} & 0.1831 & 0.0813 & \textbf{0.0118} \\
+character tokenization vs.\ subword tokenization & 0.5069 & 0.4832 & \textbf{0.0010} & 0.1500 \\
+    \end{tabular}
+    \caption{$p$-values from the paired student t-tests for each experiment. Significant results are given in \textbf{bold} using an alpha level of 0.05.}
+    \label{tab:14-pvalues}
+\end{table*}
+
+
+It is difficult to determine whether the results for a given benchmark are significant given that we only train a single run for each of the eight conditions. Instead, we calculate the significance of a particular transformation by comparing the scores for each subtask of a benchmark. We average the scores achieved by the four models with a transformation applied and average the scores achieved by the four models without the transformation applied, giving us paired results for each subtask. We then use a paired student $t$-test to assess the significance of the transformation. We give the $p$-values for our significance tests in \cref{tab:14-pvalues}.
+
+Note that there are 67 subtasks for BLiMP, 5 for BLiMP Supplement, 9 for GLUE and 9 for BabySLM (Syntactic). With only 5 pairs for BLiMP Supplement, 
+%it is difficult to beat the significance level of 0.05.
+the test is under-powered and low $p$-values are unlikely. There are no subtasks for BabySLM (Lexical) so significance cannot be computed in the same way. 
+
+
+%The lack of large, high-quality evaluation benchmarks for these languages, however, remains a considerable challenge. 
+
+%Perhaps language models trained on other languages would not show such a gap in performance, perhaps we have just created the best architectures for english orthographic text.
+
 
 \subsection{BabySLM}
 \label{sec:14-babyslm}
@@ -238,7 +271,7 @@ The removal of word boundaries has a contrasting effect on the two scores. It re
 
 For the syntactic score, the worst scores are achieved by the models that learn subwords without word boundaries. For these models, the BPE algorithm is essentially acting as an unsupervised word segmentation algorithm learning to split entire sentences into useful units. With a vocabulary size of 16,000, it seems we learn units smaller than words (morpheme-sized units such as ``un'' in \cref{table:results}) but also units that cross word boundaries (such as ``acon'' in \cref{table:results}). The resulting implicit subword boundaries seem to have particular consequences when evaluating the shorter BabySLM sentences. Using the BPE algorithm in this way could be of interest for word segmentation studies. 
 
-\subsection{The Effect of Punctuation}
+\subsection{The effect of punctuation}
 \label{sec:14-punctuation}
 
 Punctuation is a feature of written text that is rarely included in phonemic transcriptions, as it does not typically change the way that words are pronounced. However, punctuation in written text does carry important meaning about the structure and tone of sentences. In speech, this information is typically conveyed through intonation, stress and rhythm. By simply stripping punctuation in our phonemic transcriptions, we may be removing information that is important for a model's ability to learn and process language. 
@@ -275,7 +308,7 @@ This reliance on punctuation seems to be the leading cause of the drop in perfor
 There is another subtle yet crucial consequence of removing punctuation: stripping punctuation at the end of sentences, if not handled correctly, can lead to significant decreases in performance on these benchmarks. This is because without an end-of-sentence marker, certain evaluation examples are no longer valid. In order to mark the end of the sentences without punctuation, we needed to ensure that our dedicated sentence-separation token was added to the end of each evaluation instance. The effect of this adjustment is highlighted in \cref{fix:14-endofsentencetoken}. The increase in BLiMP score for our phonemic models confirms that this change was necessary and highlights the importance of carefully investigating the role of tokenization in the evaluation of large language models. We discuss this effect further in \cref{sec:14-endofsentence}.
 
 
-\subsection{The Effect of End-of-Sentence Tokens}
+\subsection{The effect of end-of-sentence tokens}
 \label{sec:14-endofsentence}
 
 By default, our tokenizers add a special start-of-sentence token \texttt{UTT\_BOUNDARY} to all sentences. This corresponds to the \texttt{<s>} token often used by tokenizers to help transformers with sentence-level processing, and also represents utterance boundaries, which unlike word boundaries are a clear cue present in speech and often included in word segmentation studies \citep{feliciano-de-faria-2019-utterance-boundaries}. 
@@ -345,7 +378,7 @@ Here, we use \ipachildes and BabySLM to establish the scaling laws of phoneme LM
 
 The scaling graphs for the lexical and syntactic scores are given in \cref{fig:babyslm}. For every model size, performance increases with more training data but for a particular data size the largest model is not always the best. For instance, the second smallest model is the best choice for the lexical task if only 300 thousand tokens of data are available, likely due to larger models over-fitting with a sample this small (even with high dropout). It is also clear that although small models with very little data seem to acquire phonological knowledge (as measured by the lexical score), much more data is required to achieve syntactic scores past 60, in line with the results of \citet{lavechin} and \citet{goriely2024babble}. The best model parameters for each score and data size are given in \cref{sec:best-model-parameters}.
 
-\subsection{Model Parameters and Training Procedure}
+\subsection{Model parameters and training procedure}
 
 \begin{table}[t!]
     \centering
@@ -375,7 +408,7 @@ Checkpoints are taken every 20,000 steps during training. At each checkpoint, th
 
 In our size requirement experiment (see \cref{sec:13-sizerequirements}), we train each model in \cref{tab:13-model_sizes} using a dropout of 0.1, 0.3 and 0.5 on each subset size of the EnglishNA portion of \ipachildes.
 
-\subsection{Best Phoneme LM Parameters Across Data Scales}\label{sec:13-best-model-parameters}
+\subsection{Best phoneme LM Parameters across data scales}\label{sec:13-best-model-parameters}
 
 
 Following the size experiment in \cref{sec:13-sizerequirements}, we report the model size and dropout values that achieved the highest BabySLM scores for each subsample size of the EnglishNA portion of \ipachildes in \cref{tab:13-best_sizes}. 
@@ -389,7 +422,7 @@ In this work, we set out to establish whether modern language model architecture
 
 In this section, we consider explanations for the difference in performance across the benchmarks and discuss the limitations of phonemic transcriptions and our monolingual approach. Our work also has implications for human acquisition investigations and studies that train models directly from raw audio, which we discuss in \cref{sec:14-further}.
 
-\subsection{The Effect of Input Transformations}
+\subsection{The effect of input transformations}
 
 There are many possible explanations for the decrease in performance for BLiMP, BLiMP Supplement and GLUE. In \cref{sec:14-evaluation} and \cref{sec:14-punctuation} we discuss two possibilities; the fact that character tokenization causes more substantial truncation (affecting GLUE) and the fact that phonemic transcriptions do not include punctuation (which particularly affects BLiMP Supplement). Another factor to consider is that although we do not change the GPT-2 architecture or training parameters, the vocabulary size does change, which affects the size of the embedding layer. Character tokenization also leads to reduced exposure to each sentence during training (fewer epochs) because each sentence is represented with more tokens, increasing the number of steps required for each epoch. Furthermore, our initial choice of model parameters may have implicitly favoured the standard orthographic input representation given that the language modelling community has been collectively optimizing these architectures to learn representations for written text, not phonemic streams. Just as the BabyLM challenge seeks to find solutions for low-resource language modelling, we may require an equivalent challenge to identify new methods and architectures for a phonemic input representation. 
 
@@ -430,37 +463,6 @@ Our study explores the effect of training language models using phonemic input r
 %We encourage further research into phonemic input training  to advance our understanding of language models and their applications.
 
 % one of the key advantages of language models—the reliance on orthographic text—and examines how this factor influences their performance. We find that replacing orthographic text with more speech-like representations often leads to a decline in performance across various language understanding tasks and syntactic abilities. Our work highlight the importance of considering data representation in language acquisition research and offers straightforward preprocessing methods as a step toward more human-like input for language models.]
-
-\section{Evaluation Details}
-
-\subsection{Significance Tests}
-\label{sec:14-significance}
-
-\begin{table*}[t]
-    \centering
-    \small
-    \begin{tabular}{l|cccc}
-     & BLiMP&BLiMP Supplement & GLUE & BabySLM (Syntactic) \\
-\hline
-orthographic vs.\ phonemic & \textbf{0.0001} & 0.0780 & \textbf{0.0149} & 0.1884 \\
-word boundaries vs.\ no word boundaries & \textbf{0.0000} & 0.1831 & 0.0813 & \textbf{0.0118} \\
-character tokenization vs.\ subword tokenization & 0.5069 & 0.4832 & \textbf{0.0010} & 0.1500 \\
-    \end{tabular}
-    \caption{$p$-values from the paired student t-tests for each experiment. Significant results are given in \textbf{bold} using an alpha level of 0.05.}
-    \label{tab:14-pvalues}
-\end{table*}
-
-
-It is difficult to determine whether the results for a given benchmark are significant given that we only train a single run for each of the eight conditions. Instead, we calculate the significance of a particular transformation by comparing the scores for each subtask of a benchmark. We average the scores achieved by the four models with a transformation applied and average the scores achieved by the four models without the transformation applied, giving us paired results for each subtask. We then use a paired student $t$-test to assess the significance of the transformation. We give the $p$-values for our significance tests in \cref{tab:14-pvalues}.
-
-Note that there are 67 subtasks for BLiMP, 5 for BLiMP Supplement, 9 for GLUE and 9 for BabySLM (Syntactic). With only 5 pairs for BLiMP Supplement, 
-%it is difficult to beat the significance level of 0.05.
-the test is under-powered and low $p$-values are unlikely. There are no subtasks for BabySLM (Lexical) so significance cannot be computed in the same way. 
-
-
-%The lack of large, high-quality evaluation benchmarks for these languages, however, remains a considerable challenge. 
-
-%Perhaps language models trained on other languages would not show such a gap in performance, perhaps we have just created the best architectures for english orthographic text.
 
 \section{Related work}
 
