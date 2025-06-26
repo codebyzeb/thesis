@@ -550,3 +550,19 @@ Our method is similar to \citet{pagnoni2024byte}, who calculate the entropy cue 
 \section{Related Work}
 
 \citet{bunzeck-etal-2025-small} use a similar approach in order to compare grapheme LMs to phoneme LMs. They also use two probing tasks to examine the representations of sentences; age prediction and rhyme prediction.
+
+
+
+
+
+
+% Copied from ipa childes paper
+
+Our \gpp tool also provides new avenues for linguistic analysis by ensuring that phonemes produced for each language are consistent with established inventories in \phoible. This not only addresses transcription errors, but also allows for the use of distinctive feature information provided by \phoible in analysis. We demonstrate this by training linear probes to extract distinctive features from the contextual embeddings of phonemes learned by our monolingual models. We find that certain features (e.g. \texttt{consonantal}) emerge solely from the distributional properties across all 11 languages, while others (e.g. \texttt{delayedRelease}) do not. 
+
+Our resources could also support the training of self-supervised speech models \citep[e.g.][]{hsu2021hubert}. These models are trained directly on audio and lag behind phoneme or text-based models, often requiring several orders of magnitude more data to learn semantic representations \citep{cuervo2024scaling}, but recent work has found that fine-tuning on phoneme classification can reduce this gap \citep{feng-2023-language-universal-phonetic, poli2024improving}. Our work is closely related to recent efforts in low-resource cross-lingual language modelling --- for example, the Goldfish suite of monolingual models spanning 350 languages, some trained on as little as 5MB of orthographic text \citep{chang2024goldfish}.
+
+IPA is also a more universal representation than orthographic text, which varies considerably across languages, with multilingual IPA models proving to be effective for force-alignment \citep{zhu-etal-2024-taste} and zero-shot cross-lingual NER \citep{sohn2024zero}. In this study we only train monolingual models, but future work could extend this to the multilingual setting.
+
+
+We demonstrate the utility of these resources for phonological analysis using phoneme LMs by extending prior work to the cross-lingual setting. Our results establish the corpus size requirements for phoneme LMs trained on developmentally plausible corpora and we show that models trained on 11 languages effectively implicitly encode distinctive features. These findings support the role of phoneme LMs in studying emergent phonology. 
