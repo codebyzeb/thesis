@@ -211,11 +211,40 @@
 \newcommand{\bytelm}{p}
 
 \newcommand{\llama}{LLaMA\xspace}
+\newcommand{\gpt}{\myemph{\mbox{GPT-2}}\xspace}
+\newcommand{\bert}{\myemph{BERT}\xspace}
+\newcommand{\babyberta}{\myemph{BabyBERTa}\xspace}
 
 \newcommand{\renyi}{R\'enyi\xspace}
 \newcommand{\bpe}{\myemph{BPE}\xspace}
 \newcommand{\bpewp}{\myemph{BPE-WP}\xspace}
 \newcommand{\wordpiece}{\myemph{WP}\xspace}
+
+
+
+
+\usepackage[table-column-type=s]{siunitx}
+\sisetup{
+    mode = math, 
+    text-family-to-math = true, 
+    text-series-to-math = true, 
+    reset-math-version = false, 
+    quantity-product
+}
+\DeclareSIUnit\thousand{k}
+\DeclareSIUnit\million{M}
+\DeclareSIUnit\billion{B}
+\DeclareSIUnit\trillion{T}
+\DeclareSIUnit\x{x}
+\DeclareSIUnit\percent{\%}
+\DeclareSIUnit\hour{h}
+\DeclareSIUnit\min{m}
+\DeclareSIUnit\sec{s}
+\DeclareSIUnit\gb{GB}
+\newcommand{\integer}[1]{\num[mode = math, round-mode=places, round-precision=0, group-separator={,}, group-minimum-digits=4]{#1}\xspace}
+\newcommand{\float}[2][1]{\num[group-digits=false, round-precision=#1, round-mode=places]{#2}\xspace}
+\newcommand{\snum}[1]{\num{#1}\xspace}
+\newcommand{\q}[2]{\qty[mode=math]{#1}{#2}\xspace}
 
 \DeclareMathOperator*{\argmin}{argmin}
 \DeclareMathOperator*{\argmax}{argmax}
