@@ -86,6 +86,9 @@ The output of the final transformer block is passed to a token prediction layer,
 
 Here, \gpt models across seven sizes are considered, ranging from 400k parameters to 85M parameters, as summarised in \cref{tab:14-model_sizes}. Following the conventions of the Pythia suite of models \citep{biderman2023pythia}, the number of non-embedding parameters are reported. Unlike their suite, where models are named according to the number of parameters, here models are only referenced according to the number of non-embedding parameters. This is because the same architecture is used with different tokenisers, each of which has a different vocabulary size according to the number of, which alters the number of embedding parameters. The \q{1}{\million}, \q{19}{\million} and \q{85}{\million}-parameter LMs are equivalent to \myemph{Pythia-14M}, \myemph{Pythia-70M} and \myemph{Pythia-160M}, respectively. Whereas the Pythia suite contains much larger models to study the scaling properties at larger scales, here smaller models are implemented in order to study the scaling properties of phoneme LMs trained on smaller phonemic datasets.
 
+% We describe the model and training parameters in \cref{table:baseline_hyperparams}. The model parameters were chosen to match those of the Pythia-170M model from the Pythia suite \citep{biderman2023pythia}. The model has 85M non-embedding parameters and is also equivalent in size to GPT-Neo 125M and OPT-125M. The Pythia models use the GPTNeoX architecture which is slightly different to GPT-2. In initial experiments, we found that GPT-2 performed better on the benchmarks across all eight of our conditions. 
+
+
 The default training parameters are provided in \cref{tab:14-trainingparams}. During training, data is prepared into batches by first tokenising the entire dataset, combining all tokens into one long vector, then splitting the vector into chunks of \integer{128} tokens. Only the very last example is padded, if required. At each step during training, random chunks are selected and combined into batches. Checkpoints are taken at every \q{10}{\percent} of training, with the best checkpoint chosen at the end of training according to perplexity on a held-out validation set.%Our training scripts are available \href{https://github.com/codebyzeb/PhonemeTransformers}{here}.
 
 % We train the model using all eight tokenizers (using the phonemized dataset for the phoneme-based tokenizers) for 400k steps, selecting the checkpoint with the lowest perplexity.\footnote{The best checkpoint for five of the eight models was the final checkpoint but a visual inspection of the curve revealed that differences between the final checkpoints were minimal.} See \cref{app:14-implementation_details} for a full description of the chosen model parameters and training procedure.
@@ -123,12 +126,12 @@ The default training parameters are provided in \cref{tab:14-trainingparams}. Du
             Learning Rate & 0.001\\
             Optimizer & AdamW \\
             Scheduler Type & Linear\\
-            Max Steps & 400k \\
-            Warm-up Steps & 90k \\
+            Max Steps & 200k \\
+            Warm-up Steps & 60k \\
             Per Device Batch Size & 32 \\
             \bottomrule
         \end{tabular}
-        \caption{Hyperparameter settings for training the \gpt architecture. Where values are not reported, they may be assumed to be default values.}
+        \caption{Hyperparameter settings for training the \gpt architecture. Vocabulary size varies according to the tokeniser, but all other parameters are constant across experiments. Where values are not reported, they may be assumed to be default values.}
         \label{tab:14-trainingparams}
     \end{minipage}
 \end{table}
@@ -175,9 +178,9 @@ Note that the vocabulary size for the character-level tokenizers operating on ph
     \label{table:results}
 \end{table*}
 
-\section{Experiment: Phoneme-based pre-training}
+\section{Experiment: Phoneme-based pre-training}\label{sec:14-phonemepretraining}
 
-This experiment explores the impact of phoneme-based pre-training by training a set of models that only differ according to the input representation. The \q{85}{\million}-parameter \gpt model is trained using each of the eight tokenisers (using the phonemic data for the phoneme-based tokenisers), using the training procedure described in \cref{sec:14-phonemearchitecture}. The only difference during training is the tokeniser used, allowing the effect of the input representation to be established through evaluation on BLiMP, GLUE and BabySLM. The trained models are hosted on Huggingface, along with the eight tokenisers.\footnote{\href{https://huggingface.co/collections/phonemetransformers/from-babble-to-words-66e068b54765a48ff30273c9}{\myemph{huggingface.co/collections/phonemetransformers/from-babble-to-words-66e068b54765a48ff30273c9}}}
+This experiment explores the impact of phoneme-based pre-training by training a set of models that only differ according to the input representation. The \q{85}{\million}-parameter \gpt model is trained using each of the eight tokenisers (using the phonemic data for the phoneme-based tokenisers), using the training procedure described in \cref{sec:14-phonemearchitecture}.\footnote{As these models are larger and trained on more data, \q{400}{\thousand} steps are used, with a warmup of \q{90}{\thousand}.} The only difference during training is the tokeniser used, allowing the effect of the input representation to be established through evaluation on BLiMP, GLUE and BabySLM. The trained models are hosted on Huggingface, along with the eight tokenisers.\footnote{\href{https://huggingface.co/collections/phonemetransformers/from-babble-to-words-66e068b54765a48ff30273c9}{\myemph{huggingface.co/collections/phonemetransformers/from-babble-to-words-66e068b54765a48ff30273c9}}}
 
 Two baseline models are used; the best-performing models from the first edition of the BabyLM challenge. These are \myemph{Baby Llama}, an auto-regressive model trained using knowledge distillation from an ensemble of teachers \citep{timiryasov-tastet-2023-baby}, and \myemph{LTG-BERT}, an architectural variation of the standard auto-encoding \bert architecture optimized for small, speech-based corpora \citep{samuel-etal-2023-trained, charpentier-samuel-2023-layers}. Both models use a \bpe tokenizer with a vocabulary size of \q{16}{\thousand} and were trained on the BabyLM dataset by the organisers of the BabyLM challenge, acting as official baselines for the second edition of the challenge \citep{hu-etal-2024-findings}. Both models are similar in size to the \gpt model used here --- \myemph{Baby Llama} has \q{41}{\million} non-embedding parameters and \myemph{LTG-BERT} has \q{110}{\million}.
 
@@ -383,7 +386,6 @@ This chapter has explored the effect of training LMs using a phoneme-based input
 \Zeb{finish this}
 
 This chapter also established the best parameters to use for different data scales. These parameters are used to train cross-lingual phoneme LMs for phonological experimentation in \cref{chapter:phonology}. Considering alternative combinations of transformations also created novel input representations --- for instance, using \bpe without word boundaries resembles unsupervised word segmentation algorithms. This idea is further explored in \cref{chapter:infotokenisation}, which proposes a novel ...
-
 
 
 % Our study explores the effect of training language models using phonemic input representations, which offer both analytical and practical advantages. We develop a pipeline to convert orthographic datasets into a continuous stream of phonemes and leverage this pipeline to train a language model on phoneme streams and evaluate its grammatical and language understanding abilities. Our findings suggest that while phoneme-based input representations result in a slight decrease in model performance on traditional language understanding tasks, it is nonetheless a feasible training paradigm, facilitating future language modelling work, improving phonological interpretability and enhancing speech-based applications.  

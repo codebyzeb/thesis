@@ -35,6 +35,11 @@
 \RequirePackage{amsthm}    % adds envs for theorems, lemmas, etc
 \RequirePackage{bbm}       % mainly used for \mathbbm{1}
 
+\RequirePackage{algorithm}
+% \newcommand{\theHalgorithm}{\arabic{algorithm}}
+\RequirePackage{algorithmic}
+
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Style (Changing the visual style of chapter headings and stuff.)
 %%
@@ -80,7 +85,6 @@
 \setlength\cellspacebottomlimit{4pt}
 \RequirePackage{setspace}
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% References (special style etc.)
 %%
@@ -102,8 +106,7 @@
 \newtheorem{example}{Example}[chapter]
 
 \tcbuselibrary{theorems}
-\newtcbtheorem{question}{Research Question}%
-{colback=green!5,colframe=green!35!black,fonttitle=\bfseries}{qu}
+\newtcbtheorem{question}{Research Question}{colback=green!5,colframe=green!35!black,fonttitle=\bfseries}{qu}
 
 % For boxes
 \RequirePackage[nobreak=true]{mdframed}
@@ -117,6 +120,7 @@
 \RequirePackage{tablefootnote}
 \RequirePackage{threeparttable}
 \RequirePackage{rotating}
+\RequirePackage{adjustbox}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -215,7 +219,6 @@
 \newcommand{\bert}{\myemph{BERT}\xspace}
 \newcommand{\babyberta}{\myemph{BabyBERTa}\xspace}
 
-\newcommand{\renyi}{R\'enyi\xspace}
 \newcommand{\bpe}{\myemph{BPE}\xspace}
 \newcommand{\bpewp}{\myemph{BPE-WP}\xspace}
 \newcommand{\wordpiece}{\myemph{WP}\xspace}
@@ -281,4 +284,23 @@
 \newcommand{\writemore}{{\color{red} ... (write more)}\xspace}
 \newcommand{\defn}[1]{\textbf{#1}}
 \newcommand{\vs}{\emph{vs.}\@\xspace}
-\newcommand{\fscore}{$F_1$ score}
+\newcommand{\fscore}{$F_1$ score\xspace}
+\newcommand{\fscores}{$F_1$ scores\xspace}
+
+
+% BYTE-SPAN DEFINITIONS
+
+\newcommand{\tokname}{\myemph{ByteSpan}\xspace}
+\newcommand{\thres}{\theta}
+
+\definecolor{customgreen}{HTML}{3BAE2E}
+\definecolor{customred}{HTML}{D13438}
+\definecolor{customyellow}{HTML}{E0A000}
+\newcommand{\green}[1]{\textcolor{customgreen}{#1}}
+\newcommand{\red}[1]{\textcolor{customred}{#1}}
+\newcommand{\yellow}[1]{\textcolor{customyellow}{#1}}
+\newcommand{\commoncorpus}{\myemph{Common-Corpus}\xspace}
+\newcommand{\fineweb}{\myemph{FineWeb-Edu}\xspace}
+\newcommand{\renyi}{R\'enyi\xspace}
+\newcommand{\minipile}{\myemph{MiniPile}\xspace}
+\newcommand{\blimp}{\myemph{BLiMP}\xspace}

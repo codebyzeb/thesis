@@ -1,0 +1,455 @@
+\chapter{Information-Driven Subword Tokenisation}\label{chapter:infotokenisation}
+
+% ABSTRACT
+
+Recent dynamic tokenisation methods operate directly on bytes and pool their latent representations into \textit{patches}. This bears similarities to computational models of word segmentation that determine lexical boundaries using spikes in an autoregressive model's prediction error. Inspired by this connection, we explore whether grouping predictable bytes---rather than pooling their representations---can yield a useful fixed subword vocabulary. We propose a new information-driven subword tokeniser, \tokname, that uses an external byte-level LM during training to identify contiguous predictable byte sequences and group them into subwords. Experiments show that \tokname yields efficient vocabularies with higher morphological alignment scores than \bpe for English. Multilingual experiments show similar compression and \renyi efficiency for \integer{25} languages. 
+
+% INTRO
+
+Modern language models (LMs) process text as sequences of \textit{byte\footnote{We use \textit{bytes} and \textit{characters} interchangeably.} spans}, or \defn{subwords}, to improve computational efficiency \citep{zouhar-etal-2023-tokenization}.  Processing raw bytes leads to longer sequences, while operating on words requires a large vocabulary.  Subword tokenisation---i.e., grouping bytes into subwords drawn from a fixed, finite vocabulary---offers a balance but is sensitive to spelling \citep{chai-etal-2024-tokenization} and has inconsistent compression rates across languages \citep{rust-etal-2021}. 
+
+To remove the LMs' dependence on tokenisers while preserving computational efficiency, recent work on tokenisation proposes to operate directly on bytes and pool their representations into \textit{patches}. These patches are created either by pooling fixed-length spans (\citealp{dai-etal-2020-funnel, nawrot-etal-2022-hierarchical, yu2023megabyte}, \textit{inter alia}) or by dynamically pooling predictable byte sequences within a context window \citep{nawrot-etal-2023-efficient, pagnoni2024byte}.
+
+Dynamic patching relies on trainable model components and unwittingly mirrors work in child language acquisition, where computational models---ranging from \ngrams to Transformers \citep{vaswani2017attention}---are used to study how children may use distributional statistics to group predictable sequences of \textit{phonemes} into words. As with dynamic patching, these methods draw on the simple principle that predictability within lexical units is high, and predictability between lexical units is low \citep{harris1955}. Inspired by this connection, we explore whether grouping predictable bytes---rather than pooling their representations---can yield a useful fixed subword vocabulary.
+
+We propose a new information-driven tokeniser, \tokname, which uses an external byte-level LM to identify predictable contiguous byte sequences, using entropy or surprisal as measures of information. Byte spans are identified using a global threshold constraint, a monotonic constraint, or a combination of the two, and we propose several methods for using byte spans identified in a training corpus to create a subword vocabulary. We use these methods to train English and multilingual tokenisers and compare them to \bpe across vocabulary sizes. Intrinsic results show that our method yields higher morphological alignment scores and higher \renyi efficiency scores for most vocabulary sizes, without compromising compression. Our multilingual experiments show similar \renyi efficiency and fertility to \bpe across 25 languages and we propose methods for balancing a vocabulary to efficiently tokenise rare orthographies. 
+
+\section{ByteSpan Subword Tokenisation}\label{sec:16-bytespan}
+
+Our method, \tokname, uses an external byte-level LM during training to identify predictable byte sequences and group them into subwords. During inference, the resulting vocabulary can be paired with any standard tokenisation function (e.g., longest-prefix match) and modern LM (e.g., \citealp{touvron-2023-llama}) without modifications. 
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.8\linewidth]{16InfoTok/example.png}
+    \caption{\textbf{Information-Driven Subword Creation.}
+    Per-byte \textbf{surprisal} of \textit{\enquote{molecules are unstable and periodically evaporate}} from a byte-level LM. \tokname groups contiguous bytes using one of three constraints; the \red{global constraint} uses a fixed threshold, the \yellow{monotonic constraint} groups bytes with decreasing information and the \green{combined constraint} groups bytes that meet either constraint. Grey vertical lines indicate pre-tokenisation boundaries.
+    }
+    \label{fig:16-example}
+\end{figure}
+
+
+\subsection{Motivation}\label{sec:16-motivation}
+
+
+This method is related to the work of \citet{pagnoni2024byte}, who group bytes into dynamic `patches' according to their entropies, as given by a byte-level LM. They experiment with two methods to identify patch boundaries; their \textbf{global constraint} identifies bytes whose entropies exceed a fixed threshold and their \textbf{monotonic constraint} identifies bytes whose entropies decrease monotonically. A \textbf{patching function} then segments a stream of bytes into patches that are fed through a latent transformer, with predicted patches decoded by the smaller byte-level LM. Conceptually, this smaller LM can make the relatively `easy' next-byte predictions given the low entropy of each byte within the patch. 
+
+% \zeb{I'm not sure this paragraph fits here, maybe we move this to the discussion?} Our proposed approach is also related to work on \textbf{dynamic tokenisation} (e.g., \citet{feher2024retrofitting}) that adaptively adjusts token boundaries using an update function \(\mathcal{U}\) to update an initial tokeniser \(<\mathcal{V}_{\text{init}}, \mathcal{T}_{\text{init}}>\): 
+% \[ \mathcal{T}_{\text{new}} (\mathcal{D}) =  \mathcal{U} (\mathcal{T}_{\text{new}} (\mathcal{D})  )\]
+
+We draw parallels between these patching constraints and computational models of word segmentation. These models are designed to demonstrate how distributional information could be leveraged by language-learning infants to bootstrap a vocabulary, following the influential statistical learning experiments of \citet{Saffran1996learning} who observed this ability in young infants. In the typical framework, these models use unsupervised algorithms to group unsegmented sequences of phonemes from transcriptions of child-directed speech into word-like units. One approach involves maximising the likelihood of word-level \ngram models(e.g., \citealp{Brent1999, Venkataraman2001}), a method that closely resembles the UnigramLM tokenisation algorithm \citep{kudo-2018-unigram}. Another approach is to extract measures of uncertainty using phoneme-level \ngram models and posit boundaries where these measures spike or surpass a threshold (e.g., \citealp{ccoltekin2014explicit, goriely2023word}). Neural language models have also been used, for instance by using the prediction of an utterance boundary (which is included in the phoneme sequence) to posit a word boundary \citep{christiansen1998learning}. In a formative analysis of character-level RNNs, \citet{elman1990finding} noted that the prediction error from a neural language model could serve as a cue for lexical boundaries more broadly; boundaries around words, morphemes, but also frequent multi-word sequences, which children often treat as fixed lexical items \citep{macwhinney1978}. Based on this observation, \addcites trained phoneme-level GPT-2 LMs across 31 languages and demonstrated a method for extracting word boundaries from the trained models; computing model uncertainty using entropy, rank and surprisal from the predictions at each point and segmenting at points of high uncertainty. These information-based approaches to word segmentation, and the later study in particular, closely resemble the patching constraints of \citet{pagnoni2024byte}.
+
+We hypothesise that a modular tokenisation pipeline using constraints based on byte-level information might retain the conceptual advantages of patch-based approaches while retaining the benefits of creating a fixed vocabulary as a pre-processing step before training. By drawing parallels with computational models of word segmentation, we hypothesise that the resulting subword tokens align better with morphological segmentations of natural language than compression-based methods such as \bpe.
+
+\subsection{The ByteSpan Algorithm}
+
+\tokname works by first collecting predictions from a byte-level LM over a corpus, from which key statistics are calculated, then grouping contiguous sequences of bytes using a constraint based on these statistics.
+
+\paragraph{Statistics and constraints.} As a starting point, we follow the patching methods of \citet{pagnoni2024byte} by using per-byte \textbf{entropy}\footnote{We note that \citet{pagnoni2024byte} actually use \emph{next-byte} entropy, which would shift our byte spans by one unit.} \(H(\ch_i)\) and considering two constraints: 
+\begin{align}
+    \mathrm{\red{Global~Constraint}} &~~ H(\ch_t) < \thres_g \\
+    \mathrm{\yellow{Monotonic~Constraint}} &~~ H(\ch_t) - H(\ch_{t-1}) < 0 
+\end{align}
+
+The first constraint groups bytes that fall under a fixed global threshold and the second constraint groups byte with monotonically decreasing information. These are visualised in \cref{fig:16-example}, where for instance the \red{global constraint} segments the word \ex{unstable} as $\{\ex{u}, \ex{n}, \ex{s}, \ex{table} \}$ whereas the \yellow{monotonic constraint} produces $\{\ex{un}, \ex{stabl}, \ex{e}\}$. The algorithm for segmenting a sequence using the \yellow{monotonic constraint} is provided in \emph{Algorithm} \ref{alg:1}. Each byte is processed once in a single pass through the sequence, so the complexity is \(O(n)\). 
+
+In addition to entropy, we also explore the use of \textbf{surprisal} as our information signal, noting that \tokname is compatible with any function mapping from the LM's logits to a scalar. We also consider a third constraint that combines the global constraint with the monotonic constraint, grouping contiguous bytes that meet either. This follows from the observation that the monotonic constraint can become unstable when the entropy or surprisal of a byte is close to zero. This can be seen from the small increase in surprisal from \example{l} to \example{e} causing \example{stable} to be split into two units in the example given in \cref{fig:16-example}. In such cases, the \green{combined constraint} joins segments below a low threshold \(\thres_g \) with monotonically decreasing segments, potentially preventing these unwanted segmentations.
+
+% \zeb{improve this}
+% Conceptually, the global constraint should capture highly predictable sequences, whereas we anticipate that the monotonic constraint will capture morphological or lexical units, following \citet{elman1990finding}'s observations that model uncertainty spikes at such boundaries, later utilised by as a strategy by word segmentation models.
+
+The \red{global constraint} aims to capture highly predictable sequences. However, we find that it often results in splitting words into single byte tokens followed by the remainder of the word, and we find that the \yellow{monotonic constraint} is superior at recovering morphological and lexical units. This follows \citet{elman-1990-finding}'s observations that model uncertainty typically spike at such boundaries.
+
+\begin{algorithm}[t]
+\caption{\textbf{ByteSpan Tokenisation}}
+\begin{algorithmic}[1]
+\STATE \textbf{Input:} Byte sequence $X = \ch_1, \ch_2, \dots, \ch_n$, Byte-level entropy values $H(\ch_i)$
+\STATE \textbf{Output:} Tokenized sequence $T$
+\STATE Initialize $i \gets 2$ \COMMENT{Start of the byte sequence}
+\STATE Initialize $T \gets []$ \COMMENT{Empty tokenized sequence}
+
+\WHILE{$i \leq n$}
+    \STATE $j \gets i$
+    \WHILE{$j \leq n$ \textbf{and} $H(\ch_j) - H(\ch_{j-1}) < 0$}
+        \STATE $j \gets j + 1$
+    \ENDWHILE
+    \STATE Extract segment $\ch_i, \ch_{i+1}, \dots, \ch_{j}$
+    \STATE Append the segment to $T$
+    \STATE $i \gets j$
+\ENDWHILE
+
+\STATE \textbf{Return:} $T$
+\end{algorithmic}
+\label{alg:1}
+\end{algorithm}
+
+\paragraph{Learning a vocabulary.} We propose three methods for using these constraints to learn a fixed-size vocabulary \(V\) from a training corpus $\dataset = \{\chvec_n\}_{n=1}^N$:
+\begin{enumerate}
+    \item \textbf{Frequency:} Using any of the three constraints, identify all unique subwords in the training corpus. Sort the subwords by frequency and use the top \(|V|\) as the tokeniser's vocabulary.
+    \item \textbf{Incremental:} Using the \red{global constraint}, gradually increase $\thres_g$ until the desired vocabulary size is reached. To prevent rare subwords from being added to the vocabulary, a minimum frequency threshold $\thres_f$ can also be applied.
+    \item \textbf{Seeding \bpe:} Using any of the three constraints, apply the \textbf{frequency cut-off} method to learn a portion $p\%$ of the final vocabulary, then apply \bpe to learn the rest of the vocabulary. 
+\end{enumerate}
+
+The frequency method is the most efficient, requiring only a single pass of the training dataset. However, for the \red{global constraint}, it requires pre-determining the global threshold $\thres_g$. The incremental method gets around this limitation by gradually increasing the threshold until the desired vocabulary size is reached. Unlike the other methods, this means that vocabularies with a larger \(|V|\) will not necessarily contain the vocabularies of tokenisers trained with a small \(|V|\). This is because higher thresholds lead to the \textbf{absorption} (or subsumption) of constituent subsequences. For instance, increasing the threshold in \cref{fig:16-example} would lead to $\ex{nstable}$ replacing $\ex{table}$ in the vocabulary.
+
+In theory, the incremental method is also compatible with the \green{combined constraint}, but in practice, the number of subwords identified by the monotonic constraint exceeds most desired vocabulary sizes at the first pass, causing the algorithm to terminate immediately without the \red{global constraint} applying.
+
+Finally, we theorise that the seeding method could provide a trade-off between \tokname and \bpe by first identifying predictable multi-byte units and then using \bpe to efficiently compress frequently co-occurring units. We note that setting $p=100\%$ is equivalent to the frequency method and that setting  $p=0\%$ is equivalent to just using \bpe to learn the vocabulary.
+
+\paragraph{ByteSpan vs BPE.}
+Unlike \bpe, which merges tokens incrementally based on frequency, \tokname finds contiguous low-information segments. Our vocabulary-learning methods are flexible, achieving a target vocabulary size by either incrementally increasing the information threshold to include longer and less predictable sequences, or by trimming down a large set of discovered units according to frequency.
+
+By only including the longest subsequences determined by the constraints used, we avoid intermediate merges, unlike \bpe. Since a sequence cannot be decomposed using a recursive \bpe-style inference procedure, we rely on \textbf{longest-prefix matching} as used by WordPiece (\wordpiece, \citealp{schuster-nakajima-2012-voice}). Notably, \tokname can also group beyond word boundaries and create \defn{superwords} (e.g., if the threshold were raised in \cref{fig:16-example}, \example{nstable and} could be added as a single token). Our implementation ensures that learned subwords align with \bpe pre-tokenisation constraints by preventing subwords from crossing pre-tokenisation boundaries (the vertical lines in \cref{fig:16-example}).
+
+\paragraph{ByteSpan vs Patching.}
+% \zeb{this paragraph needs work}
+\tokname retains the information-driven approach of patching while preserving the computational benefits of keeping tokenisation separate from language modelling. In particular, it eliminates the additional complexity of batching in patch-based methods (e.g., where patch boundaries do not align across sequences). Our method only requires computing the entropy (or surprisal) of bytes once in order to learn a fixed \(\mathcal{V}\) before training, which can then be used by standard LMs with any corpus, whereas the patching method of \citet{pagnoni2024byte} requires a byte-level LM to compute the entropy of every byte seen during training. Unlike our method, patching does not create a fixed size vocabulary, as patches are dynamically created during training.
+
+\section{Experimental Setup}\label{sec:16-setup}
+
+We explore our information-driven tokenisation approach in both English and multilingual settings. Below, we briefly describe the experimental setup. We provide additional implementation details in \cref{app:implementation_details}.
+
+\paragraph{Data.} 
+We train the English tokenisers on a sample of the \fineweb dataset\footnote{\href{https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu}{\myemph{huggingface.co/datasets/HuggingFaceFW/fineweb-edu}}.} \citep{penedo2024finewebdatasetsdecantingweb}.
+For the multilingual tokenisers, we use a balanced \integer{25}-language sample from the \commoncorpus \footnote{\href{https://huggingface.co/datasets/PleIAs/common_corpus}{\myemph{huggingface.co/datasets/PleIAs/common_corpus}}.} \citep{common_corpus}, with languages selected for morphological diversity. We convert each corpus into bytes using the Huggingface \texttt{ByteLevel} pre-tokenizer and split each corpus into three equal subsets: one to train the byte-level model, one to train the tokenizers, and one for evaluation. The \fineweb subsets contain approximately \q{500}{\million} bytes and the \commoncorpus subsets contain approximately \q{250}{\million} bytes (\q{10}{\million} per language).
+
+\paragraph{Byte-level Model.} 
+The byte-level LM is based on the Llama-2 architecture \citep{touvron-2023-llama} and we use it to collect the contextual surprisal and entropy for each byte in our corpora. The byte-level statistics only need to be collected once and can be reused for each tokeniser setup.
+
+\paragraph{Tokeniser Setup.} 
+For our English tokenisers, we train a suite of tokenisers across three vocabulary sizes; \q{16}{\thousand}, \q{32}{\thousand} and \q{64}{\thousand}. For the multilingual setting, we use a vocabulary size of \q{128}{\thousand}. For each vocabulary size, we train tokenisers using our three constraints and our two measures (entropy and surprisal). For the \red{global constraint} we use the incremental method for learning a vocabulary with a minimum frequency threshold $\thres_f = 20$. For the \yellow{monotonic constraint}, we use the frequency method and the seeding method with $p=50\%$. We use the same methods for the \green{combined constraint} and set the global threshold $\thres_g$ to be the 30th-percentile entropy (or surprisal) in the data.
+
+As baselines, we train \bpe tokenisers for each vocabulary size and corpus. We also train \bpe tokenisers that use WP-style inference to match the inference procedure of our tokenisers, since inference can have a significant impact on intrinsic tokeniser evaluation \citep{uzan-etal-2024-greed}. We label these tokenisers \bpewp.\footnote{The WordPiece tokeniser trainers on Huggingface actually use \bpe, not the WordPiece objective, to learn their vocabularies.}
+
+Our tokenisers (and \bpewp) are initialised with three copies of every byte in their vocabularies. In addition to each byte, these are the byte with the WordPiece \textbf{continuation prefix} \texttt{\#\#} (used by the inference method to distinguish pre-token-internal tokens from pre-word-initial tokens) and the byte with the start-of-word prefix (used by the \texttt{ByteLevel} pre-tokeniser to indicate whitespace). This slightly wastes vocabulary space compared to \bpe, as 768 base tokens are required instead of 512, but is a consequence of the complexities of combining tokeniser modules.
+
+\begin{table}[t]
+    \centering
+    \caption{Intrinsic evaluation results comparing \bpe and \bpewp to our \tokname tokenisers using surprisal across three vocabulary sizes. Scores are given to three significant figures, with the best score for each vocabulary size marked in \textbf{bold}.}
+    \label{tab:16-englishresults}
+    \vskip 0.15in
+    \small
+    \begin{sc}
+    \begin{tabular}{cccccccc}
+        \toprule
+        Vocab Size & Tokenizer & Constraint & \makecell{Learning \\ Method} & \makecell{Morph. \\ Alignment} & \makecell{Cognitive \\ Plausibility} & Fertility & \makecell{Renyi \\ Efficiency} \\
+        \midrule
+        % \multirow{6}{*}{\integer{8064}} & BPE & - & - & .726 & \textbf{.262} & 1.34 & .516 \\
+        %  & BPE-WP      &     -         & - & .841 & .256 & \textbf{1.32} & .526 \\
+        %  & ByteSpan  & \red{Global} & Increment  & .883 & .137 & 2.22 & .469 \\
+        %  & ByteSpan  & \yellow{Monotonic} & Seeding & .884 & .242 & 1.35 & \textbf{.530} \\
+        %  & ByteSpan  & \green{Combined} & Seeding & .867 & .244 & 1.34 & .528 \\
+        %  & ByteSpan  & \yellow{Monotonic} & Frequency & .878 & .220 & 1.50 & \textbf{.530} \\
+        %  & ByteSpan  & \green{Combined} & Frequency & \textbf{.895} & .237 & 1.42 & .524 \\
+        % \midrule
+        \multirow{7}{*}{\q{16}{\thousand}} & BPE & - & - & .694 & \textbf{.302} & 1.21 & .468 \\ 
+         & BPE-WP & - & - & .834 & .297 & \textbf{1.19} & .472 \\ 
+         & ByteSpan & \red{Global} & Increment & \textbf{.899} & .146 & 1.90 & .470 \\ 
+         & ByteSpan & \yellow{Monotonic} & Frequency & .885 & .254 & 1.39 & \textbf{ .483} \\ 
+         & ByteSpan & \yellow{Monotonic} & Seeding & .862 & .272 & 1.22 & .476 \\
+         & ByteSpan & \green{Combined} & Frequency & .890 & .268 & 1.29 & .477 \\ 
+         & ByteSpan & \green{Combined} & Seeding & .867 & .279 & 1.21 & .474 \\
+        \midrule
+        \multirow{7}{*}{\q{32}{\thousand}} & BPE & - & - & .648 & \textbf{.344} & 1.13 & .427 \\
+         & BPE-WP & - & - & .821 & .337 & \textbf{ 1.11} & .431 \\
+         & ByteSpan  & \red{Global} & Increment      & \textbf{.890} & .192 & 1.46 & \textbf{.466} \\
+         & ByteSpan  & \yellow{Monotonic} & Frequency   & .843 & .277 & 1.31 & .446 \\
+         & ByteSpan  & \yellow{Monotonic} & Seeding & .862 & .314 & 1.13 & .433 \\
+         & ByteSpan  & \green{Combined} & Frequency    & .865 & .295 & 1.20 & .438 \\
+         & ByteSpan  & \green{Combined} & Seeding  & .860 & .318 & 1.12 & .432 \\
+        \midrule
+        \multirow{7}{*}{\q{64}{\thousand}} & BPE & - & - & .609 & \textbf{.362} & 1.09 & .395 \\ 
+         & BPE-WP & - & - & .773 & .358 & \textbf{1.06} & .399 \\ 
+         & ByteSpan & \red{Global} & Increment & \textbf{.865} & .258 & 1.18 & \textbf{.421} \\ 
+         & ByteSpan & \yellow{Monotonic} & Frequency & .816 & .285 & 1.25 & .416 \\ 
+         & ByteSpan & \yellow{Monotonic} & Seeding & .809 & .339 & 1.08 & .410 \\ 
+         & ByteSpan & \green{Combined} & Frequency & .833 & .302 & 1.14 & .409 \\ 
+         & ByteSpan & \green{Combined} & Seeding & .808 & .344 & 1.07 & .400 \\ 
+         \bottomrule
+    \end{tabular}
+    \end{sc}
+    \vskip -0.1in
+\end{table}
+
+
+\paragraph{Evaluation.} 
+We use the intrinsic evaluation benchmark proposed in \citet{uzan-etal-2024-greed}. It consists of four information measures: Morphological Alignment, Cognitive Plausibility, \renyi Efficiency, and Fertility:
+
+\begin{itemize}[leftmargin=*]
+    \item \textbf{Morphological alignment} The alignment of tokenisers with gold-standard morphological segmentations of words. The benchmark compares tokeniser alignment to morphological annotations from seven resources and returns a macro-averaged $F_1$ score. The morphological data comes from LADEC \citep{gagne2019ladec}, MorphoLex \citep{sanchez2018morpholex}, MorphyNet \citep{batsuren-etal-2021-morphynet}, and DagoBert \citep{hofmann-etal-2020-dagobert}. \citet{uzan-etal-2024-greed} further augment these datasets with morpheme segmentation data \citep{batsuren-etal-2022-unimorph}, novel blend structure detection data \citep{pinter-etal-2021-will}, and compound separation data \citep{minixhofer-etal-2023-compoundpiece}.
+    \item \textbf{Cognitive plausibility} A benchmark from \citet{beinborn-pinter-2023-analyzing} who found that human reaction time and accuracy from a lexical decision task correlated negatively with the number of tokens produced by a tokeniser for words, and correlated positively for non-words. The score consists of an average from correlation scores across the four conditions (words/non-words, accuracy/reaction time) with a higher score indicating increased `cognitive plausibility'.
+    \item \textbf{\renyi efficiency} A measure that penalises vocabularies consisting of many low-frequency or high-frequency tokens. It captures efficient channel usage and was found to correlate highly with \myemph{Bleu} scores \citep{zouhar-etal-2023-tokenization}.
+    \item \textbf{Fertility} The average number of subwords produced per tokenised word, used by \citet{acs2019exploring} to compare compression efficiency across languages for a multilingual tokeniser. A score of \integer{1} indicates perfect compression; every word in the evaluation set exists in the tokeniser's vocabulary.
+\end{itemize}
+
+This setup allows us to evaluate tokenisers without the time- and resource-intensive process of training and evaluating LMs on downstream tasks. 
+
+\citet{uzan-etal-2024-greed} use \minipile \citep{kaddour2023minipile} to compute \renyi efficiency and fertility in order to match the dataset they used to train their tokenisers. To match our tokenisers, we compute these measures using the third subsets of our corpora (\fineweb for English, \commoncorpus for the multilingual tokenisers).
+
+For our multilingual tokenisers, we only report \renyi efficiency and fertility using \commoncorpus, as the intrinsic evaluation benchmark for the other metrics only support English.
+
+\section{Results}\label{sec:16-results}
+
+We provide the results for our English tokenisers in \cref{tab:16-englishresults} and the results for our multilingual tokenisers in \cref{fig:16-multilingual}. We only include the \tokname tokenisers using \textbf{surprisal} as the information signal --- this is because for almost every measure, the equivalent tokenizer using \textbf{entropy} achieves almost identical results (the results with entropy are provided in \cref{app:additional_results}). When comparing vocabularies, we find a very high overlap --- ranging from \q{85.7}{\percent} to \q{98.8}{\percent} --- suggesting that both measures of information identify similar byte spans. We thus only report the \textbf{surprisal} scores in this section. Below, we summarise our key findings.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{16InfoTok/multilingual.png}
+    \caption{Fertility and \renyi efficiency for each language in our \commoncorpus evaluation subset, comparing multilingual \bpe to our multilingual \tokname tokenisers using surprisal with a vocabulary size of \q{128}{\thousand}.}
+    \label{fig:16-multilingual}
+\end{figure}
+
+\paragraph{Linguistic and cognitive alignment.}
+
+We find that our English \tokname tokenisers achieve higher morphological alignment scores than \bpe and \bpewp for each vocabulary size but achieve lower scores on the cognitive plausibility metric. This indicates that morphological units in text can be successfully extracted using the surprisal from a byte-level model but that the number of splits may not correlate well with human performance in a lexical decision task. Our results for \bpe and \bpewp mirror those of \citet{uzan-etal-2024-greed}, who found that using the vocabulary from \bpe but applying the WordPiece inference strategy led to higher morphological alignment but lower cognitive plausibility. In general, their results suggest a trade-off between these two measures, which we also observe with our tokenisers. It is unclear which score is more desirable, although morphological alignment has long been hypothesised to be important for downstream use-cases (see e.g. \citet{gow-smith-etal-2022-improving}).
+
+When comparing between our proposed constraints and learning methods, the \red{global constraint} achieves the highest morphological alignment score for all three vocabulary sizes (and due to the apparent trade-off, also the lowest cognitive plausibility score). We found this result to contradict qualitative analysis of the tokenisers; in many cases, such as the example phrase in \cref{fig:16-example}, the \red{global constraint} seems to segment the first few letters of a word individually and then the rest of the word as one token, since surprisal tends to fall towards the end of a word. This does not seem to align with English morphology and in most examples, the \yellow{monotonic} or \green{combined} constraints seem to produce more morphological segmentations. Upon investigation of how the morphological alignment score is calculated in the intrinsic benchmark, we found that it skips words \textbf{unless all items in the gold segmentation of that word are contained in the vocabulary of the tokeniser}. For example, if a tokenizer's vocabulary does not contain the tokens \(\ex{ramp}, \ex{ant}, \ex{ly}\) then the word \ex{rampantly} is skipped. This can skew the score if a tokeniser's vocabulary does not contain many valid morphemes or stems, making comparison between tokenisers with different vocabularies difficult.
+
+In order to explore this further, we define the \textbf{morphological coverage} of a tokeniser as the percentage of words in the morphological data where all gold segments exist in the tokeniser's vocabulary (i.e, the percentage of the words used to calculate the alignment score for each tokeniser). We plot the coverage in \cref{fig:16-coverage}. Indeed, the tokenisers using the \red{global constraint} have much lower coverage, suggesting that the high alignment score is not comparable to the other tokenisers. This analysis reveals that our other tokenisers have similar coverage to \bpe and \bpewp and still achieve higher morphological alignment, suggesting that they do produce a more linguistically motivated segmentation, with the \green{combined constraint} tokenisers achieving both high coverage and high alignment. 
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{16InfoTok/coverage.png}
+    \caption{Morphological coverage of \bpe, \bpewp and our \tokname tokenisers using surprisal.}
+    \label{fig:16-coverage}
+\end{figure}
+
+\paragraph{Token distribution statistics.}
+
+Besides those using the \red{global constraint}, our \tokname tokeniser lead to higher \renyi efficiency scores than \bpe and \bpewp and very similar fertility scores across vocabulary sizes. This indicates that \tokname leads to good compression while ensuring that the vocabulary space does not contain too many high-frequency and low-frequency tokens. Comparing between the incremental method and the seeding method for using \tokname to learn a vocabulary, we find that the seeding method improves fertility at the cost of \renyi efficiency, resulting in scores very similar to \bpewp. The fact that these tokenisers have similar token distribution statistics to \bpewp but maintain a higher morphological alignment score suggests that by using \tokname to learn an initial vocabulary that is then supplemented by \bpe, the resulting vocabulary contains more morphologically-aligned tokens without sacrificing compression.
+
+To investigate this further, we examine the length of each token in the vocabularies of the \bpewp tokeniser and our two tokenisers with the \green{combined constraint} for the largest vocabulary size, shown in \cref{fig:16-distribution}. For all three tokenisers, the most common token lengths are \integer{4} and \integer{5}, but the frequency method leads to a tighter distribution around these lengths compared to \bpewp. The seeding method provides a balance by allowing \bpe to merge commonly occurring sequences identified by \tokname, creating a distribution that more closely resembles the long tail of the \bpewp vocabulary.
+
+In general, the \red{global constraint} does not lead to good compression. This is because, as observed in \cref{fig:16-example}, the first letters of words are highly unpredictable and so tend to be initially segmented at the character-level, even if long suffixes are compressed. The fact that this method learns long suffixes is also at odds with the longest-\textbf{prefix} inference method that we use. For example, for the largest tokeniser trained using this constraint, the token \ex{bonization} is learned but \ex{carbonization} is tokenised as \(\{\ex{carbon},\ex{ization}\}\) because the token \ex{carbon} also exists in the vocabulary. The \yellow{monotonic} and \green{combined} constraints seem to learn units across words so are not as negatively affected by this inference method.
+
+\paragraph{Multilingual evaluation.}
+
+The fertility and \renyi efficiency scores for each tokeniser across the \integer{25} languages in our training corpus are given in \cref{fig:16-multilingual}. Note that the fertility scores are higher for Chinese, Japanese and Korean because these languages are not delimited by whitespace in \commoncorpus, so pre-tokens consist of entire phrases. 
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.95\linewidth]{16InfoTok/distribution.png}
+    \caption{Distribution of token lengths comparing \bpewp to our \tokname tokenisers using surprisal and the \green{combined constraint} with either the frequency method or the seeding method to learn the vocabulary. Vocabulary size is \q{64}{\thousand}.}
+    \label{fig:16-distribution}
+\end{figure}
+
+Mirroring the English results, the \tokname tokenisers score achieve higher \renyi efficiency scores but lower fertility for most languages. Out of our tokenisers, the lowest fertility scores are achieved by the \yellow{monotonic} or \green{combined} constraints using the seeding method, whereas the incremental method and frequency method produce higher fertility scores. This difference is particularly pronounced for the languages in our corpus with unique writing systems; Arabic, Chinese, Hebrew, Hindi, Japanese, Korean and Russian. It is possible that since the frequency method adds the top $|V|$ most frequent byte spans to the vocabulary, this will naturally bias towards orthographies shared by most of the corpus (in this case, subwords containing Latin characters). Similarly, as the incremental method gradually raises the global threshold $\thres_g$, if the byte-level LM struggles to predict rarer orthographies due to occurring less frequently in the data, the threshold may not add as many subwords from those languages. In the case of the frequency method, allowing \bpe to learn the remaining $50\%$ of the vocabulary seems to be an effective strategy, but \bpe is also implicitly biased by frequency.
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.9\linewidth]{16InfoTok/difference.png}
+    \caption{Increase in fertility for each language when balancing added tokens across languages when training our multilingual \tokname tokenisers with the frequency method. The tokenisers use surprisal as the byte-level measure and the vocabulary size is \q{128}{\thousand}. A decrease in fertility indicates better compression.}
+    \label{fig:16-difference}
+\end{figure}
+
+We consider one possible approach to this problem. For the frequency method, instead of selecting the top $|V|$ most frequent discovered subwords across the whole dataset, we can adjust the method to select the top $\frac{|V|}{L}$ most frequent discovered subwords for each language\footnote{Since subwords can appear in the frequency lists of multiple languages, we add tokens round-robin until the desired vocabulary size is met, which in practice can assign more than $\frac{|V|}{L}$ tokens from the languages with rarer orthographies.} (where $L$ is the number of languages). This guarantees that the rarer orthographies are assigned a dedicated portion of the final vocabulary. We plot the effect of this adjustment on fertility in \cref{fig:16-difference}. This approach seems to lead to the desired outcome; fertility decreases for most of the languages with unique orthographies (all but Chinese). By dedicating a portion of the vocabulary to these languages, the fertility does slightly rise for all Latin-script languages, but the average across languages is not affected (even slightly decreasing). 
+
+
+
+% \section{Extrinsic evaluation}\label{app:blimp}
+
+% Whereas intrinsic evaluation of tokenisers involves using metrics computed from their vocabularies or tokenised corpora, extrinsic evaluation explores the effect that tokenisers have on language modelling tasks. As an initial experiment, we train three models using \bpe and three models using \tokname-S at vocabulary size \q{32}{\thousand}. The model parameters and training procedure are the similar to the byte-level models, as described in \cref{app:implementation_details}. The only differences are that we use 4 GPUs (the effective batch size is kept the same) and we train on all of \fineweb (no data is repeated during training).
+
+% We evaluate the trained models using \blimp \citep{warstadt2020blimp}, a zero-shot benchmark that scores models for linguistic knowledge according to whether they assign a higher likelihood to grammatical sentences in a minimal pair across a range of grammatical categories. The results are provided in \cref{tab:16-blimp}. Although the models using our tokeniser achieve higher scores for two of the three seeds, there is no significant difference between the scores within each seed, as assessed by a paired t-test using the 68 task-level scores with a significance value of $p<0.05$. This suggests that our tokenisers do not inhibit language modelling capabilities compared to \bpe, but that further experimentation is required for a stronger result.
+
+% \begin{table}[!t]
+%     \centering
+%     \caption{BLiMP scores achieved by language models pre-trained on \fineweb. The data is tokenised using either \bpe or \tokname-S with a vocabulary size of \q{32}{\thousand} and we repeat training across three seeds. }
+%     \vskip 0.15in
+%     \small
+%     \begin{tabular}{clc}
+%     \toprule
+%         \textbf{Seed} & \textbf{Tokeniser} & \textbf{BLiMP score} \\
+%         \midrule
+%         \multirow{2}{*}{\integer{22}} & \bpe & 78.0 \\
+%         & \tokname-S & 78.1 \\
+%         \midrule
+%         \multirow{2}{*}{\integer{32}} & \bpe & 78.5 \\
+%         & \tokname-S & 77.6 \\
+%         \midrule
+%         \multirow{2}{*}{\integer{42}} & \bpe & 77.1 \\
+%         & \tokname-S & 78.2 \\
+%         \bottomrule
+%     \end{tabular}
+%     \vskip -0.1in
+%     \label{tab:16-blimp}
+% \end{table}
+
+
+\section{Discussion}
+\label{sec:discussion}
+
+The proposed method of training a tokeniser based on information extracted from a byte-level LM achieves a balance between dynamic patching approaches and the computational benefits of a fixed vocabulary size. Through intrinsic evaluation in English, we found this approach to improve morphological alignment and \renyi efficiency compared to \bpe and \bpewp while retaining similar levels of compression. Whereas \citet{pagnoni2024byte} only used entropy in their study, we found surprisal to be an effective informative signal for grouping predictable bytes. As surprisal is cheaper to compute than entropy, this could lead to efficiency gains for dynamic patching approaches that require information to be calculated at every byte during training. Further work could explore information-based tokenisation with alternative information signals, such as the probability of whitespace tokens, mimicking connectionist models of word segmentation models that rely on utterance boundary prediction \citep{christiansen1998learning}.
+
+In our multilingual evaluation, we found that the information-based approach struggles with languages whose writing systems are less represented in the data, but that using our method to seed an initial vocabulary before applying \bpe addresses a gap in compression for these languages. We note that our frequency method for learning a vocabulary may implicitly lead to the vocabulary being biased towards more the more frequent orthographies found in the training data, but that by adjusting our method to force the same number of subwords to be added for each language, we could improve fertility for languages with unique orthographies. In general, our method still relies on grouping contiguous bytes based on the predictions from a byte-level LM, which may not identify useful subwords for non-concatenative languages or right-to-left languages like Arabic and Hebrew. By using bytes as our fall-back representation, we also perpetuate the encoding bias of UTF-8, which on average assigns more bytes per character for non-Latin-script languages. Future work should incorporate more balanced byte-level schemes, such as MYTE, a morphologically-driven byte encoding \citep{limisiewicz-etal-2024-myte}.
+
+Finally, although \tokname is parameter-free for certain combinations of constraints and vocabulary-learning methods, the \green{combined constraint} and \textbf{seeding method} both use hyper-parameters which we have not thoroughly explored here (we set $p=50\%$ for seeding method and $\thres_g$ to the 30th-percentile for the \green{combined constraint}). These should be explored further in future work. Future work could also explore the use of an \textbf{approximate} monotonic constraint (using $H(\ch_t) - H(\ch_{t-1}) < \thres_m$ instead of $H(\ch_t) - H(\ch_{t-1}) < 0$). This was proposed by \citet{pagnoni2024byte} and could provide an alternative mechanism of dealing with the instability of the monotonic constraint at near-zero values for surprisal and entropy.
+
+% as these could impact the predictions extracted from a byte-level model. Future work could explore balancing writing systems as well as languages when choosing a tokeniser using this method, or training separate, smaller byte-level models for each language. Our method also uses an autoregressive model, which may not be appropriate for right-to-left writing systems and languages with non-concatenative morphology. Further work might explore the effect of adding non-contiguous information thresholds for non-concatenative morphologies.
+
+% In an initial experiment, we found that one of our tokenisers did not achieve significantly different results compared to \bpe using a minimal-pair linguistic judgement task (see \cref{app:blimp}). 
+
+% - Our method uses entropy of current token, patches does next token, perhaps would have gotten full words more often with next-entropy.
+
+% The proposed method of training a tokeniser based  on entropy or surprisal thresholds achieves a balance between adaptive or dynamic segmentation approaches and the computational benefits of a fixed \(\mathcal{V}\). Using a LM's predictions to choose a tokeniser's vocabulary is not a novel proposal. In fact, the WordPiece objective was originally to maximise a dataset's likelihood under an \ngram model, with predictions re-estimated after each merge \citep{schuster-nakajima-2012-voice}. The modern WordPiece objective given in \cref{eq:wp_obj}, which purportedly optimises for mutual information, also greedily optimises a unigram model's likelihood of the dataset. Our proposed method does not require re-estimation and needs to train a transformer-based LM only once to produce higher-quality predictions. The  model-agnostic nature of our method, which modularises dynamic tokenisation from architectures, might provide a structured and computationally-efficient framework for other architecture that do not inherently handle dynamic segmentation (e.g., simple Transformers, feed-forward models) and might also be advantageous in resource-constrained settings (e.g., performing dynamic segmentation on edge devices).  Future work in dynamic information-driven tokenisation might  integrate further ideas of dynamic tokenisation into this modularised setting, such as learning monotonically decreasing units first rather than setting a set threshold, or using  a simple unigram model to evaluate and starts with a large vocabulary that is subsequently pruned.
+
+%\Zeb{Prefix-first strategy of unigram may not be appropriate for this approach. Could also look at .}\Zeb{Maybe mention UnigramLM bases selection of tokens on how they are used in a language model but uses a simple unigram model to evaluate and starts with a large vocabulary that is pruned.} 
+
+
+
+
+% ===========
+% CONCLUSIONS
+% ===========
+\section{Conclusion}
+
+We present \tokname, a novel method for learning a subword vocabulary using the predictions of a byte-level LM. By grouping contiguous sequences of predictable bytes using one of three constraints, we find that \tokname tokenisers have efficient vocabularies with a higher morphological alignment than \bpe and \bpewp on English evaluation sets, with the \yellow{monotonic constraint} generally being more effective than the \red{global constraint}. In the multilingual setting, \tokname tokenisers result in similar compression rates to \bpe but some methods struggle to compress languages with unique orthographies. We hypothesise that this could be due to our frequency-based vocabulary-learning method and find that balancing the vocabulary by language counteracts this effect. In general, \tokname provides a novel method for learning subwords with parallels to word segmentation and patching, all while keeping the benefits of learning a fixed-size vocabulary for efficient language modelling. This could feed into explorations of information in lexical unit extraction that may improve future static tokenisers and dynamic patching approaches.
+
+% ===========
+% LIMITATIONS
+% ===========
+\section*{Limitations}
+
+In this study we propose novel methods for learning a subword vocabulary but only use one inference method for applying the tokenisers; the longest-prefix method of WordPiece. Future work could explore the use our learned vocabularies with alternative inference methods, such as longest-suffix matching \citep{jacobs2022lost}.
+
+The experiments reported in the paper only utilise one type of Transformer models, although preliminary work utilised a 5-gram model. Further work might explore the scaling properties of the byte-level model. Our evaluation largely focused on English, although we do explore a multilingual setting. In our multilingual setting we are restricted to token distribution statistics due to limited evaluation resources available for these other languages, although there are individual pipelines for individual languages (e.g., \citet{gazit2025splinteringnonconcatenativelanguagesbetter} uses lexical decision data to evaluate Hebrew tokenisers).
+
+Finally, in this study, we have focused on intrinsic evaluation of tokenisation methods, in part due to the computational cost of extrinsic evaluation. The intrinsic evaluation benchmark scores are designed to allude to potential gains in language modelling capability, but ideally this should be established by pre-training separate language models with each tokeniser and evaluating the pre-trained models using perplexity on held-out data or grammatical benchmarks such as \blimp \citep{warstadt-etal-2020-blimp-benchmark}.
+
+% \Zeb{WordPiece model could be a limitation since our vocabulary starts with three copies of each byte, although this becomes relatively less of a waste with larger vocabulary sizes, and our \renyi efficiency is still better than \bpe in most cases}
+
+
+
+\section{Implementation Details}
+\label{app:implementation_details}
+
+We implement all experiments using the PyTorch framework \citep{paszke-etal-2019-pytorch} and implement variants of the Llama architecture with components implemented in the \myemph{transformers} library \citep{wolf-etal-2020-transformers}. Tokenisers are implemented using modules from the \myemph{tokenizers} library.\footnote{\href{https://github.com/huggingface/tokenizers}{\myemph{github.com/huggingface/tokenizers}}.}
+
+% \paragraph{Data.}
+% % \Pietro{Remove?}
+% % We use the \minipile dataset \citep{kaddour2023minipile}, a \q{6}{\gb} curated subset of the deduplicated Pile corpus \citep{gao-etal-2020-pile, biderman-etal-2022-datasheet}. 
+% % The training set contains \q{1}{\million} documents which we use to train the tokenisers. We use the \q{10}{\thousand} documents from the validation set to collect the log-probabilities.
+
+% We train the English tokenisers on a \q{20}{\billion}-token subset of the \fineweb dataset \citep{penedo-etal-2024-fineweb}\footnote{\href{https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu}{\myemph{huggingface.co/datasets/HuggingFaceFW/fineweb-edu}}.}.
+% For the multilingual tokenisers, we use a balanced \integer{25}-language sample from the \commoncorpus\footnote{\href{https://huggingface.co/datasets/PleIAs/common_corpus}{\myemph{huggingface.co/datasets/PleIAs/common_corpus}}.}, selected for morphological diversity.
+
+% Both corpora are converted to bytes using the \myemph{ByteLevel} pre-tokenizer from the \myemph{tokenizers} library.\footnote{\href{https://github.com/huggingface/tokenizers}{\myemph{github.com/huggingface/tokenizers}}.} We then split each corpora into three small subsets.\footnote{The subsets contain about 5 billion bytes. The multilingual subsets are balanced to ensure the same number of bytes per language.} 
+
+\paragraph{Byte-Level Model Training.}
+We train a small byte-level LMs on our subsets of the \fineweb and \commoncorpus datasets. 
+We use the Llama 2 architecture with \integer{24} attention heads, \integer{6} layers, hidden size of \integer{768}, and tied input--output embeddings, totalling 57M parameters.
+We use AdamW \citep{adam,loshchilov2018decoupled} as our optimiser, with learning rate \snum{6e-4}, parameters $\beta_1\mathop{=}0.9$, $\beta_2\mathop{=}0.95$, $\epsilon\mathop{=}\snum{1e-8}$, and weight decay set to \float{0.1}.
+We use the warm-up-stable-decay schedule \citep{zhai2022scaling}, where after warm-up, the learning rate stays constant for most training and decreases briefly during the cool-down. 
+Unlike the cosine schedule, this approach does not need a pre-specified compute budget, facilitating continued pre-training and enhancing our artifact's value for the community. It is also more effective for small language models \citep{hu2024minicpm, wen2024understanding}.
+During training, we set the context size to \integer{2048} tokens and batch size \integer{128}, clip the norm of the gradients to \float{1}, and train for \q{50}{\thousand} steps, saving checkpoints every \q{2}{\thousand} steps.
+% Each model is trained with the same seed so that data order and parameter initialisation is consistent across experiments.
+
+\paragraph{Byte-Level Model Predictions.}
+
+We use our trained models to extract per-byte entropy and surprisal on a different subsets of \fineweb and \commoncorpus to prevent over-fitting. We use a context size of \integer{2048} and shift the dataset along by strides of \integer{512}. This ensures that all byte-level predictions have at least \integer{1536} tokens of context. We then use the logits at each byte to calculate surprisal and entropy. These predictions are stored as a split of each dataset in Huggingface to facilitate training tokenisers using our method.
+
+\paragraph{Hardware Details.}
+We use a server with one \myemph{NVIDIA A100 80GB PCIe}, \integer{32} CPUs, and \integer{32} GB of RAM for all experiments. Below, we report a subset of the output of the \myemph{lscpu} command:
+
+\begin{tcolorbox}[left=5pt,right=5pt,top=5pt,bottom=5pt]
+    \small
+    \begin{verbatim}
+Architecture:        x86_64
+CPU op-mode(s):      32-bit, 64-bit
+Address sizes:       46 bits physical, 
+                     48 bits virtual
+Byte Order:          Little Endian
+CPU(s):              32
+On-line CPU(s) list: 0-31
+Vendor ID:           GenuineIntel
+Model name:          Intel(R) Xeon(R)
+                     Silver 4210R CPU
+                     @ 2.40GHz
+CPU family:          6
+Model:               85
+Thread(s) per core:  1
+Core(s) per socket:  1
+Socket(s):           8
+Stepping:            7
+BogoMIPS:            4800.11
+\end{verbatim}
+\end{tcolorbox}
+
+
+\paragraph{Reproducibility.}
+
+We release all experimental artefacts as a collection on the Hugging Face Hub at \href{https://huggingface.co/InfoTokenizers}{huggingface.co/InfoTokenizers}: (i) the byte-level versions of the two datasets; (ii) the subsets of each dataset used to train the byte-level models, extract predictions and evaluate the resulting tokenisers; (iii) the byte-level surprisal and entropy for each dataset; (iv) the \bpe, \bpewp and \tokname tokenisers used in our experiments; (v) all model checkpoints. Our codebase is available at \href{https://github.com/codebyzeb/bytespantokenization}{github.com/codebyzeb/bytespantokenization}.\looseness=-1
+
+\section{Additional Results}
+\label{app:additional_results}
+
+For brevity, in \cref{sec:16-results} we only included results for the \tokname tokenisers using surprisal. Here, we provide the full results for our English tokenisers in \cref{tab:16-fullenglishresults}, and the results for our multilingual tokenisers using entropy in \cref{fig:16-multilingualentropy}. As discussed in \cref{sec:16-results}, we observe very little difference between the two measures.
+
+\begin{table}[t]
+    \centering
+    \caption{Intrinsic evaluation results comparing \bpe and \bpewp to our \tokname tokenisers using surprisal (ByteSpan-S) and entropy (ByteSpan-E) across three vocabulary sizes. Scores are given to three significant figures, with the best score for each vocabulary size marked in \textbf{bold}.}
+    \label{tab:16-fullenglishresults}
+    \vskip 0.15in
+    \small
+    \begin{sc}
+    \begin{tabular}{cccccccc}
+        \toprule
+        Vocab Size & Tokenizer & Constraint & \makecell{Learning \\ Method} & \makecell{Morph. \\ Alignment} & \makecell{Cognitive \\ Plausibility} & Fertility & \makecell{Renyi \\ Efficiency} \\
+        \midrule
+        % \multirow{6}{*}{\integer{8064}} & BPE & - & - & .726 & \textbf{.262} & 1.34 & .516 \\
+        %  & BPE-WP      &     -         & - & .841 & .256 & \textbf{1.32} & .526 \\
+        %  & ByteSpan  & \red{Global} & Increment  & .883 & .137 & 2.22 & .469 \\
+        %  & ByteSpan  & \yellow{Monotonic} & Seeding & .884 & .242 & 1.35 & \textbf{.530} \\
+        %  & ByteSpan  & \green{Combined} & Seeding & .867 & .244 & 1.34 & .528 \\
+        %  & ByteSpan  & \yellow{Monotonic} & Frequency & .878 & .220 & 1.50 & \textbf{.530} \\
+        %  & ByteSpan  & \green{Combined} & Frequency & \textbf{.895} & .237 & 1.42 & .524 \\
+        % \midrule
+        \multirow{12}{*}{\q{16}{\thousand}} & BPE  & - & - & .694 & \textbf{.302} & 1.21 & .468 \\ 
+         & BPE-WP & - & - & .834 & .297 & \textbf{1.19} & .472 \\ 
+         & ByteSpan-S & \red{Global} & Increment & \textbf{.899} & .146 & 1.90 & .470 \\ 
+         & ByteSpan-E & \red{Global} & Increment & \textbf{.899} & .146 & 1.90 & .470 \\ 
+         & ByteSpan-S  & \yellow{Monotonic} & Frequency & .885 & .254 & 1.39 & \textbf{ .483} \\ 
+         & ByteSpan-E & \yellow{Monotonic} & Frequency & .882 & .271 & 1.38 &  .482 \\ 
+         & ByteSpan-S & \yellow{Monotonic} & Seeding & .862 & .272 & 1.22 & .476 \\
+         & ByteSpan-E  & \yellow{Monotonic} & Seeding & .857 & .273 & 1.22 & .476 \\
+         & ByteSpan-S  & \green{Combined} & Frequency & .890 & .268 & 1.29 & .477 \\ 
+         & ByteSpan-E & \green{Combined} & Frequency & .889 & .286 & 1.27 & .476 \\ 
+         & ByteSpan-S  & \green{Combined} & Seeding & .867 & .279 & 1.21 & .474 \\
+         & ByteSpan-E & \green{Combined} & Seeding & .866 & .281 & 1.21 & .474 \\
+        \midrule
+        \multirow{12}{*}{\q{32}{\thousand}} & BPE & - & - & .648 & \textbf{.344} & 1.13 & .427 \\
+         & BPE-WP  & - & - & .821 & .337 & \textbf{ 1.11} & .431 \\
+         & ByteSpan-S & \red{Global} & Increment      & \textbf{.890} & .192 & 1.46 & .466 \\
+         & ByteSpan-E & \red{Global} & Increment      & \textbf{.890} & .193 & 1.48 & \textbf{.467} \\
+         & ByteSpan-S  & \yellow{Monotonic} & Frequency   & .843 & .277 & 1.31 & .446 \\
+         & ByteSpan-E & \yellow{Monotonic} & Frequency   & .837 & .291 & 1.30 & .445 \\
+         & ByteSpan-S & \yellow{Monotonic} & Seeding & .862 & .314 & 1.13 & .433 \\
+         & ByteSpan-E  & \yellow{Monotonic} & Seeding & .859 & .315 & 1.13 & .433 \\
+         & ByteSpan-S & \green{Combined} & Frequency    & .865 & .295 & 1.20 & .438 \\
+         & ByteSpan-E  & \green{Combined} & Frequency    & .854 & .308 & 1.19 & .438 \\
+         & ByteSpan-S & \green{Combined} & Seeding  & .860 & .318 & 1.12 & .432 \\
+         & ByteSpan-E  & \green{Combined} & Seeding  & .858 & .322 & 1.12 & .432 \\
+        \midrule
+        \multirow{12}{*}{\q{64}{\thousand}} & BPE & - & - & .609 & \textbf{.362} & 1.09 & .395 \\ 
+         & BPE-WP & - & - & .773 & .358 & \textbf{1.06} & .399 \\ 
+         & ByteSpan-S  & \red{Global} & Increment & \textbf{.865} & .258 & 1.18 & .421 \\ 
+         & ByteSpan-E  & \red{Global} & Increment & \textbf{.865} & .271 & 1.20 & \textbf{.424} \\ 
+         & ByteSpan-S & \yellow{Monotonic} & Frequency & .816 & .285 & 1.25 & .416 \\ 
+         & ByteSpan-E  & \yellow{Monotonic} & Frequency & .806 & .293 & 1.24 & .416 \\ 
+         & ByteSpan-S  & \yellow{Monotonic} & Seeding & .809 & .339 & 1.08 & .410 \\ 
+         & ByteSpan-E  & \yellow{Monotonic} & Seeding & .805 & .340 & 1.08 & .416 \\ 
+         & ByteSpan-S  & \green{Combined} & Frequency & .833 & .302 & 1.14 & .409 \\ 
+         & ByteSpan-E  & \green{Combined} & Frequency & .822 & .307 & 1.13 & .408 \\ 
+         & ByteSpan-S  & \green{Combined} & Seeding & .808 & .344 & 1.07 & .400 \\ 
+         & ByteSpan-E & \green{Combined} & Seeding & .804 & .344 & 1.07 & .400 \\ 
+         \bottomrule
+    \end{tabular}
+    \end{sc}
+    \vskip -0.1in
+\end{table}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{16InfoTok/multilingualentropy.png}
+    \caption{Fertility and \renyi efficiency for each language in our \commoncorpus evaluation subset, comparing multilingual \bpe to our multilingual \tokname tokenisers using entropy with a vocabulary size of \q{128}{\thousand}.}
+    \label{fig:16-multilingualentropy}
+\end{figure}

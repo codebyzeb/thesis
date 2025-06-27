@@ -91,36 +91,97 @@ BogoMIPS:            4800.11
 \end{verbatim}
 \end{tcolorbox}
 
+\section{Full word segmentation results}\label{app:fullsegresults}
 
-\subsection{Model Parameters and Training Procedure}
+All boundary placement F1 scores for the Tiny, Small, Medium and Large suites are given in \cref{fig:15-tiny}, \cref{fig:15-small}, \cref{fig:15-medium} and \cref{fig:15-large}, respectively. The best combination of cue and segmentation strategy for each language is given in \cref{tab:15-bestcuesfull}.
 
-\begin{table}[ht!]
+%Correlations between F1 scores for peak and threshold segmentation within each group and cue are given in \cref{tab:15-correlations}. Note that for the Large suite there is only one data point for each cue, so the correlation is 1.0 by default. 
+
+% \begin{table}[h]
+%     \centering
+%     \begin{tabular}{lllll}
+%         \toprule
+%         Suite & Boundary & Entropy & Loss & Rank \\
+%         \midrule
+%         Tiny & 0.83 & 0.91 & 0.83 & 0.85 \\
+%         Small & 0.78 & 0.85 & 0.89 & 0.86 \\
+%         Medium & 0.93 & 0.87 & 0.92 & 0.89 \\
+%         Large & 1.00 & 1.00 & 1.00 & 1.00 \\
+%         \bottomrule
+%     \end{tabular}
+%     \caption{Correlation scores between F1 scores for peak segmentation and F1 scores for threshold segmentation, grouping scores by boundary cue and suite size.}
+%     \label{tab:15-correlations}
+% \end{table}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/tiny.png}
+    \caption{Boundary placement F1 scores achieved by the models in the \textbf{Tiny} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
+    \label{fig:15-tiny}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/small.png}
+    \caption{Boundary placement F1 scores achieved by the models in the \textbf{Small} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
+    \label{fig:15-small}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/medium.png}
+    \caption{Boundary placement F1 scores achieved by the models in the \textbf{Medium} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
+    \label{fig:15-medium}
+\end{figure*}
+
+\begin{figure*}
+    \centering
+    \includegraphics[width=0.99\linewidth]{Figures/15Phonology/large.png}
+    \caption{Boundary placement F1 scores achieved by the models in the \textbf{Large} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
+    \label{fig:15-large}
+\end{figure*}
+
+
+\begin{table*}[t]
     \centering
     \small
-    \begin{tabular}{lc}
+    \begin{tabular}{lllll}
     \toprule
-         Parameter & Value\\
+    Language & 100k & 700k & 2M & 18M \\
     \midrule
-         Layers & 12 \\
-         Heads & 12 \\
-         Dropout & 0.1 \\
-         Embedding Size & 768 \\
-         Inner Size & 3072 \\
-         Max Example Length & 128 \\
-         Learning Rate & 0.001 \\
-         Optimizer & AdamW \\
-         Scheduler Type & Linear\\
-         Max Steps & 400,000 \\
-         Warm-up Steps & 90,000\\
-         Per Device Batch Size & 32 \\
+    Basque & Loss (relative) &  &  &  \\
+    Cantonese & UBP (relative) & UBP (threshold) &  &  \\
+    Catalan & Loss (relative) &  &  &  \\
+    Croatian & Rank (peak) &  &  &  \\
+    Danish & UBP (peak) &  &  &  \\
+    Dutch & UBP (peak) & Entropy (relative) & Entropy (relative) &  \\
+    EnglishNA & UBP (peak) & UBP (peak) & UBP (peak) & UBP (peak) \\
+    EnglishUK & UBP (peak) & UBP (peak) & UBP (peak) &  \\
+    Estonian & UBP (peak) & UBP (relative) & UBP (relative) &  \\
+    Farsi & Loss (relative) &  &  &  \\
+    French & UBP (peak) & UBP (peak) & UBP (peak) &  \\
+    German & UBP (peak) & Entropy (relative) & Entropy (relative) &  \\
+    Hungarian & UBP (peak) &  &  &  \\
+    Icelandic & UBP (peak) &  &  &  \\
+    Indonesian & Loss (relative) & UBP (relative) & UBP (relative) &  \\
+    Irish & Loss (relative) &  &  &  \\
+    Italian & Entropy (threshold) & Entropy (relative) &  &  \\
+    Japanese & UBP (relative) & UBP (relative) & UBP (relative) &  \\
+    Korean & Rank (relative) & Entropy (relative) &  &  \\
+    Mandarin & UBP (threshold) & UBP (relative) & UBP (threshold) &  \\
+    Norwegian & UBP (peak) &  &  &  \\
+    Polish & Loss (relative) & UBP (relative) &  &  \\
+    PortugueseBr & UBP (relative) &  &  &  \\
+    PortuguesePt & UBP (threshold) & UBP (threshold) &  &  \\
+    Quechua & UBP (threshold) &  &  &  \\
+    Romanian & Loss (relative) &  &  &  \\
+    Serbian & Rank (relative) & UBP (relative) & UBP (relative) &  \\
+    Spanish & Rank (relative) & Entropy (peak) & Entropy (threshold) &  \\
+    Swedish & UBP (peak) & UBP (peak) &  &  \\
+    Turkish & Loss (relative) &  &  &  \\
+    Welsh & Loss (relative) &  &  &  \\
     \bottomrule
     \end{tabular}
-    \caption{Hyperparameter settings for training the GPT-2 architecture. Vocabulary size varies according to the tokenizer used, but all other parameters are constant across experiments. Where values are not reported, they may be assumed to be default values.}
-    \label{table:baseline_hyperparams}
-\end{table}
-
-We describe the model and training parameters in \cref{table:baseline_hyperparams}. The model parameters were chosen to match those of the Pythia-170M model from the Pythia suite \citep{biderman2023pythia}. The model has 85M non-embedding parameters and is also equivalent in size to GPT-Neo 125M and OPT-125M. The Pythia models use the GPTNeoX architecture which is slightly different to GPT-2. In initial experiments, we found that GPT-2 performed better on the benchmarks across all eight of our conditions. 
-
-Data is prepared into batches by first tokenizing the entire dataset, combining all tokens into one long vector, and then splitting the vector into chunks of 128 tokens. Only the very last example is padded, if required. At each step during training, random chunks are selected and combined into batches. 
-
-Checkpoints are taken every 50,000 steps during training. At each checkpoint, the perplexity is evaluated on the held-back evaluation set, and at the end of training the checkpoint with the lowest perplexity is returned as the best model. 
+    \caption{Best combination of boundary cue and segmentation strategy for each language and each suite.}
+    \label{tab:15-bestcuesfull}
+\end{table*}
