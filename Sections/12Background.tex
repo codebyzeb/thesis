@@ -173,7 +173,7 @@ In this thesis, the terms ``subword tokenisation'' and ``subword tokeniser'' wil
 
 % The design and availability of this tokenization pipeline has largely been driven by the sheer scaling capabilities of LM architectures, the largest of which are called ``large'' language models (LLMs). Now, the vast majority of language models are distributed on platforms such as Huggingface with an associated tokenizers that consistently process orthographic text, pre-tokenize the text to preserve word boundaries, and return tokens representing subwords.
 
-\subsection{Subword tokenisation methods}
+\subsection{Subword tokenisation methods}\label{sec:12-subwordmethods}
 
 Formally, subword tokenisers can be defined as a tuple $\tokeniser \defeq (\vocab, \detok, \tok)$. The first item in the tuple is the \defn{vocabulary} $\vocab$: a finite set of subwords, each defined as a concatenation $\subword \defeq \ch_i \circ \cdots \circ \ch_j$ of symbols $\ch$ from an alphabet $\alphabet$. The alphabet can be defined as set of characters appearing in the pre-tokens --- this can be all unique characters appearing in the data (e.g. letters, punctuation and whitespace) or the set of all bytes, if using character-to-byte conversion. %Without loss of generalisation, the alphabet is assumed to be bytes below.
 
@@ -209,7 +209,7 @@ While BPE and WordPiece are widely used representative examples of subword token
 For a broader survey of subword tokenisation techniques in NLP, see \citet{mielke2021between}.
 % REMOVE THE SURVEY?
 
-\subsection{Limitations of subword-based representations}
+\subsection{Limitations of subword-based representations}\label{sec:12-subwordlimitations}
 
 While data-driven subword tokenisation algorithms offer practical advantages, a substantial body of research has highlighted their limitations and proposed various extensions, as outlined below.
 

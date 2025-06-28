@@ -1,6 +1,5 @@
 \appendix
 \chapter{Additional Experiments}
-Some more text ...
 
 % \section{\gpp usage}
 % \label{appendix:corpus-phonemizer-usage}
@@ -61,11 +60,7 @@ where $P(p_i)$ is the probability of phoneme $p_i$ given by its frequency in the
 
 \chapter{Implementation Details}\label{app:implementation}
 
-We conduct our experiments using the \texttt{PyTorch} framework \citep{paszke-etal-2019-pytorch} and the \texttt{Transformers} library \citep{wolf-etal-2020-transformers}.
-
-\subsection{Hardware Details}
-
-We use a server with one NVIDIA A100 80GB PCIe GPU, 32 CPUs, and 32 GB of RAM for all experiments. Below, we report a subset of the output of the \emph{lscpu} command:
+LM experiments are conducted using the PyTorch framework \citep{paszke-etal-2019-pytorch}. \gpt and \llama architectures are implemented using the \myemph{transformers} library \citep{wolf-etal-2020-transformers}. Tokenisers are implemented using modules from the \myemph{tokenizers} library.\footnote{\href{https://github.com/huggingface/tokenizers}{\myemph{github.com/huggingface/tokenizers}}.} The server used for experiments has one \myemph{NVIDIA A100 80GB PCIe}, \integer{32} CPUs, and \integer{32} GB of RAM. Below, a subset of the output of the \emph{lscpu} command is shown:
 
 \begin{tcolorbox}[left=5pt,right=5pt,top=5pt,bottom=5pt]
 \small
@@ -91,7 +86,7 @@ BogoMIPS:            4800.11
 \end{verbatim}
 \end{tcolorbox}
 
-\section{Full word segmentation results}\label{app:fullsegresults}
+\section{Supplementary word segmentation results}\label{app:fullsegresults}
 
 All boundary placement F1 scores for the Tiny, Small, Medium and Large suites are given in \cref{fig:15-tiny}, \cref{fig:15-small}, \cref{fig:15-medium} and \cref{fig:15-large}, respectively. The best combination of cue and segmentation strategy for each language is given in \cref{tab:15-bestcuesfull}.
 
@@ -113,33 +108,33 @@ All boundary placement F1 scores for the Tiny, Small, Medium and Large suites ar
 %     \label{tab:15-correlations}
 % \end{table}
 
-\begin{figure*}
+\begin{figure}
     \centering
     \includegraphics[width=0.99\linewidth]{Figures/15Phonology/tiny.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Tiny} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-tiny}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}
+\begin{figure}
     \centering
     \includegraphics[width=0.99\linewidth]{Figures/15Phonology/small.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Small} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-small}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}
+\begin{figure}
     \centering
     \includegraphics[width=0.99\linewidth]{Figures/15Phonology/medium.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Medium} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-medium}
-\end{figure*}
+\end{figure}
 
-\begin{figure*}
+\begin{figure}
     \centering
     \includegraphics[width=0.99\linewidth]{Figures/15Phonology/large.png}
     \caption{Boundary placement F1 scores achieved by the models in the \textbf{Large} suite for each cue and segmentation strategy, with the highest score for each language highlighted.}
     \label{fig:15-large}
-\end{figure*}
+\end{figure}
 
 
 \begin{table*}[t]
@@ -185,3 +180,76 @@ All boundary placement F1 scores for the Tiny, Small, Medium and Large suites ar
     \caption{Best combination of boundary cue and segmentation strategy for each language and each suite.}
     \label{tab:15-bestcuesfull}
 \end{table*}
+
+\section{Supplementary ByteSpan Results}
+\label{app:additional_results}
+
+\Cref{sec:16-results} only reported results for the \tokname tokenisers using surprisal, since there was very little difference observed between surprisal and entropy. Here, the full results for the English tokenisers are provided in \cref{tab:16-fullenglishresults}, and the results for the multilingual tokenisers using entropy are provided in \cref{fig:16-multilingualentropy}.
+
+\setlength{\tabcolsep}{5pt}
+\begin{table}[t]
+    \centering
+    \footnotesize
+    \begin{tabular}{cccccccc}
+        \toprule
+        Vocab Size & Tokenizer & Constraint & \makecell{Learning \\ Method} & \makecell{Morph. \\ Alignment} & \makecell{Cognitive \\ Plausibility} & Fertility & \makecell{Renyi \\ Efficiency} \\
+        \midrule
+        % \multirow{6}{*}{\integer{8064}} & BPE & - & - & .726 & \textbf{.262} & 1.34 & .516 \\
+        %  & BPE-WP      &     -         & - & .841 & .256 & \textbf{1.32} & .526 \\
+        %  & ByteSpan  & \red{Global} & Increment  & .883 & .137 & 2.22 & .469 \\
+        %  & ByteSpan  & \yellow{Monotonic} & Seeding & .884 & .242 & 1.35 & \textbf{.530} \\
+        %  & ByteSpan  & \green{Combined} & Seeding & .867 & .244 & 1.34 & .528 \\
+        %  & ByteSpan  & \yellow{Monotonic} & Frequency & .878 & .220 & 1.50 & \textbf{.530} \\
+        %  & ByteSpan  & \green{Combined} & Frequency & \textbf{.895} & .237 & 1.42 & .524 \\
+        % \midrule
+        \multirow{12}{*}{\q{16}{\thousand}} & BPE  & - & - & .694 & \textbf{.302} & 1.21 & .468 \\ 
+        & BPE-WP & - & - & .834 & .297 & \textbf{1.19} & .472 \\ 
+        & ByteSpan-S & \red{Global} & Increment & \textbf{.899} & .146 & 1.90 & .470 \\ 
+        & ByteSpan-E & \red{Global} & Increment & \textbf{.899} & .146 & 1.90 & .470 \\ 
+        & ByteSpan-S  & \yellow{Monotonic} & Frequency & .885 & .254 & 1.39 & \textbf{ .483} \\ 
+        & ByteSpan-E & \yellow{Monotonic} & Frequency & .882 & .271 & 1.38 &  .482 \\ 
+        & ByteSpan-S & \yellow{Monotonic} & Seeding & .862 & .272 & 1.22 & .476 \\
+        & ByteSpan-E  & \yellow{Monotonic} & Seeding & .857 & .273 & 1.22 & .476 \\
+        & ByteSpan-S  & \green{Combined} & Frequency & .890 & .268 & 1.29 & .477 \\ 
+        & ByteSpan-E & \green{Combined} & Frequency & .889 & .286 & 1.27 & .476 \\ 
+        & ByteSpan-S  & \green{Combined} & Seeding & .867 & .279 & 1.21 & .474 \\
+        & ByteSpan-E & \green{Combined} & Seeding & .866 & .281 & 1.21 & .474 \\
+        \midrule
+        \multirow{12}{*}{\q{32}{\thousand}} & BPE & - & - & .648 & \textbf{.344} & 1.13 & .427 \\
+        & BPE-WP  & - & - & .821 & .337 & \textbf{ 1.11} & .431 \\
+        & ByteSpan-S & \red{Global} & Increment      & \textbf{.890} & .192 & 1.46 & .466 \\
+        & ByteSpan-E & \red{Global} & Increment      & \textbf{.890} & .193 & 1.48 & \textbf{.467} \\
+        & ByteSpan-S  & \yellow{Monotonic} & Frequency   & .843 & .277 & 1.31 & .446 \\
+        & ByteSpan-E & \yellow{Monotonic} & Frequency   & .837 & .291 & 1.30 & .445 \\
+        & ByteSpan-S & \yellow{Monotonic} & Seeding & .862 & .314 & 1.13 & .433 \\
+        & ByteSpan-E  & \yellow{Monotonic} & Seeding & .859 & .315 & 1.13 & .433 \\
+        & ByteSpan-S & \green{Combined} & Frequency    & .865 & .295 & 1.20 & .438 \\
+        & ByteSpan-E  & \green{Combined} & Frequency    & .854 & .308 & 1.19 & .438 \\
+        & ByteSpan-S & \green{Combined} & Seeding  & .860 & .318 & 1.12 & .432 \\
+        & ByteSpan-E  & \green{Combined} & Seeding  & .858 & .322 & 1.12 & .432 \\
+        \midrule
+        \multirow{12}{*}{\q{64}{\thousand}} & BPE & - & - & .609 & \textbf{.362} & 1.09 & .395 \\ 
+        & BPE-WP & - & - & .773 & .358 & \textbf{1.06} & .399 \\ 
+        & ByteSpan-S  & \red{Global} & Increment & \textbf{.865} & .258 & 1.18 & .421 \\ 
+        & ByteSpan-E  & \red{Global} & Increment & \textbf{.865} & .271 & 1.20 & \textbf{.424} \\ 
+        & ByteSpan-S & \yellow{Monotonic} & Frequency & .816 & .285 & 1.25 & .416 \\ 
+        & ByteSpan-E  & \yellow{Monotonic} & Frequency & .806 & .293 & 1.24 & .416 \\ 
+        & ByteSpan-S  & \yellow{Monotonic} & Seeding & .809 & .339 & 1.08 & .410 \\ 
+        & ByteSpan-E  & \yellow{Monotonic} & Seeding & .805 & .340 & 1.08 & .416 \\ 
+        & ByteSpan-S  & \green{Combined} & Frequency & .833 & .302 & 1.14 & .409 \\ 
+        & ByteSpan-E  & \green{Combined} & Frequency & .822 & .307 & 1.13 & .408 \\ 
+        & ByteSpan-S  & \green{Combined} & Seeding & .808 & .344 & 1.07 & .400 \\ 
+        & ByteSpan-E & \green{Combined} & Seeding & .804 & .344 & 1.07 & .400 \\ 
+        \bottomrule
+    \end{tabular}
+    \caption{Intrinsic evaluation results comparing \bpe and \bpewp to the \tokname tokenisers using surprisal (ByteSpan-S) and entropy (ByteSpan-E) across three vocabulary sizes. Scores are given to three significant figures, with the best score for each vocabulary size marked in \textbf{bold}.}
+    \label{tab:16-fullenglishresults}
+\end{table}
+\setlength{\tabcolsep}{6pt}
+
+\begin{figure}[!t]
+    \centering
+    \includegraphics[width=0.98\linewidth]{16InfoTok/multilingualentropy.png}
+    \caption{Fertility and \renyi efficiency for each language in the \commoncorpus evaluation subset, comparing multilingual \bpe to our multilingual \tokname tokenisers using entropy with a vocabulary size of \q{128}{\thousand}.}
+    \label{fig:16-multilingualentropy}
+\end{figure}

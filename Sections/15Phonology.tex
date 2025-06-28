@@ -18,7 +18,7 @@ This chapter introduces language-independent methods for phonological probing. T
 % %Noting that prediction-error in sequential models indicates word boundaries \citep{elman-1990-finding}, 
 % we identify four word boundary cues that can be extracted from trained models and three unsupervised strategies for placing boundaries using these cues, as illustrated in \cref{fig:15-example}. We additionally follow the supervised approach of \citet{hahn-baroni-2019-tabula}, training linear probes on final layer embeddings to determine if word boundaries are implicitly tracked in order to improve phoneme prediction.
 
-% We train phoneme-based BabyLMs on the phonemic transcriptions of child-centered speech comprising the \ipachildes dataset \citep{goriely2025}. We find that these models implicitly encode word boundaries across all 31 languages and identify two factors that may provide useful priors depending on the language: the length of words and the distribution of phonemes at the end of words. 
+% We train phoneme-based BabyLMs on the phonemic transcriptions of child-centred speech comprising the \ipachildes dataset \citep{goriely2025}. We find that these models implicitly encode word boundaries across all 31 languages and identify two factors that may provide useful priors depending on the language: the length of words and the distribution of phonemes at the end of words. 
 
 % %but that word-final phoneme distributions and word lengths vary between languages and act as confounding factors, making it difficult to compare results across languages. 
 
@@ -62,7 +62,7 @@ Previous work has explored the representations of word boundaries in LMs. \citet
 
 Here, word boundaries are extracted from phoneme LMs trained on child-directed speech transcripts, a more `tabula rasa' paradigm. Two methods for extracting word boundaries are explored; an unsupervised method that follows past computational models of word segmentation (as introduced in \cref{sec:12-wordseg}) and a linear probe, following \citet{hahn-baroni-2019-tabula}.
 
-\subsection{Unsupervised word segmentation}
+\subsection{Unsupervised word segmentation}\label{sec:15-wordsegunsupervised}
 
 Given a list of utterances, each of which consists of a non-delimited phoneme sequence, the task of an unsupervised word segmentation method is to produce a \emph{segmentation} of each utterance by using an unsupervised method for placing word boundaries. For instance, given the utterance ``what do you see'', represented phonemically as \ttipa{w2tdu:yu:si:}, successful segmentation would return \ttipa{w2t du: yu: si:}, as demonstrated in \cref{fig:15-example}.
 
@@ -183,7 +183,7 @@ Across all languages, the accuracy of the word boundary probes increases from th
 
 % \emph{Qualitative evaluation of the English model is given in \cref{fig:15-qualitative}. First, we note one of the failure cases for the peak segmentation strategy. Since by definition one peak can't follow another, the \ttipa{h} in ``help'' cannot be correctly identified as a word boundary for any measure after preceding \ttipa{aI} is correctly identified.}
 
-% \emph{Considering the relatively longer words ``opening'' and ``fingers'', we see that when segmenting with the Boundary Probability or Entropy cue, the `incorrect' bondaries split the words into possible morphoneme, ``open''+``ing'' and ``fing'' + ``ers''. This last segmentation is barely visible on the plot and this segmentation probably should not happen given that `e` appears 99.9\% of the time after `fing` in the training dataset, but since the strategy only captures relative certainty, we incorrectly place a word boundary. }
+% \emph{Considering the relatively longer words ``opening'' and ``fingers'', we see that when segmenting with the Boundary Probability or Entropy cue, the `incorrect' boundary split the words into possible morphemes, ``open''+``ing'' and ``fing'' + ``ers''. This last segmentation is barely visible on the plot and this segmentation probably should not happen given that `e` appears 99.9\% of the time after `fing` in the training dataset, but since the strategy only captures relative certainty, we incorrectly place a word boundary. }
 
 \begin{figure}[t]
 \centering
@@ -199,8 +199,8 @@ Across all languages, the accuracy of the word boundary probes increases from th
 \label{fig:15-frequencies}
 \end{figure}
 
-%the same number of word-final embeddings, labeled as boundary positions, as the number of non-word-final embeddings
-%they must identify word-final contextual embeddings, with all other positions labeled as non-boundary
+%the same number of word-final embeddings, labelled as boundary positions, as the number of non-word-final embeddings
+%they must identify word-final contextual embeddings, with all other positions labelled as non-boundary
 %where the the number of word-final embeddings used to train the probe is equal to the number non-word-final embeddings
 
 \paragraph{Italian has a strong prior for learning word boundaries.}
