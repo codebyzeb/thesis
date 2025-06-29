@@ -1,22 +1,22 @@
 \chapter{Discussion}\label{chapter:discussion}
 
-
-\section{Further Implications}
-\label{sec:14-further}
-
-\subsection{Comparing Human Acquisition to Language Model Learning}
-\label{sec:14-acquisition}
-
-% Here we could go into the BabyLM challenge as related work that looks into reducing the advantages language models have over humans, say that our work here contributes to the BabyLM challenge, and finally briefly mention the literature regarding 'advantages' and point to our discussion section on audio-based models. 
-
-The capacity of LMs to learn language from text alone has spurred interest in using such models for acquisition and psychology studies, such as comparing model learning trends to child learning behaviour \citep{evanson-etal-2023-language} and using model outputs to predict human reading times \citep{hollenstein-etal-2021-multilingual}.
-
-To push this research further, recent efforts aim to make language modeling more cognitively plausible \citep{beinborn2024cognitive} by reducing the advantages that typical language models have over humans during the learning process \citep{warstadt-2022-artificial}. One approach is to limit and curate the dataset to that which a typical human may be exposed to, such as is done in the BabyLM challenge \citep{warstadt-2023-babylm-findings}. Another approach is to use an input representation that more closely mimics speech rather than written text \citep{dupoux-2018-cognitive}. Finally, we must consider whether the architectures themselves are suitable linguistic theories, given that they were developed for downstream tasks \citep{baroni-2022-proper}.
-
-In this work we contribute to all three approaches by training a language model with streams of phonemes and assess whether the language model architecture used is advantaged or disadvantaged by these changes according to a wide variety of benchmarks. We hope that this leads to further work studying acquisition using phoneme streams as an input representation. However, while streams of phonemes may seem more cognitively plausible than written text, many studies go further than we do and seek to train directly on raw audio.
-
-\subsection{Learning directly from audio}
+\section{Phonological representations in language models}
 \label{sec:14-audiomodels}
+
+
+% \subsection{Comparing Human Acquisition to Language Model Learning}
+% \label{sec:14-acquisition}
+
+% % Here we could go into the BabyLM challenge as related work that looks into reducing the advantages language models have over humans, say that our work here contributes to the BabyLM challenge, and finally briefly mention the literature regarding 'advantages' and point to our discussion section on audio-based models. 
+
+% The capacity of LMs to learn language from text alone has spurred interest in using such models for acquisition and psychology studies, such as comparing model learning trends to child learning behaviour \citep{evanson-etal-2023-language} and using model outputs to predict human reading times \citep{hollenstein-etal-2021-multilingual}.
+
+% To push this research further, recent efforts aim to make language modeling more cognitively plausible \citep{beinborn2024cognitive} by reducing the advantages that typical language models have over humans during the learning process \citep{warstadt-2022-artificial}. One approach is to limit and curate the dataset to that which a typical human may be exposed to, such as is done in the BabyLM challenge \citep{warstadt-2023-babylm-findings}. Another approach is to use an input representation that more closely mimics speech rather than written text \citep{dupoux-2018-cognitive}. Finally, we must consider whether the architectures themselves are suitable linguistic theories, given that they were developed for downstream tasks \citep{baroni-2022-proper}.
+
+% In this work we contribute to all three approaches by training a language model with streams of phonemes and assess whether the language model architecture used is advantaged or disadvantaged by these changes according to a wide variety of benchmarks. We hope that this leads to further work studying acquisition using phoneme streams as an input representation. However, while streams of phonemes may seem more cognitively plausible than written text, many studies go further than we do and seek to train directly on raw audio.
+
+\section{Learning directly from audio}
+\label{sec:17-audiomodels}
 
 Our study focused on alternative input representations for text-based language models, but there is also a field of work dedicated to training models directly from raw audio.
 %, a completely separate class of input representations.
@@ -37,3 +37,9 @@ The gap in linguistic performance between text-based models and audio-based mode
 %[Despite us approaching human-like input, sequences of phonemes are still an abstraction from the true nature of input we receive as children and in our day-to-day lives, which in reality is continuous audio, and full of noise and non-linguistic information. Furthermore, phonemes are themselves an abstraction of phones and are learned representations that may even be learned after some initial stages of acquisition, raising questions as to whether they should be used as a primary representation of the input. Arguably we do get to a point where we process audio into streams of phonemes, but that might happen later, and phonemes are also language-dependent.]
 
 %[Some studies do try to learn from true audio input, but data is very limited. Some do show performance (e.g. the audio book one) but even those have advantages, and once removed (using true raw audio from a child's environment) those same models seem to learn nothing. Perhaps we just need more data, as those represent very little, but perhaps we are further than we thought in terms of producing a model that is able to learn language in exactly the same conditions as our amazing brains.]
+
+\section{Limitations and future directions}
+\label{sec:17-limitations}
+
+Wider limitations of work in this thesis?
+
