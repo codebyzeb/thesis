@@ -1,117 +1,77 @@
 \chapter{Introduction}\label{chapter:intro}
 
-The field of Natural Language Processing (NLP), which is concerned with the computational analysis, generation and processing of natural language, has undergone several paradigms shifts during its history. The current paradigm is dominated by the use of \textbf{Deep Neural Networks} (DNNs) to learn general-purpose representations of language that transfer well to downstream tasks. The representations are learned using self-supervised tasks that allow the neural network to learn \textbf{contextual embeddings} for language split into discrete \textbf{tokens}. This learning process is called \textbf{pre-training} and the resulting networks are referred to as \textbf{Pretrained Language Models} (PLMs), or often simply as \textbf{Language Models} (LMs). 
+% Language models are ubiquitous tools in the field of Natural Language Processing (NLP). Originally consisting of \ngram counts and now implemented using deep neural networks with billions of parameters, they have demonstrated a striking ability to process natural language, leading to their use in downstream applications but also to gain new insights into the statistical properties and structure of language. 
 
-This pre-training process is almost entirely end-to-end, except for the very first step: the conversion of language into discrete tokens, which in this thesis is referred to as the \textbf{input representation}. In some of the earliest examples of neural networks being used to study the sequential properties of language, these tokens may have consisted of individual characters or even \textbf{phonemes}, allowing researchers to theorize about human language learning and processing. The input representation now used to train LMs is not motivated by linguistics or cognition, but by efficiency. A major benefit of the pre-training process is that it is far more scalable than previous methods in NLP, not requiring explicitly labelled data. Now, the largest of these networks, known as \textbf{Large Language Models} (LLMs) consist of billions of parameters, are trained on trillions of words, and are remarkably powerful across a broad range of tasks and applications. As a result of this success, the NLP has converged on an input representation that make this scaling feasible. As the easiest means of sourcing trillions of words of data is web-scraping \addcites, tokens predominantly represent \textbf{orthographic} text\footnote{Web-scraping also means that LLMs are predominantly trained on English...}. Instead of characters or words, the discrete unit used to split this data is the \textbf{subword}, an arbitrary unit which typically lies between between characters and words in length but is not motivated by morphology. Instead, subword tokenisers such as BPE seem to seek a balance between many (often competing) technical constraints, such as compression rate, vocabulary size and the handling of out-of-vocabulary (OOV) items.
+Language models have long been foundational tools in Natural Language Processing (NLP). By providing probability distributions over sequences of discrete linguistic units, they have supported a wide range of downstream applications and enabled the quantitative study of the statistical structure of language.
 
-This \textbf{default input representation} has become ubiquitous in NLP and although many alternatives to popular subword tokenisation algorithms have been proposed, there have been relatively few studies challenging this ubiquity. One alternative representation consists of individual \emph{phonemes}, the perceptually distinct units of sound in a specified language used to distinguish words in speech. Instead of orthographic subwords, the \textbf{phonemic input representation} consists of individual phonemes, often without word boundaries, as these are not easily available in speech. Although a few studies have explored specific practical and analytical benefits of using this representation to train language models (see \cref{sec:12-phoneval} for a review), phoneme-level modelling is still vastly under-studied. There is a clear need for a thorough examination of this representation in order to identify possible resource constraints %that could be preventing work in this area,
-and to establish the feasibility of using the phonemic input representation to train modern LM architectures.% through a comparison with the standard input representation.
+From early \ngram models to today's large neural architectures, language models have undergone significant evolution. Modern models, particularly \defn{large language models} (LLMs), contain millions or even billions of parameters and are trained on trillions of words of text. These models now exhibit remarkable language processing abilities and have become ubiquitous --- both as objects of linguistic study and as integral components of commercial NLP systems. This widespread adoption has, in turn, driven substantial research into understanding how LLMs learn, often drawing on linguistic theory to investigate whether their training behaviours resembles human language acquisition \citep{evanson-2023-language}, whether their predictions align with human language processing, and whether the internal representations they develop capture generalisable grammatical patterns.
 
-%there are limited insights that can be gained when relating these models to phonology (as the representation is orthographic) or human language learning. %Phoneme-level modelling is vastly under-studied, despite the potential benefits for phonological analysis, alternative tokenisation, multilingual modelling, and low-resource modelling. 
+Alongside efforts to analyse how LLMs learn, there has also been growing interest in improving language models by incorporating insights from linguistics. Initiatives such as the Zero Resource Speech Challenge \citep{dunbar2022self} and the BabyLM Challenge \citep{warstadt2023findings} have motivated new architectures and learning strategies designed to function in low-resource settings --- reflecting how humans acquire language from far less linguistic input than current LLMs receive. Within this framework, linguistic principles have shaped new approaches to architecture design, curriculum learning, and training methodologies.
 
-The phoneme input representation could also have significant implications for research using LMs to investigate the distributional properties of language, updating legacy `connectionist' models (which often did use phonemes) with much more powerful architectures. In the current paradigm, LMs are frequently compared to human learners; however, this comparison is complicated by the fact that models are typically trained on vastly more linguistic data than humans encounter over their lifetimes \citep{huebner-etal-2021-babyberta}. This concern has motivated the \emph{BabyLM challenge} \citep{warstadt-2023-babylm-findings,conll-2024-babylm}, where so called `BabyLMs' are pre-trained using corpora whose scale and source are considered ``developmentally plausible''. Despite the aim to improve comparisons between language models and human learners, the default input representation has become so entrenched that it is not even challenged here, despite the divergence from the auditory input available to human infants. Reevaluating the input modality is thus a crucial step toward more realistic comparisons with human language acquisition.\zeb{Potentially needs rephrasing to be more targeted towards general study of phonology as done in \cref{chapter:phonology}}
+Despite these advances, one critical factor in language modelling remains relatively under-explored: the \defn{input representation} --- the way raw language data is transformed into the discrete tokens processed by the model. While contemporary LLMs overwhelmingly rely on \emph{subword}-based representations derived from orthographic text, earlier \ngram models often used tokens corresponding to individual \emph{phonemes}, extracted from speech transcripts. Although phoneme-based representations continue to appear in certain speech processing systems and phonological studies, they remain largely neglected in the context of modern, large-scale language modelling.
 
-%The choice of input representation—such as phonemes—has significant implications for research using language models (LMs) to investigate the distributional properties of language, particularly as modern architectures build on the legacy of early connectionist models. In the current landscape, LMs are frequently compared to human learners; however, this comparison is complicated by the fact that models are typically trained on vastly more linguistic data than humans encounter over their lifetimes \citep{huebner-etal-2021-babyberta}. This concern has motivated the \emph{BabyLM Challenge} \citep{warstadt-2023-babylm-findings,findings,conll-2024-babylm}, which promotes the development of LMs trained on data that is both limited in scale and developmentally plausible. Despite this promising direction, most BabyLMs still rely on standard input formats—typically text segmented into subword units—even though such representations diverge significantly from the auditory, phonemic input available to human infants. Reevaluating the input modality is thus a crucial step toward more realistic models of human language acquisition.
+This thesis investigates the potential of phoneme-based input representations in modern language model architectures, with a particular emphasis on developmentally plausible training scenarios. I refer to language models trained in this way as \defn{phoneme LMs} in this thesis. Confronting a lack of suitable tools and datasets for training phoneme LMs, I first develop and release two open-source resources, also designed to support broader phonological analysis. I then conduct a series of experiments leveraging these resources to evaluate the feasibility of phoneme-based input for training neural language models. By comparing phoneme-based inputs to subword-based inputs, these experiments reveal the subtle impact of input representation on how these neural language models acquire phonological and syntactic capabilities, and further experiments reveal how these capabilities scale with data and model size.
 
-% Particularly easy to scale compared to past NLP methods since only unlabelled text is required. Instead,  Benefiting from the vast quantities of text available online through procedures like web-scraping, state-of-the-art has been dominated by scaling this pre-training step as much as possible, using particularly large networks trained on especially massive corpora, aptly-named Large Language Models. 
+Building on these results, I demonstrate how phoneme-based input enables cross-linguistic phonological analysis by training phoneme LMs on child-directed speech from 31 languages and probing the learned representations for phonological knowledge. Distinctive phonological feature probes reveal that certain features are encoded by these models, implying they have a role in distributional phonology cross-lingually. Using a word segmentation task inspired by the language acquisition literature, I show that these models implicitly track word boundaries --- even though no explicit boundary information was provided during training.
 
-
-%Standard NLP pipeline uses large data, orthographic, scraped from the web, with subword tokenisation for efficiency and downstream performance. (+high level explanation here) Remarkable power and almost entirely end-to-end, save for a crucial component: the tokeniser, which is often trained in advance and uses a subword representation motivated entirely by efficiency, rather than being motivated by cognition or linguistic boundaries. Call this the ``standard input representation''.
-
-% Possibly for background instead: Now, pre-training is so expensive that very large models are only trained once, and later fine-tuned for specific tasks, however since the tokeniser is `locked-in', this often limits out-of-domain fine-tuning due to the subword vocabulary badly representing the new task. In some cases, pre-training a smaller network is more effective and in fact less computationally expensive than fine-tuning a large network.
-
-%The earliest `LMs' (then called "connectionist" networks) used a completely different input representation - often individual phonemes or characters, in order to best model the brain's processing of language by choosing appropriate units for modelling. These networks were not built to handle noisy data and so `tokeniser' may not be the correct term. Modern LLMs continue to be a useful tool for linguistic analysis. In response to the astounding performance of transformer-based architectures on downstream tasks, one areas of research investigated the linguistic capabilities of these models....
-
-%However, when trained on internet-scraped written text using a subword-based tokeniser, there are limited insights that can be gained when relating these models to phonology (as the representation is orthographic) or human language learning. In recent years, the unrealistic scale of the pre-training data used in the standard NLP pipeline has led to an alternative direction of research, where models trained on developmentally plausible data (not just in scale, but also in domain) have led to new insights... BabyLM challenge... particularly as these experiments are feasible with academic budgets.
-
-%Despite the focus on developmentally plausible data in the BabyLM research community, the subword input representation is so entrenched that the vast majority of entries continued to use subword tokenisers. This is despite the fact that subword tokenisation is not cognitively plausible...etc...
-
-%Phoneme-level modelling is vastly under-studied, despite the potential benefits for phonological analysis, alternative tokenisation, multilingual modelling, and low-resource modelling. 
-
-The focus of this thesis is to establish the benefits and insights that can be gained from using a phonemic input representation to train modern NLP architectures, particularly when considering developmentally plausible training data. First, finding a lack of suitable tools and datasets for phonemic language modelling, I develop and release two open-source resources which also support phonological analysis more broadly. I then carry out a wide range of experiments leveraging these resources in order to assert the feasibility of the phonemic input representation for training transformer-based architectures. These experiments also establish how phonological and syntactic capabilities scale with data and model size. Using these findings and resources, I demonstrate how the phonemic input representation supports phonological analysis by training LMs on child-directed speech across 31 languages and probing the trained models for phonological features. Using a word segmentation task drawn from the acquisition literature, I find that these models implicitly track word boundaries, despite word boundaries not appearing during training. Finally, noting the parallels between the word segmentation task and bottom-up subword tokenisers, I propose a novel method for learning token merges and find that \writemore
-
-
-\Zeb{maybe end with something like... demonstrating that research into cognitively-motivated modelling can lead to new improvements even in industry-scale use of these models...}
-
-% 6. I address these questions in \cref{chapter:resources} and \cref{chapter:modelling}. 
-
-
-
-% LMs can also be a useful tool for linguistic analysis, studying learning dynamics, and drawing parallels to acquisition using developmentally plausible data. 
-
-
-
-
-% 3. As large-scale language modelling has grown out-of-reach for academic budgets, such explorations have developed as an alternative research direction (BabyLM).
-
-%3. The earliest examples of auto-regressive neural networks were developed for linguistic analysis, not for downstream use. 
-
-
-%3. Phoneme-level modelling is under-studied, despite the benefits for phonological analysis, alternative tokenisation, multilingual modelling, and low-resource modelling. Resources exist but are limited in availability and few are cross-lingual.
-
-%4. Hence, we must introduce new resources (chapter 3) and properly determine if LM architectures are suitable for modelling with phonemes (chapter 4).
-
-%5. We can then model cross-lingually and probe these models for phonological knowledge using word segmentation (chapter 5). 
-
-%6. Finally, word segmentation could inspire new methods for tokenisation in the standard NLP setup (chapter 6), demonstrating the downstream benefits of research that seeks to explore language and language learning more broadly...
+Finally, drawing on parallels between the word segmentation problem and common subword tokenisation techniques, I propose a novel, unsupervised method for learning subword vocabularies based on grouping predictable bytes. This final contribution illustrates how linguistic insights can inspire new techniques for application-driven language modelling, and the broader value of studying the nature of input representations in language models.
 
 \section{Research questions and contributions}
 
-The research conducted in this thesis investigates the feasibility of using phonemes as input to modern LLM architectures and whether this input representation can lead to new insights across phonological experimentation and tokenisation. The notion of feasibility can be broken down into two research questions:
+The research conducted in this thesis explores insights that can be gained by training language models with a phoneme-based input representation. This broad exploration is split into three research questions, the first of which concerns the need for dedicated resources to support phoneme-based pre-training:
 
 \begin{question}{}{resources}
-    To what extent do sufficient resources exist for training and evaluating language models using a phonemic input representation?
+    To what extent do sufficient resources exist for pre-training and evaluating language models using a phoneme-based input representation?
 \end{question}
 
-\begin{question}{}{modelling}
-    To what extent are transformer-based architectures suitable for pre-training with the phonemic input representation?
-\end{question}
-
-I address these two questions through the following targeted contributions:
+This question is addressed through the following contributions:
 
 \begin{itemize}
-    \item I conduct a thorough analysis of existing datasets and grapheme-to-phoneme tools and find crucial gaps in existing resources.
-    \item I develop and release two resources that fill these gaps; the \ipachildes dataset and the \gpp tool for grapheme-to-phoneme conversion.
-    \item Using the BabyLM challenge framework, I compare models trained with a phonemic input representation to models trained with a default subword input representation by considering three key transformations.
-    \item Using the North American English section of \ipachildes, I compare the effect of model size and data size on syntactic and phonological capabilities of phoneme models. 
+    \item I conduct a thorough analysis of existing datasets and grapheme-to-phoneme tools and find crucial gaps in existing resources (\cref{chapter:resources}).
+    \item I develop and release two resources that fill these gaps; the \ipachildes dataset and the \gpp tool for grapheme-to-phoneme conversion (\cref{chapter:resources}).
+    \item I demonstrate that the BabyLM challenge framework can be used to train and evaluate phoneme-based language models using standard language modelling benchmarks (\cref{chapter:modelling}).
+    \item I demonstrate that distinctive feature probes and the word segmentation task can be used to test phoneme-based language models for phonological knowledge (\cref{chapter:phonology}).
 \end{itemize}
 
-Addressing these research questions facilitates the use of these models to seek new insights. With these newly developed resources and the suitability of transformer-based architectures for this research established, \cref{chapter:phonology,chapter:infotokenisation} tackle the following two research questions:
+With these resources established, the second research questions concerns the linguistic insights that can be gained from phoneme-based pre-training:
 
 \begin{question}{}{phonology}
-    To what extent does the phonemic input representation facilitate cross-lingual phonological experimentation and analysis?
+    To what extent can phoneme-based pre-training facilitate cross-lingual phonological experimentation and analysis?
 \end{question}
 
-\begin{question}{}{tokenisation}
-    To what extent can phonological experimentation with language models lead to the development of alternative algorithms for tokenisation? 
-\end{question}
-
-I contribute to these questions through the following specific contributions:
+This question is addressed through the following contributions:
 
 \begin{itemize}
-    \item I probe models trained on 11 languages from \ipachildes for phonological distinctive features, possible due to the coherence that \gpp maintains with a pre-existing phonological database. 
-    \item I investigate whether phoneme LMs implicitly track word boundaries by using the word segmentation task, proposing a novel unsupervised method based on models in the acquisition literature which I use to use alongside linear probes to evaluate models across 31 languages.
-    \item Noting the parallels between information-driven word segmentation strategies and subword tokenisation, I propose and evaluate a novel tokenisation strategy that bases merges on surprisal, rather than frequency.
+    \item I probe models trained on 11 languages from \ipachildes for phonological distinctive features, possible due to the coherence that \gpp maintains with a pre-existing phonological database (\cref{chapter:phonology}).
+    \item I investigate whether phoneme LMs implicitly track word boundaries by using the word segmentation task, proposing a novel unsupervised method based on models in the acquisition literature which I use to use alongside linear probes to evaluate models across 31 languages (\cref{chapter:phonology}).
 \end{itemize}
 
-I first note the lack of suitable tools and datasets for phonemic language modelling and so develop and release two open-source resources; an improved grapheme-to-phoneme tool for converting orthographic text to a phonemic representation and a phonemic dataset of child-centred speech across 31 languages. I then use these resources to explore the feasibility of phoneme-based pre-training of modern NLP architectures. Noting the three transformations that separate the phonemic input representation from the default input representation, I use linguistic judgement tasks and downstream tests to both confirm this feasibility and establish the size requirements for phoneme-based language modelling across data and model sizes. 
+Finally, the final research question explores the technical insights that can be gained from phoneme-based pre-training:
 
-Using linguistic judgement tasks, I assess the data and size requirements for phoneme-based there are few phonemic datasets large enough for training LLMs and none that are both multilingual and naturalistic, and tools for converting orthographic text to a phonemic representation 
+\begin{question}{}{modelling}
+    To what extent can phoneme-based pre-training provide insights into language model pre-training?
+\end{question}
 
+This question is addressed through the following contributions:
 
-First, we must establish whether suitable resources are available to facilitate this work, and whether modern transformer-based architectures support a phonemic input representation. This can be split into two research questions:
+\begin{itemize}
+    \item I compare models trained with a phoneme-based input representation to models trained with a standard subword-based input representation to explore the technical effects of three identified transformations that separate the two (\cref{chapter:modelling}).
+    \item Using the North American English section of \ipachildes, I compare the effect of model size and data size on syntactic and phonological capabilities of phoneme models (\cref{chapter:modelling}).
+    \item Using word boundary probes, I identify that phoneme models implicitly track word boundaries (\cref{chapter:phonology}).
+    \item Noting the parallels between information-driven word segmentation strategies and subword tokenisation, I propose and evaluate a novel tokenisation strategy that groups bytes using prediction error, rather than frequency (\cref{chapter:infotokenisation}).
+\end{itemize}
 
 \section{Thesis outline}
 
 A summary of the subsequent chapters of this thesis is given below.
 
 \begin{itemize}
-    \item In \cref{chapter:background}, I provide the necessary background for the research presented in this thesis. I discuss the role of tokenisation in modern NLP architectures and define the phonemic input representation in relation to the default input representation by finding three transformations that separate them, noting previous studies that have examined these transformations. I then examine prior work that has used phoneme LMs for cross-lingual phonological experimentation, studying theories of acquisition and downstream applications, finding relatively few benchmarks for phonological probing. Finally, I discuss research surrounding `BabyLMs', smaller models pre-trained on developmentally plausible corpora, which have led to numerous advancements and insights but have predominantly focused on English and mostly used a subword representation, despite the relative implausibility of orthographic text split into subwords, which can be addressed by the phonemic input representation.
-    \item In \cref{chapter:resources}, I conduct a thorough review of existing phonemic datasets and methods used for creating these datasets. I identify a particular lack of data for cross-lingual work to do with spontaneous or child-centred speech. I find that the majority of large datasets are created using grapheme-to-phoneme conversion tools but that these tools lack coherence with established phonemic inventories and phonological databases. I address both of these issues by developing two resources which are released open-source; \gpp, an improved grapheme-to-phoneme conversion tool which ensures that phoneme inventories correspond to inventories from an established phonological database, and \ipachildes, a phonemic dataset of child-centred, spontaneous speech across 31 languages, created using \gpp.
-    \item In \cref{chapter:modelling}, I explore the feasibility of training LLMs with a phonemic input representation. I begin by defining model architecture used for the experimental work in this thesis. I then present eight tokenisers that cover all combinations of the three input transformations and compare models trained with these tokenisers using the BabyLM challenge dataset and evaluation pipeline, finding that phoneme LMs only lead to a minor decrease in performance on these traditional benchmarks but are beneficial for phonological benchmarks. I then establish the scaling laws of phoneme LMs by training models of various sizes on subsets of North American English portion of \ipachildes and evaluating their syntactic and phonological capabilities.
-    \item In \cref{chapter:phonology}, having established appropriate model sizes for the varying availabilities of data in \ipachildes, I train and release a suite of phoneme LMs across 31 languages to support phonological experimentation. I demonstrate how the correspondence that \gpp maintains with a phonological database allows for these models to be probed for implicit knowledge of distinctive features and find that the distributional properties of phonemes are sufficient to learn major class and place features cross-lingually. I then turn to the word segmentation task from the acquisition literature, proposing an unsupervised method for extracting word boundaries from phoneme LMs as well as using linear probes, finding that these models implicitly track word boundaries and noting priors inherit in the distributional properties of phonemes in different languages.
-    \item In \cref{chapter:infotokenisation}, I note the similarities between my unsupervised approach to word segmentation and alternative methods for the tokenisation step in LLMs. Returning to the tokenisers compared in \cref{chapter:modelling}, I propose an alternative method for learning phoneme-based subwords using the predictions of a phoneme LM and find that this leads to improvements across syntactic and phonological tasks. Applying this strategy to a standard language modelling setup, whereby byte merges are based on predictions from a byte-level LM rather than frequency, I find\ldots \zeb{needs completing}. 
-    \item In \cref{chapter:conclusion}, I summarise the contributions of this thesis and discuss the wider implications. I propose ideas for future directions and ending with some concluding remarks.
+    \item In \cref{chapter:background}, I provide the necessary background for the research presented in this thesis. I discuss how input representations have evolved alongside language model architectures, defining the phoneme-based input representation in contrast to the subword-based input representations. I then focus on subword-based input representations, discussing typical tokenisation methods used to create them, their limitations, and reviewing alternative representations that have been explored. I then focus on phoneme-based input representations, reviewing prior work that has utilised them in \ngram models as well as modern architectures. Finally, I discuss research that uses a developmentally-plausible pre-training framework to study smaller neural language models. This research has led to numerous advancements and insights but has predominantly focused on English and mostly used the subword-based input representation, despite the relative implausibility of orthographic text split into subwords. I conclude that this framework is useful for studying the impact of phoneme-based input representations and describe the datasets and evaluation benchmarks utilised in this thesis.
+    \item In \cref{chapter:resources}, I conduct a thorough review of existing phonemic datasets and the methods used to create them. I identify a particular lack of data for cross-lingual studies of spontaneous or child-centred speech. I find that the majority of phonemic datasets are created using grapheme-to-phoneme conversion tools but that these tools lack coherence with established phonological inventories and databases. I address both of these issues by developing two resources which are released open-source; \gpp, an improved grapheme-to-phoneme conversion tool which ensures that phoneme inventories correspond to inventories from an established phonological database, and \ipachildes, a phonemic dataset of child-centred, spontaneous speech across 31 languages, created using \gpp.
+    \item In \cref{chapter:modelling}, I explore the impact of phoneme-based pre-training with modern neural language architectures. I begin by defining the architecture used for the experimental work in this thesis. I then present eight tokenisers that cover all combinations of the three input transformations and compare models trained with these tokenisers using the BabyLM challenge dataset and evaluation pipeline, finding that phoneme LMs only lead to a minor decrease in performance on these traditional benchmarks but are beneficial for phonological benchmarks. I then establish the scaling laws of phoneme LMs by training models of various sizes on subsets of North American English portion of \ipachildes and evaluating their syntactic and phonological capabilities.
+    \item In \cref{chapter:phonology}, using the scaling laws established in the previous chapter, I train and release a suite of phoneme LMs across the 31 languages of \ipachildes to support phonological experimentation. I demonstrate how the correspondence that \gpp maintains with a phonological database allows for these models to be probed for implicit knowledge of distinctive features and find that the distributional properties of phonemes are sufficient to learn major class and place features cross-lingually. I also use the word segmentation task from the acquisition literature, proposing unsupervised methods for extracting word boundaries from phoneme LMs as well as using linear probes, finding that these models implicitly track word boundaries and noting priors inherit in the distributional properties of phonemes in different languages.
+    \item In \cref{chapter:infotokenisation}, I draw parallels between the unsupervised word segmentation methods introduced in the previous chapter and recent tokenisation methods utilised in LLMs. Using this insight, I introduce \bytespan, a novel method for learning subwords using the predictions of a byte-level language model. I find that this cognitively-motivated method learns subwords that align more closely with morphemes without sacrificing the benefits of popular subword tokenisation methods for compression. In a multilingual setup, I find that the method has the potential to be biased towards dominant scripts, but explore a method for balancing the vocabulary across languages. 
+    \item In \cref{chapter:conclusion}, I summarise the contributions of this thesis and discuss the wider implications of phoneme-based input representations in contrast to recent advances in audio-based pre-training. Finally, I conclude with ideas for future directions.
 \end{itemize}
 
 \section{Publications}
@@ -119,50 +79,51 @@ A summary of the subsequent chapters of this thesis is given below.
 The research presented in this thesis has been the basis for the following publications.
 
 \begin{itemize}
-\item The work presented in \cref{chapter:resources}, the experiments using the IPA-CHILDES dataset in \cref{chapter:modelling} and the phonological feature probing experiments in \cref{chapter:phonology} are published as:
-
+\item The work presented in \cref{chapter:resources} was published as:
 \begin{mdframed}[linewidth=1pt]
-Zébulon Goriely and Paula Buttery. 2025. \href{https://arxiv.org/abs/2504.03036}{IPA-CHILDES \& G2P+: Feature-Rich Resources for Cross-Lingual Phonology and Phonemic Language modelling.} Currently under review at CoNLL 2025.
+Z\'ebulon Goriely and Paula Buttery. 2025. \href{https://arxiv.org/abs/2504.03036}{\myemph{IPA-CHILDES \& G2P+: Feature-Rich Resources for Cross-Lingual Phonology and Phonemic Language modelling}}. Accepted to CoNLL 2025.
 \end{mdframed}
 
-\item The work presented in \cref{chapter:modelling} (excluding the experiments using the IPA-CHILDES dataset) won the ``Outstanding Paper'' award at the second edition of the BabyLM challenge and is published as:
-
+\item The work presented in \cref{chapter:modelling} won the \enquote{Outstanding Paper} award at the second edition of the BabyLM challenge and was published as:
 \begin{mdframed}[linewidth=1pt]
-Zébulon Goriely, Richard Diehl Martinez, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2024. \href{https://aclanthology.org/2024.conll-babylm.4/#}{From Babble to Words: Pre-Training Language Models on Continuous Streams of Phonemes}. In The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning, pages 37–53, Miami, FL, USA. Association for Computational Linguistics.
+Z\'ebulon Goriely, Richard Diehl Martinez, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2024. \href{https://aclanthology.org/2024.conll-babylm.4/#}{\myemph{From Babble to Words: Pre-Training Language Models on Continuous Streams of Phonemes}}. In The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning, pages 37--53, Miami, FL, USA. Association for Computational Linguistics.
 \end{mdframed}
 
-\item The work presented in \cref{chapter:phonology} (excluding the phonological feature probing experiments) is published as:
+\item The work presented in \cref{chapter:phonology} was published as:
 \begin{mdframed}[linewidth=1pt]
-Zébulon Goriely and Paula Buttery. 2025. \href{https://arxiv.org/abs/2504.03338}{BabyLM's First Words: Word Segmentation as a Phonological Probing Task}. Currently under review at CoNLL 2025.
+Z\'ebulon Goriely and Paula Buttery. 2025. \href{https://arxiv.org/abs/2504.03338}{\myemph{BabyLM's First Words: Word Segmentation as a Phonological Probing Task}}. Accepted to CoNLL 2025.
 \end{mdframed}
 
-\item The work presented in \cref{chapter:infotokenisation} is published as:
+\item The work presented in \cref{chapter:infotokenisation} was published as:
 \begin{mdframed}[linewidth=1pt]
-Insert paper here.
+Z\'ebulon Goriely, Suchir Salhan, Pietro Lesci, Julius Cheng, and Paula Buttery. 2025. \href{https://arxiv.org/abs/2506.18639}{\myemph{ByteSpan: Information-Driven Subword Tokenisation}}. Accepted to TokShop 2025.
 \end{mdframed}
 \end{itemize}
 
-Additionally, several related publications were produced alongside the papers listed above. These are listed below due to being highly related to this research but are not included in this thesis.
+Note that some experiments have been moved from their original papers to other chapters in this thesis to provide a more coherent narrative. Specifically, these are the scaling experiments using the \ipachildes dataset in \cref{chapter:modelling} and the distinctive feature probing experiments in \cref{chapter:phonology}, both of which were originally published in the first paper above.
+
+In addition to the publications above, several related publications were produced during the course of this research. These are as follows:
+%These are listed below due to being highly related to this research but are not included in this thesis.
 
 \begin{itemize}
-\item The winner of the \enquote{Most Interesting Paper} award at the first edition of the BabyLM challenge, exploring the use of curriculum learning for training LLMs in a developmentally plausible setting:
+\item The winner of the \enquote{Most Interesting Paper} award at the first edition of the BabyLM challenge, exploring the use of curriculum learning to train language models in a developmentally-plausible setting:
 \begin{mdframed}[linewidth=1pt]
-    Richard Diehl Martinez, Zébulon Goriely, Hope McGovern, Christopher Davis, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2023. \href{https://aclanthology.org/2023.conll-babylm.10/}{CLIMB – Curriculum Learning for Infant-inspired Model Building}. In Proceedings of the BabyLM Challenge at the 27th Conference on Computational Natural Language Learning, pages 112–127, Singapore. Association for Computational Linguistics.
+    Richard Diehl Martinez, Z\'ebulon Goriely, Hope McGovern, Christopher Davis, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2023. \href{https://aclanthology.org/2023.conll-babylm.10/}{\myemph{CLIMB --- Curriculum Learning for Infant-inspired Model Building}}. In Proceedings of the BabyLM Challenge at the 27th Conference on Computational Natural Language Learning, pages 112--127, Singapore. Association for Computational Linguistics.
 \end{mdframed}
 
-\item Introducing a measure of \enquote{Frequency Bias} in LLMs and introducing \enquote{Syntactic Smoothing}, using a prior based on part-of-speech classes during training, to mitigate this bias:
+\item Introducing a measure of \defn{Frequency Bias} to explore how the grammatical capabilities of language models are affected by token frequency and introducing \defn{Syntactic Smoothing}, using a prior based on part-of-speech classes during training, to mitigate this bias:
 \begin{mdframed}[linewidth=1pt]
-    Zébulon Goriely, Richard Diehl Martinez, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2024. \href{https://aclanthology.org/2024.emnlp-main.344/}{Mitigating Frequency Bias and Anisotropy in Language Model Pre-Training with Syntactic Smoothing}. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, pages 5999–6011, Miami, Florida, USA. Association for Computational Linguistics.
+    Z\'ebulon Goriely, Richard Diehl Martinez, Andrew Caines, Paula Buttery, and Lisa Beinborn. 2024. \href{https://aclanthology.org/2024.emnlp-main.344/}{\myemph{Mitigating Frequency Bias and Anisotropy in Language Model Pre-Training with Syntactic Smoothing}}. In Proceedings of the 2024 Conference on Empirical Methods in Natural Language Processing, pages 5999–6011, Miami, Florida, USA. Association for Computational Linguistics.
 \end{mdframed}
 
 \item Exploring the use of fine-grained curriculum learning strategies based on linguistic acquisition theories across several languages:
 \begin{mdframed}[linewidth=1pt]
-    Suchir Salhan, Richard Diehl Martinez, Zébulon Goriely, and Paula Buttery. 2024. \href{https://aclanthology.org/2024.conll-babylm.15/}{Less is More: Pre-Training Cross-Lingual Small-Scale Language Models with Cognitively-Plausible Curriculum Learning Strategies}. In The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning, pages 174–188, Miami, FL, USA. Association for Computational Linguistics.
+    Suchir Salhan, Richard Diehl Martinez, Z\'ebulon Goriely, and Paula Buttery. 2024. \href{https://aclanthology.org/2024.conll-babylm.15/}{\myemph{Less is More: Pre-Training Cross-Lingual Small-Scale Language Models with Cognitively-Plausible Curriculum Learning Strategies}}. In The 2nd BabyLM Challenge at the 28th Conference on Computational Natural Language Learning, pages 174--188, Miami, FL, USA. Association for Computational Linguistics.
 \end{mdframed}
 
 \item My master's thesis exploring a cue-based algorithm for word segmentation, which was augmented with additional experiments:
 \begin{mdframed}[linewidth=1pt]
-    Zébulon Goriely, Andrew Caines and Zébulon Goriely. 2023. \href{https://www.cambridge.org/core/journals/journal-of-child-language/article/word-segmentation-from-transcriptions-of-childdirected-speech-using-lexical-and-sublexical-cues/5D206536C878ADA80026ED8E2E72F848}{Word segmentation from transcriptions of child-directed speech using lexical and sub-lexical cues}. Journal of Child Language. 2025;52(1):1-41.
+    Z\'ebulon Goriely, Andrew Caines and Paula Buttery. 2023. \href{https://www.cambridge.org/core/journals/journal-of-child-language/article/word-segmentation-from-transcriptions-of-childdirected-speech-using-lexical-and-sublexical-cues/5D206536C878ADA80026ED8E2E72F848}{\myemph{Word segmentation from transcriptions of child-directed speech using lexical and sub-lexical cues}}. Journal of Child Language. 2025;52(1):1-41.
 \end{mdframed}
 \end{itemize}
 
@@ -171,21 +132,17 @@ Additionally, several related publications were produced alongside the papers li
 The two resources presented in \cref{chapter:resources} have been released as open-source:
 
 \begin{itemize}
-\item \gpp is a pip-installable tool using an MIT license. The source is available on \href{https://github.com/codebyzeb/g2p-plus}{GitHub}. 
-\item The \ipachildes dataset is hosted on \href{https://huggingface.co/datasets/phonemetransformers/IPA-CHILDES}{Huggingface}.
+\item \gpp is a pip-installable tool using an MIT license. The source is available on \href{https://github.com/codebyzeb/g2p-plus}{\myemph{GitHub}}. 
+\item The \ipachildes dataset is hosted on \href{https://huggingface.co/datasets/phonemetransformers/IPA-CHILDES}{\myemph{Huggingface}}.
 \end{itemize}
 
 Additionally, the following research artefacts have been released for reproducibility and dissemination:
 
 \begin{itemize}
-    \item \href{https://github.com/codebyzeb/childes-processor}{https://github.com/codebyzeb/childes-processor}: The source code for \childesprocessor, a pip-installable tool used to download and process the CHILDES database for the creation of the \ipachildes (\cref{chapter:resources}). It is open-sourced with an MIT license.
-    \item \href{https://github.com/codebyzeb/babylm-ipa}{https://github.com/codebyzeb/babylm-ipa}: The scripts used for leveraging \gpp to convert the BabyLM training data and evaluation data to an IPA representation (\cref{chapter:modelling}).
-    \item \href{https://github.com/codebyzeb/PhonemeTransformers}{https://github.com/codebyzeb/PhonemeTransformers}: The source code and scripts used to train language models using phonemes, compare input representations and evaluate models using word segmentation and phonological features probes (\cref{chapter:modelling,chapter:phonology}). 
-    \item \href{https://huggingface.co/phonemetransformers}{https://huggingface.co/phonemetransformers}: A Huggingface organisation containing all datasets, models and tokenisers trained for the experiments in \cref{chapter:modelling,chapter:phonology}, grouped into collections for convenience.
-    \item \href{https://github.com/codebyzeb/infotokenization}{https://github.com/codebyzeb/infotokenization}: The scripts used to train byte-level language models, use their predictions to create subword tokenisers, train subword-level models using these tokenisers and evaluate them (\cref{chapter:infotokenisation}).
-    \item \href{https://huggingface.co/Infotokenizers}{https://huggingface.co/Infotokenizers}: A Huggingface organisation containing all datasets, models and tokenisers trained for the experiments in \cref{chapter:infotokenisation}.
+    \item \href{https://github.com/codebyzeb/childes-processor}{\myemph{github.com/codebyzeb/childes-processor}}: The source code for \gpp, a pip-installable tool used to download and process the CHILDES database for the creation of the \ipachildes in \cref{chapter:resources}. It is open-sourced with an MIT license.
+    \item \href{https://github.com/codebyzeb/babylm-ipa}{\myemph{github.com/codebyzeb/babylm-ipa}}: The scripts used for leveraging \gpp to convert the BabyLM training data and evaluation data to an IPA representation in \cref{chapter:modelling}.
+    \item \href{https://github.com/codebyzeb/PhonemeTransformers}{\myemph{github.com/codebyzeb/PhonemeTransformers}}: The source code and scripts used to train language models using phonemes, compare input representations and evaluate models using word segmentation and distinctive phonological features probes in \cref{chapter:modelling,chapter:phonology}. 
+    \item \href{https://huggingface.co/phonemetransformers}{\myemph{huggingface.co/phonemetransformers}}: A Huggingface organisation containing all datasets, models and tokenisers trained for the experiments in \cref{chapter:modelling,chapter:phonology}, grouped into collections for convenience.
+    \item \href{https://github.com/codebyzeb/infotokenization}{\myemph{github.com/codebyzeb/infotokenization}}: The scripts used to train byte-level language models, extract their predictions to create subword tokenisers, train subword-level models using these tokenisers and evaluate them for the experiments in \cref{chapter:infotokenisation}.
+    \item \href{https://huggingface.co/Infotokenizers}{\myemph{huggingface.co/Infotokenizers}}: A Huggingface organisation containing all datasets, models and tokenisers trained for the experiments in \cref{chapter:infotokenisation}.
 \end{itemize}
-
-% \section{Statement of style}
-
-% \Zeb{Use of ``we'' in the thesis for stylistic reasons and to acknowledge the contribution of co-authors. Mixed spelling between British English and American English due to my mixed background and the dominance of American spelling in technical terminology. British English is used throughout, except for the word "tokeniser". }

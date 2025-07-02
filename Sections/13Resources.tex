@@ -209,7 +209,7 @@ The outputs of \myemph{phonemizer} and \myemph{epitran} both differ considerably
 
 \Zeb{Might need a bit more here.}
 
-\section{\ipachildes}\label{sec:13-ipachildes}
+\section{IPA CHILDES}\label{sec:13-ipachildes}
 
 To create \ipachildes, I first download all corpora in CHILDES that are monolingual and non-SLI to ensure each language partition contains naturalistic, monolingual speech. CHILDES has 48 languages but only 31 are supported by a backend in \gpp (either because the language is not supported, or because they have been transcribed using an irregular script). For languages supported by multiple backends, a sample transcription is produced using each backend and I carefully examine the output. The `best-fitting' backend (the one that produces a phonemic vocabulary closest to one of the inventories in \phoible) is selected and is the backend for which a folding map is produced, as described in \cref{sec:13-folding}. Having selected the best backend, \gpp is used to convert all orthographic utterances for each language to a phonemic representation, producing a CSV containing the original representation, the phonemic representation as well as additional data stored in CHILDES (such as target child age, morpheme count, part of speech information, and the IDs of each utterance, transcript, corpus and collection). 
 
