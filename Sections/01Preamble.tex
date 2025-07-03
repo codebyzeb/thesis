@@ -93,7 +93,6 @@
 \RequirePackage[capitalise, noabbrev]{cleveref}
 %\setlength{\parindent}{0pt}
 
-
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Theorems, definitions, and examples
 %%
@@ -104,13 +103,12 @@
 %% label and reference them etc.)
 %%
 \newtheorem{example}{Example}[chapter]
-
 \tcbuselibrary{theorems}
-\newtcbtheorem{question}{Research Question}{colback=green!5,colframe=green!35!black,fonttitle=\bfseries}{qu}
+\newtcbtheorem{question}{Research Question}{colback=green!5, colframe=green!35!black, fonttitle=\bfseries}{question}
 
 % For boxes
 \RequirePackage[nobreak=true]{mdframed}
-\crefformat{tcb@cnt@question}{Research Question~#2#1#3}
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
