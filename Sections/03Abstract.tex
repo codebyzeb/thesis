@@ -1,3 +1,13 @@
-\abstract{%
-offering new tools for linguistic inquiry and informing future directions in the design of NLP systems.
+\abstract{
+
+Large language models (LLMs) are the dominant tools for processing and generating natural language, typically operating over an \emph{input representation} consisting of discrete subword tokens derived from web-scraped orthographic text. Understanding and interpreting these models is crucial not only for advancing NLP technology but also for gaining insights into the structure of language itself. Recently, smaller language models trained on developmentally plausible corpora have emerged as a promising framework for such analyses. However, one important aspect that remains under-explored is the effect of the input representation used during training.
+
+This thesis investigates the benefits and insights gained from using phoneme-based input representations in language model training, leveraging developmentally plausible training frameworks. First, it surveys existing phoneme-based datasets and the grapheme-to-phoneme conversion methods commonly used to generate them. Identifying a shortage of suitable resources, this work introduces two new contributions: a cross-lingual dataset of child-centred speech, and an improved grapheme-to-phoneme conversion tool that better preserves alignment with established phonemic inventories.
+
+These resources enable a comprehensive modelling study that confirms the viability of training language models on phoneme-based inputs. The study reveals key transformations that distinguish phoneme-based from subword-based representations, providing new insights into their differential effects on language model performance in grammatical and language understanding tasks. Additionally, the scaling properties of phoneme-based models are established, culminating in a suite of phoneme language models trained across 31 languages represented in the child-centred speech dataset. The phonological representations learned by these models are examined using word boundary and distinctive feature probes to reveal the encoded distributional phonology. Building on child language acquisition research, the thesis also introduces unsupervised word segmentation methods, demonstrating the presence of distributional cues for learning word-like units.
+
+Finally, inspired by parallels between these segmentation methods and recent advances in LLM tokenisation, the thesis proposes a new linguistically motivated subword tokenisation method that achieves comparable compression to existing techniques while improving morphological alignment.
+
+Overall, this work demonstrates that phoneme-based input representations provide useful insights into cross-lingual phonology and the acquisition of linguistic structure by language models. More broadly, it highlights the importance of exploring input representations as a means to develop novel tools for linguistic inquiry and to guide future NLP system design.
+
 }
