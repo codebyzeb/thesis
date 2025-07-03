@@ -73,9 +73,9 @@ The global constraint aims to capture highly predictable sequences. However, it 
 \caption{\textbf{ByteSpan Tokenisation}}
 \begin{algorithmic}[1]
 \STATE \textbf{Input:} Byte sequence $X = \ch_1, \ch_2, \dots, \ch_n$, Byte-level entropy values $H(\ch_i)$
-\STATE \textbf{Output:} Tokenized sequence $T$
-\STATE Initialize $i \gets 2$ \COMMENT{Start of the byte sequence}
-\STATE Initialize $T \gets []$ \COMMENT{Empty tokenized sequence}
+\STATE \textbf{Output:} Tokenised sequence $T$
+\STATE Initialise $i \gets 2$ \COMMENT{Start of the byte sequence}
+\STATE Initialise $T \gets []$ \COMMENT{Empty tokenised sequence}
 
 \WHILE{$i \leq n$}
     \STATE $j \gets i$
@@ -103,7 +103,7 @@ The frequency method is the most efficient, requiring only a single pass of the 
 
 In theory, the incremental method is also compatible with the combined constraint, but in practice, the number of subwords identified by the monotonic constraint exceeds most desired vocabulary sizes at the first pass, causing the algorithm to terminate immediately without the global constraint applying.
 
-Finally, I theorise that the seeding method could provide a trade-off between \bytespan and \bpe by first identifying predictable multi-byte units and then using \bpe to efficiently compress frequently co-occurring units. Note that setting $p=100\%$ is equivalent to the frequency method and that setting  $p=0\%$ is equivalent to just using \bpe to learn the vocabulary.
+Finally, the seeding method could provide a trade-off between \bytespan and \bpe by first identifying predictable multi-byte units and then using \bpe to efficiently compress frequently co-occurring units. Note that setting $p=100\%$ is equivalent to the frequency method and that setting  $p=0\%$ is equivalent to just using \bpe to learn the vocabulary.
 
 \paragraph{ByteSpan vs BPE.}
 
@@ -121,7 +121,7 @@ The information-driven tokenisation approach is explored in both English and mul
 
 \paragraph{Data.} 
 English tokenisers are trained on a sample of the \fineweb dataset\footnote{\href{https://huggingface.co/datasets/HuggingFaceFW/fineweb-edu}{\myemph{huggingface.co/datasets/HuggingFaceFW/fineweb-edu}}.} \citep{penedo2024finewebdatasetsdecantingweb}.
-For the multilingual tokenisers, a balanced \integer{25}-language sample from the \commoncorpus \footnote{\href{https://huggingface.co/datasets/PleIAs/common_corpus}{\myemph{huggingface.co/datasets/PleIAs/common_corpus}}.} \citep{common_corpus} is used, with languages selected for morphological diversity. Each corpus is converted into bytes using the Huggingface \texttt{ByteLevel} pre-tokenizer and split each corpus into three equal subsets: one to train the byte-level model, one to train the tokenizers, and one for evaluation. The \fineweb subsets contain approximately \q{500}{\million} bytes and the \commoncorpus subsets contain approximately \q{250}{\million} bytes (\q{10}{\million} per language).
+For the multilingual tokenisers, a balanced \integer{25}-language sample from the \commoncorpus \footnote{\href{https://huggingface.co/datasets/PleIAs/common_corpus}{\myemph{huggingface.co/datasets/PleIAs/common_corpus}}.} \citep{common_corpus} is used, with languages selected for morphological diversity. Each corpus is converted into bytes using the Huggingface \texttt{ByteLevel} pre-tokeniser and split each corpus into three equal subsets: one to train the byte-level model, one to train the tokenisers, and one for evaluation. The \fineweb subsets contain approximately \q{500}{\million} bytes and the \commoncorpus subsets contain approximately \q{250}{\million} bytes (\q{10}{\million} per language).
 
 \paragraph{Byte-level Model.} 
 
@@ -140,7 +140,7 @@ For the multilingual tokenisers, a balanced \integer{25}-language sample from th
         \midrule
         Max Example Length & 2048 \\
         Learning Rate & 0.0006 \\
-        Optimizer & AdamW \\
+        Optimiser & AdamW \\
         Scheduler Type & Warm-up stable decay \\
         Max Steps & 50k \\
         Warm-up Steps & 2k \\
@@ -153,11 +153,11 @@ For the multilingual tokenisers, a balanced \integer{25}-language sample from th
 
 % The byte-level LM is based on the \llama-2 architecture \citep{touvron-2023-llama} and is used to collect the contextual surprisal and entropy for each byte in the corpora. The byte-level statistics only need to be collected once and can be reused for each tokeniser setup.
 
-A small byte-level LM is trained on the subsets of the \fineweb and \commoncorpus datasets. The model and training parameters are provided in \cref{tab:16-trainingparams} --- these follow the parameters used by \citet{lesci2025causal}, who explore the causal effect of tokenisation on how LMs assign probability to token sequences. The \llama architecture is used instead of \gpt since it is more representative of modern LM pre-training, whereas \gpt is appropriate for architectural and phonological experimentation.
+A small byte-level LM is trained on the subsets of the \fineweb and \commoncorpus datasets. The model and training parameters are provided in \cref{tab:16-trainingparams} --- these follow the parameters used by \citet{lesci2025causal}, who explore the causal effect of tokenisation on how LMs assign probability to token sequences. The \llama architecture is used instead of \gpt since it is more representative of modern LM training, whereas \gpt is appropriate for architectural and phonological experimentation.
 
 % The \llama-2 architecture is used with \integer{24} attention heads, \integer{6} layers, hidden size of \integer{768}, and tied input--output embeddings, totalling \q{57}{\million} parameters.
 % The optimiser used is AdamW \citep{adam,loshchilov2018decoupled}, with learning rate \snum{6e-4}, parameters $\beta_1\mathop{=}0.9$, $\beta_2\mathop{=}0.95$, $\epsilon\mathop{=}\snum{1e-8}$, and weight decay set to \float{0.1}.
-% The warm-up-stable-decay schedule is used \citep{zhai2022scaling}, where after warm-up, the learning rate stays constant for most training and decreases briefly during the cool-down. Unlike the cosine schedule, this approach does not need a pre-specified compute budget, facilitating continued pre-training and enhancing our artifact's value for the community. It is also more effective for small language models \citep{hu2024minicpm, wen2024understanding}.
+% The warm-up-stable-decay schedule is used \citep{zhai2022scaling}, where after warm-up, the learning rate stays constant for most training and decreases briefly during the cool-down. Unlike the cosine schedule, this approach does not need a pre-specified compute budget, facilitating continued training and enhancing our artifact's value for the community. It is also more effective for small language models \citep{hu2024minicpm, wen2024understanding}.
 % During training, the context size is set to \integer{2048} tokens and the batch size is set to \integer{128}, clip the norm of the gradients to \float{1}, and train for \q{50}{\thousand} steps, saving checkpoints every \q{2}{\thousand} steps.
 % Each model is trained with the same seed so that data order and parameter initialisation is consistent across experiments.
 
@@ -212,7 +212,7 @@ BPB provides a means of comparing the perplexities assigned by models that use d
     \footnotesize
     \begin{tabular}{cccccccc}
         \toprule
-        Vocab Size & Tokenizer & Constraint & \makecell{Learning \\ Method} & \makecell{Morph. \\ Alignment} & \makecell{Cognitive \\ Plausibility} & Fertility & \makecell{Renyi \\ Efficiency} \\
+        Vocab Size & Tokeniser & Constraint & \makecell{Learning \\ Method} & \makecell{Morph. \\ Alignment} & \makecell{Cognitive \\ Plausibility} & Fertility & \makecell{Renyi \\ Efficiency} \\
         \midrule
         % \multirow{6}{*}{\integer{8064}} & BPE & - & - & .726 & \textbf{.262} & 1.34 & .516 \\
         %  & BPE-WP      &     -         & - & .841 & .256 & \textbf{1.32} & .526 \\
@@ -345,7 +345,7 @@ Overall, these extrinsic results suggest that the monotonic and combined constra
     \footnotesize
     \begin{tabular}{cccccccc}
         \toprule
-        Tokenizer & Constraint & Learning Method & \blimp & BPB \\
+        Tokeniser & Constraint & Learning Method & \blimp & BPB \\
         \midrule
         \bpe & - & - & 78.7 &  .825 \\
         \bpewp & - & - & 78.7 & \textbf{.824} \\
