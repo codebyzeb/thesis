@@ -41,7 +41,9 @@
 
 \section{Average Information Density of Transcribed Child-Directed Speech Increases with Age Cross-Lingually}\label{app:parentese}
 
-The phonemic representation of the utterances in our dataset open up new avenues for exploring the phonotactic properties of languages and the information-theoretic properties of child-directed speech. %Previous research in these areas have had to base their calculations on word types \citep{piantadosi2011word, dautriche2017words, pimentel2020phonotactic} or orthographic text \citep{mahowald2013info, dautriche2017wordform, futrell2020lossy}, often citing a lack of phonemic data as a limiting factor. %For instance, \citet{piantadosi2011word} show a strong correlation between information and word length across 10 languages using orthographic data, stating that orthographic word length is correlated with phonetic length, but this may not be the case for certain languages. 
+\Zeb{I worry that this experiment is too half-baked even for the appendix. I'm thinking I should either remove it, or try to expand it a bit and use it as analysis of \ipachildes in \cref{chapter:resources}.}
+
+The phonemic representation of the utterances in \ipachildes open up new avenues for exploring the phonotactic properties of languages and the information-theoretic properties of child-directed speech. %Previous research in these areas have had to base their calculations on word types \citep{piantadosi2011word, dautriche2017words, pimentel2020phonotactic} or orthographic text \citep{mahowald2013info, dautriche2017wordform, futrell2020lossy}, often citing a lack of phonemic data as a limiting factor. %For instance, \citet{piantadosi2011word} show a strong correlation between information and word length across 10 languages using orthographic data, stating that orthographic word length is correlated with phonetic length, but this may not be the case for certain languages. 
 
 %This representation may be useful when comparing languages that have different levels of orthographic transparency (the correspondence between how words are written and how words are pronounced). 
 
@@ -52,13 +54,15 @@ The phonemic representation of the utterances in our dataset open up new avenues
     \label{fig:13-information-trends}
 \end{figure}
 
-Here, we demonstrate one information-theoretic experiment, comparing the average information content of child-directed utterances to the age of the child being spoken to (this information is also available in CHILDES and is preserved in our dataset). We group child ages in years (0-12 months, 12-24 months, etc.) and calculate the average information content of a sample of child-directed utterances using a unigram language model. The information $I_U$ of each utterance consisting of a sequence of phonemes $p_1,p_2,\ldots,p_n$ is given by
+Here, one information-theoretic experiment is demonstrated, comparing the average information content of child-directed utterances to the age of the child being spoken to (this information is also available in CHILDES and is preserved in \ipachildes). Child ages are grouped in years (0-12 months, 12-24 months, etc.) and calculate the average information content of a sample of child-directed utterances using a unigram language model. The information $I_U$ of each utterance consisting of a sequence of phonemes $p_1,p_2,\ldots,p_n$ is given by
 
 $$I_U = -\sum_{i=0}^{n}{log_2P(p_i)},$$
 
-where $P(p_i)$ is the probability of phoneme $p_i$ given by its frequency in the data. We plot the average information of utterances in each age category for the largest 10 languages in the dataset in \cref{fig:13-information-trends}. We find that across all 10 languages the average information of utterances increases with the age of the child, indicating that speakers of `Parentese' may adjust the complexity of their speech according to the learner's age. 
+where $P(p_i)$ is the probability of phoneme $p_i$ given by its frequency in the data. The average information of utterances in each age category for the largest 10 languages in the dataset is shown in \cref{fig:13-information-trends}. Across all 10 languages the average information of utterances increases with the age of the child, indicating that speakers of `Parentese' may adjust the complexity of their speech according to the learner's age. 
 
 \chapter{Implementation Details}\label{app:implementation}
+
+\Zeb{Is this worth keeping in the thesis?}
 
 LM experiments are conducted using the PyTorch framework \citep{paszke-etal-2019-pytorch}. \gpt and \llama architectures are implemented using the \myemph{transformers} library \citep{wolf-etal-2020-transformers}. Tokenisers are implemented using modules from the \myemph{tokenizers} library.\footnote{\href{https://github.com/huggingface/tokenizers}{\myemph{github.com/huggingface/tokenizers}}.} The server used for experiments has one \myemph{NVIDIA A100 80GB PCIe}, \integer{32} CPUs, and \integer{32} GB of RAM. Below, a subset of the output of the \emph{lscpu} command is shown:
 
@@ -139,7 +143,7 @@ All boundary placement F1 scores for the Tiny, Small, Medium and Large suites ar
 
 \begin{table*}[t]
     \centering
-    \small
+    \footnotesize
     \begin{tabular}{lllll}
     \toprule
     Language & 100k & 700k & 2M & 18M \\
